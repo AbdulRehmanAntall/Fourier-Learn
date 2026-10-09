@@ -38,9 +38,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Read Python minor version
+        id: py
+        shell: bash
+        # Any 3.12.x is supported natively; GitHub doesn't build every patch release for every OS.
+        run: echo "minor=$(cut -d. -f1,2 .python-version)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-python@v6
         with:
-          python-version-file: .python-version
+          python-version: ${{ steps.py.outputs.minor }}
 
       - uses: actions/setup-node@v5
         with:
