@@ -1,7 +1,19 @@
 // `npm run dev`: start Postgres (via Docker, if available), then backend + frontend together.
 import path from "node:path";
 import concurrently from "concurrently";
-import { BACKEND, ROOT, c, dockerAvailable, ok, readEnvFile, requireVenv, rootConfig, run, step, warn } from "./lib.mjs";
+import {
+  BACKEND,
+  ROOT,
+  c,
+  dockerAvailable,
+  ok,
+  readEnvFile,
+  requireVenv,
+  rootConfig,
+  run,
+  step,
+  warn,
+} from "./lib.mjs";
 
 requireVenv();
 const { backendPort, frontendPort } = rootConfig();
@@ -11,7 +23,8 @@ if (dockerAvailable()) {
   // --wait blocks until the db healthcheck passes.
   const code = await run("docker", ["compose", "up", "-d", "--wait", "db"], { cwd: ROOT });
   if (code === 0) ok("Postgres is running (docker compose service `db`)");
-  else warn("Could not start Postgres with Docker. Continuing; /api/health will show database=false.");
+  else
+    warn("Could not start Postgres with Docker. Continuing; /api/health will show database=false.");
 } else {
   const dbUrl = readEnvFile(path.join(BACKEND, ".env")).DATABASE_URL ?? "(not set)";
   warn("Docker is not available, so Postgres was not started.");

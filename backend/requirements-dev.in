@@ -1,0 +1,8 @@
+# Direct dev/test dependencies (edit this file, not requirements-dev.txt).
+# After editing, run `npm run deps:lock` to regenerate requirements-dev.txt.
+-c requirements.txt
+pytest==9.1.1
+ruff==0.16.10
+httpx==0.28.1
+# Generates the lockfiles (npm run deps:lock).
+uv==0.12.24

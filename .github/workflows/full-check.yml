@@ -1,0 +1,89 @@
+# Slower checks: native setup on Windows/macOS/Linux, and the full Docker stack.
+# Runs on pushes to main, on pull requests that touch setup/Docker/dependency files,
+# and manually (Actions tab -> Full check -> Run workflow).
+name: Full check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "frontend/package*.json"
+      - "backend/requirements*"
+      - "backend/Dockerfile"
+      - "backend/docker-entrypoint.sh"
+      - "frontend/Dockerfile"
+      - "frontend/docker-entrypoint.sh"
+      - "docker-compose.yml"
+      - ".python-version"
+      - ".nvmrc"
+      - ".github/workflows/full-check.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: full-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-setup:
+    name: npm run setup (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      # No Cairo/LaTeX installed here on purpose: this checks that a fresh machine can still
+      # set up and run the app (setup falls back to installing without Manim where needed).
+      - name: npm run setup
+        run: npm run setup
+
+      - name: npm run doctor
+        run: npm run doctor
+
+      - name: Backend tests
+        run: npm run test:backend
+
+      - name: Frontend type check
+        run: npm run test:frontend
+
+  docker:
+    name: docker compose up
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build and start the stack
+        run: docker compose up --build --detach --wait --wait-timeout 300
+
+      - name: Health check reports every dependency
+        run: |
+          curl -fsS --retry 30 --retry-delay 2 --retry-all-errors http://localhost:8000/api/health | tee health.json
+          python3 -c "import json,sys; c=json.load(open('health.json'))['checks']; sys.exit(0 if all(c.values()) else 1)"
+
+      - name: Frontend responds
+        run: curl -fsS --retry 30 --retry-delay 2 --retry-all-errors http://localhost:3000 | grep -q FourierLearn
+
+      - name: Manim smoke test inside Docker
+        run: docker compose exec -T backend python scripts/manim_smoke.py
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop
+        if: always()
+        run: docker compose down -v
