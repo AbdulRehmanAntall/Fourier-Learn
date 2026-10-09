@@ -38,7 +38,9 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
   report(
     version?.startsWith(`${PY_MINOR}.`),
     `Python ${PY_MINOR}`,
-    version ? `${version}${venv ? ", backend/.venv" : ", no venv yet: run npm run setup"}` : "not found",
+    version
+      ? `${version}${venv ? ", backend/.venv" : ", no venv yet: run npm run setup"}`
+      : "not found",
     hint({
       windows: `winget install Python.Python.${PY_MINOR} (any ${PY_MINOR}.x is fine)`,
       macos: `brew install python@${PY_MINOR}`,
@@ -56,7 +58,10 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
     `Node ${NODE_VERSION.split(".")[0]}+ (LTS)`,
     `${process.versions.node}, .nvmrc wants ${NODE_VERSION}`,
     hint({
-      windows: "install Node LTS from https://nodejs.org/ (or nvm-windows: nvm install " + NODE_VERSION + ")",
+      windows:
+        "install Node LTS from https://nodejs.org/ (or nvm-windows: nvm install " +
+        NODE_VERSION +
+        ")",
       macos: `nvm install (reads .nvmrc), or brew install node@${NODE_VERSION.split(".")[0]}`,
       linux: "nvm install (reads .nvmrc), see https://github.com/nvm-sh/nvm",
     }),
@@ -71,13 +76,20 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
   report(
     daemon,
     "Docker (optional)",
-    cli.status !== 0 ? "not installed" : daemon ? firstLine(cli) : "installed but the daemon is not running",
+    cli.status !== 0
+      ? "not installed"
+      : daemon
+        ? firstLine(cli)
+        : "installed but the daemon is not running",
     cli.status === 0
       ? "start Docker Desktop (or: sudo systemctl start docker)"
       : hint({
-          windows: "install Docker Desktop (uses WSL2): https://docs.docker.com/desktop/setup/install/windows-install/",
-          macos: "install Docker Desktop: https://docs.docker.com/desktop/setup/install/mac-install/",
-          linux: "install Docker Engine + compose plugin: https://docs.docker.com/engine/install/ubuntu/",
+          windows:
+            "install Docker Desktop (uses WSL2): https://docs.docker.com/desktop/setup/install/windows-install/",
+          macos:
+            "install Docker Desktop: https://docs.docker.com/desktop/setup/install/mac-install/",
+          linux:
+            "install Docker Engine + compose plugin: https://docs.docker.com/engine/install/ubuntu/",
         }),
     { optional: true },
   );
@@ -105,11 +117,16 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
   report(
     latex.status === 0 && dvisvgm.status === 0,
     "LaTeX (latex + dvisvgm)",
-    [latex.status === 0 ? "latex ok" : "latex missing", dvisvgm.status === 0 ? "dvisvgm ok" : "dvisvgm missing"].join(", "),
+    [
+      latex.status === 0 ? "latex ok" : "latex missing",
+      dvisvgm.status === 0 ? "dvisvgm ok" : "dvisvgm missing",
+    ].join(", "),
     hint({
-      windows: "install MiKTeX (https://miktex.org/download) and allow on-the-fly package installs, or TeX Live",
+      windows:
+        "install MiKTeX (https://miktex.org/download) and allow on-the-fly package installs, or TeX Live",
       macos: "brew install --cask mactex-no-gui   (smaller: brew install --cask basictex)",
-      linux: "sudo apt install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science cm-super dvisvgm",
+      linux:
+        "sudo apt install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science cm-super dvisvgm",
     }),
   );
 }
@@ -127,7 +144,8 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
       : hint({
           windows: "re-run npm run setup (Windows wheels include Cairo/Pango)",
           macos: "brew install cairo pango pkg-config, then npm run setup",
-          linux: "sudo apt install build-essential pkg-config libcairo2-dev libpango1.0-dev, then npm run setup",
+          linux:
+            "sudo apt install build-essential pkg-config libcairo2-dev libpango1.0-dev, then npm run setup",
         }),
   );
 }
@@ -143,7 +161,11 @@ function portFree(port) {
 }
 
 const { frontendPort, backendPort, postgresPort } = rootConfig();
-for (const [port, what] of [[frontendPort, "frontend"], [backendPort, "backend"], [postgresPort, "postgres"]]) {
+for (const [port, what] of [
+  [frontendPort, "frontend"],
+  [backendPort, "backend"],
+  [postgresPort, "postgres"],
+]) {
   const free = await portFree(port);
   report(
     free,
@@ -157,5 +179,8 @@ for (const [port, what] of [[frontendPort, "frontend"], [backendPort, "backend"]
 const failed = results.filter((r) => !r.passed);
 console.log("");
 if (failed.length === 0) console.log(c.green(c.bold("All checks passed.")));
-else console.log(`${failed.length} check(s) need attention. The app still starts without FFmpeg/LaTeX/Manim/Postgres.`);
+else
+  console.log(
+    `${failed.length} check(s) need attention. The app still starts without FFmpeg/LaTeX/Manim/Postgres.`,
+  );
 process.exitCode = results.some((r) => r.required && !r.passed) ? 1 : 0;
