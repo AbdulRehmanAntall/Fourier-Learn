@@ -1,0 +1,11 @@
+# Direct runtime dependencies (edit this file, not requirements.txt).
+# After editing, run `npm run deps:lock` to regenerate requirements.txt.
+fastapi==0.143.0
+uvicorn[standard]==0.54.0
+pydantic-settings==2.15.0
+SQLAlchemy==2.1.4
+alembic==1.20.0
+psycopg[binary]==3.3.6
+sympy==1.14.0
+# Manim needs Cairo/Pango (and LaTeX + FFmpeg at render time). See README.
+manim==0.22.0

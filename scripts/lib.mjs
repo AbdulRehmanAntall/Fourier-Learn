@@ -17,7 +17,14 @@ export const NPM = isWindows ? "npm.cmd" : "npm";
 
 const useColor = process.stdout.isTTY && !process.env.NO_COLOR;
 const paint = (code) => (text) => (useColor ? `\x1b[${code}m${text}\x1b[0m` : String(text));
-export const c = { green: paint(32), red: paint(31), yellow: paint(33), cyan: paint(36), bold: paint(1), dim: paint(2) };
+export const c = {
+  green: paint(32),
+  red: paint(31),
+  yellow: paint(33),
+  cyan: paint(36),
+  bold: paint(1),
+  dim: paint(2),
+};
 
 export const ok = (msg) => console.log(`${c.green("✓")} ${msg}`);
 export const fail = (msg) => console.log(`${c.red("✗")} ${msg}`);
@@ -89,12 +96,17 @@ export function hasCommand(cmd, versionArg = "--version") {
 
 /** True if a Docker daemon is reachable and `docker compose` works. */
 export function dockerAvailable() {
-  return capture("docker", ["info"]).status === 0 && capture("docker", ["compose", "version"]).status === 0;
+  return (
+    capture("docker", ["info"]).status === 0 &&
+    capture("docker", ["compose", "version"]).status === 0
+  );
 }
 
 export function requireVenv() {
   if (!existsSync(VENV_PYTHON)) {
-    fail(`Python venv not found at ${path.relative(ROOT, VENV_PYTHON)}. Run ${c.bold("npm run setup")} first.`);
+    fail(
+      `Python venv not found at ${path.relative(ROOT, VENV_PYTHON)}. Run ${c.bold("npm run setup")} first.`,
+    );
     process.exit(1);
   }
 }

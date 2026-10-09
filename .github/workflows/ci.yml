@@ -1,0 +1,81 @@
+# Fast checks on every pull request and every push to main.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint, format, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install system libraries for Manim
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libcairo2-dev libpango1.0-dev pkg-config
+
+      - name: Install Python dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Ruff lint
+        working-directory: backend
+        run: ruff check .
+
+      - name: Ruff format check
+        working-directory: backend
+        run: ruff format --check .
+
+      - name: Lockfiles are up to date
+        working-directory: backend
+        run: |
+          PY_MINOR=$(cut -d. -f1,2 ../.python-version)
+          for pair in "requirements.in requirements.txt" "requirements-dev.in requirements-dev.txt"; do
+            set -- $pair
+            uv pip compile --universal --python-version "$PY_MINOR" --no-header --annotation-style split --quiet "$1" -o "$2"
+          done
+          git diff --exit-code -- requirements.txt requirements-dev.txt \
+            || (echo "::error::Lockfiles are out of date. Run 'npm run deps:lock' and commit the result." && exit 1)
+
+      - name: Pytest
+        working-directory: backend
+        run: pytest
+
+  frontend:
+    name: Frontend (lint, format, types)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci && npm ci --prefix frontend
+
+      - name: ESLint
+        run: npm run lint:frontend
+
+      - name: Prettier check
+        run: npx prettier --check .
+
+      - name: Type check
+        run: npm run test:frontend
