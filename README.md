@@ -10,7 +10,7 @@ adapted by a learner model (Bayesian Knowledge Tracing).
 
 | Part     | Stack                                                                                   |
 | -------- | --------------------------------------------------------------------------------------- |
-| Backend  | Python 3.11, FastAPI, Uvicorn, Pydantic Settings, SQLAlchemy 2 + Alembic, psycopg 3, SymPy, Manim CE |
+| Backend  | Python 3.12, FastAPI, Uvicorn, Pydantic Settings, SQLAlchemy 2 + Alembic, psycopg 3, SymPy, Manim CE |
 | Frontend | Next.js 16 (App Router), TypeScript, ESLint, Tailwind CSS                               |
 | Database | PostgreSQL 16                                                                           |
 | Tooling  | Docker + Docker Compose, Node scripts (cross-platform), Git                             |
@@ -27,7 +27,7 @@ There are two ways to run the project. Pick one:
 ## Prerequisites
 
 Always needed: **Git**. For Docker you also need **Docker Desktop**. For native you also need
-**Python 3.11** (exact version in `.python-version`), **Node 24 LTS** (exact version in `.nvmrc`),
+**Python 3.12** (exact version in `.python-version`), **Node 24 LTS** (exact version in `.nvmrc`),
 and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pango**.
 
 ### Windows 10/11
@@ -37,8 +37,10 @@ and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pang
    Then install Docker Desktop (<https://docs.docker.com/desktop/setup/install/windows-install/>)
    and keep "Use WSL 2 based engine" ticked.
 3. **Native only:**
-   - Python 3.11: <https://www.python.org/downloads/windows/>. Tick **"Add python.exe to PATH"**.
-     The `py` launcher (`py -3.11`) is used automatically.
+   - Python 3.12: `winget install Python.Python.3.12`, or the **3.12.10** installer from
+     <https://www.python.org/downloads/windows/> (tick **"Add python.exe to PATH"**). Any 3.12.x
+     works; python.org has no Windows installers for later 3.12 releases.
+     The `py` launcher (`py -3.12`) is used automatically, even if another version is your default.
    - Node 24 LTS: <https://nodejs.org/>, or `nvm-windows` and then `nvm install 24.21.0`.
    - FFmpeg: `winget install Gyan.FFmpeg`. Open a new terminal afterwards.
    - LaTeX: **MiKTeX** (<https://miktex.org/download>). In the MiKTeX Console, set "Install missing
@@ -50,7 +52,7 @@ and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pang
 
 ```bash
 # Install Homebrew first if needed: https://brew.sh
-brew install git python@3.11 node@24 ffmpeg cairo pango pkg-config
+brew install git python@3.12 node@24 ffmpeg cairo pango pkg-config
 brew install --cask mactex-no-gui        # full LaTeX (~5 GB), or the smaller: brew install --cask basictex
 brew install --cask docker               # Docker Desktop (or download from docker.com)
 ```
@@ -62,15 +64,14 @@ Open a new terminal after installing LaTeX so `latex` is on your PATH.
 ### Ubuntu / Debian
 
 ```bash
-# Python 3.11 is not Ubuntu's default Python, so add the deadsnakes PPA first
-sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt update
-sudo apt install -y git python3.11 python3.11-venv ffmpeg \
+sudo apt install -y git python3.12 python3.12-venv ffmpeg \
   build-essential pkg-config libcairo2-dev libpango1.0-dev \
   texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science cm-super dvisvgm
 ```
 
-- Instead of the PPA you can install Python 3.11 with [pyenv](https://github.com/pyenv/pyenv)
+- Python 3.12 is the default on Ubuntu 24.04. On 22.04, add `ppa:deadsnakes/ppa` first, or install
+  it with [pyenv](https://github.com/pyenv/pyenv)
   (`pyenv install`, which reads `.python-version`) or [uv](https://docs.astral.sh/uv/).
 - Node 24: use [nvm](https://github.com/nvm-sh/nvm), then run `nvm install` (it reads `.nvmrc`).
 - Docker Engine and the compose plugin: <https://docs.docker.com/engine/install/ubuntu/>, then
@@ -288,8 +289,9 @@ under `C:\`. Or set `DOCKER_FILE_POLLING=true` in the root `.env` and restart th
 If PowerShell refuses to run `Activate.ps1`, run
 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once. Leave the venv with `deactivate`.
 
-**`npm run setup` says Python 3.11 was not found.** Install Python 3.11 (see Prerequisites). On
-Windows, check that `py -3.11 --version` works. Elsewhere, check `python3.11 --version`.
+**`npm run setup` says Python 3.12 was not found.** Install Python 3.12 (see Prerequisites) and
+open a new terminal. On Windows, check that `py -3.12 --version` works. Elsewhere, check
+`python3.12 --version`.
 
 **Strange dependency errors in Docker.** Reset the dependency volumes with `docker compose down -v`
 (this also deletes the local database), then `docker compose up --build`.
