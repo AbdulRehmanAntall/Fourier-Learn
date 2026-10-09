@@ -37,7 +37,9 @@ and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pang
    Then install Docker Desktop (<https://docs.docker.com/desktop/setup/install/windows-install/>)
    and keep "Use WSL 2 based engine" ticked.
 3. **Native only:**
-   - Python 3.11: <https://www.python.org/downloads/windows/>. Tick **"Add python.exe to PATH"**.
+   - Python 3.11: `winget install Python.Python.3.11`, or the **3.11.9** installer from
+     <https://www.python.org/downloads/windows/> (tick **"Add python.exe to PATH"**). Any 3.11.x
+     works; python.org has no Windows installers for later 3.11 releases.
      The `py` launcher (`py -3.11`) is used automatically.
    - Node 24 LTS: <https://nodejs.org/>, or `nvm-windows` and then `nvm install 24.21.0`.
    - FFmpeg: `winget install Gyan.FFmpeg`. Open a new terminal afterwards.

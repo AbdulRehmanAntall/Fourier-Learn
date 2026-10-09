@@ -31,7 +31,8 @@ async function main() {
   } else {
     const python = findPython();
     if (!python) {
-      fail(`Python ${PY_MINOR} not found. Install Python ${PY_VERSION} (see README → Prerequisites) and re-run.`);
+      fail(`Python ${PY_MINOR} not found. Install any Python ${PY_MINOR}.x (see README → Prerequisites), open a new terminal and re-run.`);
+      if (isWindows) console.log(`    ${c.dim("fix:")} winget install Python.Python.${PY_MINOR}`);
       process.exit(1);
     }
     const [cmd, pre] = python;
