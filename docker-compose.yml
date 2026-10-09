@@ -1,0 +1,60 @@
+# Development stack: `docker compose up --build`
+# Ports and credentials can be overridden in the root .env (see .env.example).
+
+name: fourierlearn
+
+services:
+  db:
+    image: postgres:16.15-bookworm
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fourierlearn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fourierlearn}
+      POSTGRES_DB: ${POSTGRES_DB:-fourierlearn}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      # Inside the compose network Postgres is `db:5432` (overrides backend/.env).
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-fourierlearn}:${POSTGRES_PASSWORD:-fourierlearn}@db:5432/${POSTGRES_DB:-fourierlearn}
+      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-3000},http://127.0.0.1:${FRONTEND_PORT:-3000}
+      MEDIA_DIR: media
+      # Set DOCKER_FILE_POLLING=true in the root .env if hot reload misses changes (Windows without WSL2 files).
+      WATCHFILES_FORCE_POLLING: ${DOCKER_FILE_POLLING:-false}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - backend_venv:/app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      # Used by the browser on your machine, so it points at the host port.
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}
+      WATCHPACK_POLLING: ${DOCKER_FILE_POLLING:-false}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  backend_venv:
+  frontend_node_modules:
+  frontend_next:

@@ -1,0 +1,4 @@
+Alembic migrations. None exist yet.
+
+Create one:  cd backend && alembic revision --autogenerate -m "describe change"
+Apply:       npm run db:migrate   (alembic upgrade head)
