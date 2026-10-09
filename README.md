@@ -1,2 +1,295 @@
-# Fourier-Learn
-Turn plain-text math prompts into studio-quality, animated video lessons in real time. Powered by LLM primitive compilation, Manim motion graphics, and adaptive voiceover.
+# FourierLearn
+
+Turn plain-text maths prompts into narrated, animated O-Level maths lessons (Manim), with difficulty
+adapted by a learner model (Bayesian Knowledge Tracing).
+
+> **Status: project skeleton only.** There is a FastAPI backend with one real endpoint
+> (`GET /api/health`), a Next.js page that shows that health status, Postgres, Alembic (no
+> migrations yet) and a Manim smoke test. Lesson generation, LLM calls, BKT and auth are **not**
+> implemented. The packages under `backend/app/` for those parts are empty placeholders.
+
+| Part     | Stack                                                                                   |
+| -------- | --------------------------------------------------------------------------------------- |
+| Backend  | Python 3.11, FastAPI, Uvicorn, Pydantic Settings, SQLAlchemy 2 + Alembic, psycopg 3, SymPy, Manim CE |
+| Frontend | Next.js 16 (App Router), TypeScript, ESLint, Tailwind CSS                               |
+| Database | PostgreSQL 16                                                                           |
+| Tooling  | Docker + Docker Compose, Node scripts (cross-platform), Git                             |
+
+There are two ways to run the project. Pick one:
+
+- **Docker (recommended):** you only need Git and Docker Desktop. FFmpeg, LaTeX, Cairo and Pango are
+  installed inside the backend image, so Manim works the same on every OS.
+- **Native:** faster reloads and easier debugging, but you install Python, Node, FFmpeg and LaTeX
+  yourself.
+
+---
+
+## Prerequisites
+
+Always needed: **Git**. For Docker you also need **Docker Desktop**. For native you also need
+**Python 3.11** (exact version in `.python-version`), **Node 24 LTS** (exact version in `.nvmrc`),
+and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pango**.
+
+### Windows 10/11
+
+1. **Git:** <https://git-scm.com/download/win>
+2. **Docker Desktop:** install WSL2 first. In an *admin* PowerShell run `wsl --install`, then reboot.
+   Then install Docker Desktop (<https://docs.docker.com/desktop/setup/install/windows-install/>)
+   and keep "Use WSL 2 based engine" ticked.
+3. **Native only:**
+   - Python 3.11: <https://www.python.org/downloads/windows/>. Tick **"Add python.exe to PATH"**.
+     The `py` launcher (`py -3.11`) is used automatically.
+   - Node 24 LTS: <https://nodejs.org/>, or `nvm-windows` and then `nvm install 24.21.0`.
+   - FFmpeg: `winget install Gyan.FFmpeg`. Open a new terminal afterwards.
+   - LaTeX: **MiKTeX** (<https://miktex.org/download>). In the MiKTeX Console, set "Install missing
+     packages on-the-fly" to **Yes**. **TeX Live** (<https://tug.org/texlive/windows.html>) also
+     works.
+   - Cairo/Pango: nothing to do, because the Windows wheels for Manim's dependencies include them.
+
+### macOS (Homebrew)
+
+```bash
+# Install Homebrew first if needed: https://brew.sh
+brew install git python@3.11 node@24 ffmpeg cairo pango pkg-config
+brew install --cask mactex-no-gui        # full LaTeX (~5 GB), or the smaller: brew install --cask basictex
+brew install --cask docker               # Docker Desktop (or download from docker.com)
+```
+
+If you use BasicTeX, add the extra packages that Manim's install guide lists:
+`sudo tlmgr update --self && sudo tlmgr install standalone preview doublestroke relsize fundus-calligra wasysym physics dvisvgm rsfs wasy cm-super everysel setspace`.
+Open a new terminal after installing LaTeX so `latex` is on your PATH.
+
+### Ubuntu / Debian
+
+```bash
+# Python 3.11 is not Ubuntu's default Python, so add the deadsnakes PPA first
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y git python3.11 python3.11-venv ffmpeg \
+  build-essential pkg-config libcairo2-dev libpango1.0-dev \
+  texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science cm-super dvisvgm
+```
+
+- Instead of the PPA you can install Python 3.11 with [pyenv](https://github.com/pyenv/pyenv)
+  (`pyenv install`, which reads `.python-version`) or [uv](https://docs.astral.sh/uv/).
+- Node 24: use [nvm](https://github.com/nvm-sh/nvm), then run `nvm install` (it reads `.nvmrc`).
+- Docker Engine and the compose plugin: <https://docs.docker.com/engine/install/ubuntu/>, then
+  `sudo usermod -aG docker $USER` and log out and back in.
+
+Not sure what you have? After cloning, run **`npm run doctor`**. It checks everything and prints
+an install hint for whatever is missing.
+
+---
+
+## Quick start (Docker, recommended)
+
+```bash
+git clone <repo-url> fourierlearn
+cd fourierlearn
+docker compose up --build
+```
+
+The first build takes a while because it downloads LaTeX. When it's done:
+
+- App: <http://localhost:3000>. The status panel should show everything green.
+- API health: <http://localhost:8000/api/health>
+- API docs (Swagger): <http://localhost:8000/docs>
+- Postgres: `localhost:5433`, user/password/db `fourierlearn`
+
+Source folders are mounted into the containers, so edits hot-reload. `node_modules`, the Python
+venv and `.next` live in their own Docker volumes, so they never clash with a native install on
+your machine. If `requirements*.txt` or `package-lock.json` change, the containers reinstall the
+dependencies automatically on the next start.
+
+Useful commands:
+
+```bash
+docker compose up --build -d                                  # run in the background
+docker compose logs -f backend                                # follow logs
+docker compose exec backend python scripts/manim_smoke.py     # Manim smoke test inside Docker
+docker compose exec backend python -m pytest                  # backend tests inside Docker
+docker compose exec backend alembic upgrade head              # migrations inside Docker
+docker compose down                                           # stop (database data is kept)
+docker compose down -v                                        # stop and DELETE all volumes (db data, deps)
+```
+
+The smoke test writes its video to `backend/media/smoke/videos/480p15/SmokeScene.mp4` on your
+machine.
+
+## Quick start (native)
+
+```bash
+git clone <repo-url> fourierlearn
+cd fourierlearn
+npm run setup     # one-time: venv, Python + npm deps, .env files
+npm run doctor    # optional: see what's missing
+npm run dev       # Postgres (via Docker if available) + backend + frontend
+```
+
+`npm run setup` creates `backend/.venv`, installs `requirements.txt` and `requirements-dev.txt`,
+runs `npm install` at the root and in `frontend/`, and copies each `.env.example` to `.env` (it
+never overwrites an existing `.env`). If Manim can't be installed because Cairo/Pango is missing,
+setup installs everything else and tells you. Install the system libraries, then run
+`npm run setup` again.
+
+`npm run dev` starts Postgres with `docker compose up -d db` when Docker is running. Otherwise it
+prints a warning and the backend uses whatever `DATABASE_URL` is in `backend/.env`, for example a
+locally installed Postgres. Logs from both servers are colour-prefixed. **Ctrl+C stops both.**
+
+The app works without Postgres, LaTeX or Manim. `/api/health` just reports those checks as
+`false` (red in the UI).
+
+### Running the servers separately
+
+From the repo root: `npm run dev:backend` and `npm run dev:frontend`.
+
+Or by hand:
+
+```bash
+# Backend: activate the venv first (see "venv activation" below), then:
+cd backend
+uvicorn app.main:app --reload --port 8000
+
+# Frontend, in a second terminal:
+cd frontend
+npm run dev
+```
+
+---
+
+## Commands
+
+All commands run from the repo root and work on Windows, macOS and Linux.
+
+| Command                 | What it does                                                                     |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `docker compose up --build` | Run the whole stack in Docker (db + backend + frontend) with hot reload     |
+| `npm run setup`         | One-time native setup (venv, deps, `.env` files)                                  |
+| `npm run dev`           | Start Postgres (Docker), backend and frontend together                           |
+| `npm run dev:backend`   | Backend only (`uvicorn --reload` on port 8000)                                    |
+| `npm run dev:frontend`  | Frontend only (`next dev` on port 3000)                                           |
+| `npm run doctor`        | Check Python, Node, Docker, FFmpeg, LaTeX, Manim and free ports, with fix hints   |
+| `npm run test`          | Backend tests (pytest), then frontend lint and type-check                         |
+| `npm run lint:backend`  | Ruff lint for the backend                                                        |
+| `npm run manim:smoke`   | Render a tiny Manim scene (axes + `y = x^2`) at low quality and print the video path |
+| `npm run db:migrate`    | `alembic upgrade head`                                                           |
+
+The npm scripts call `backend/.venv`'s Python directly, so you don't need to activate the venv for
+them.
+
+## Configuration
+
+Every setting comes from environment variables or `.env` files. Real `.env` files are git-ignored,
+and only the `.env.example` files are committed.
+
+| File                    | Variables                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `.env` (root)           | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING` |
+| `backend/.env`          | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet)     |
+| `frontend/.env`         | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                              |
+
+If you change a port in the root `.env`, also update `DATABASE_URL` and `CORS_ORIGINS` in
+`backend/.env` and `NEXT_PUBLIC_API_URL` in `frontend/.env`. Docker Compose derives these from the
+root `.env` automatically.
+
+`MEDIA_DIR` (default `backend/media`) is created on startup and is git-ignored.
+
+---
+
+## Project structure
+
+```
+.
+├── backend/
+│   ├── app/
+│   │   ├── main.py                # FastAPI app, CORS, router registration
+│   │   ├── core/config.py         # settings from env / backend/.env (pydantic-settings)
+│   │   ├── db/                    # engine, session, Base (no models yet)
+│   │   ├── api/routes/health.py   # GET /api/health, the only real endpoint
+│   │   ├── prompt_interpreter/    # placeholder: prompt → structured lesson plan
+│   │   ├── code_generator/        # placeholder: lesson plan → Manim code
+│   │   ├── primitives/            # placeholder: validated Manim primitives library
+│   │   ├── audio_pipeline/        # placeholder: TTS narration
+│   │   ├── scheduler/             # placeholder: render queue / prefetching
+│   │   ├── learner_state/         # placeholder: Bayesian Knowledge Tracing
+│   │   └── workers/               # placeholder: render workers
+│   ├── alembic/ + alembic.ini     # migrations (none yet); URL comes from DATABASE_URL
+│   ├── scripts/manim_smoke.py     # Manim + LaTeX + FFmpeg smoke test
+│   ├── tests/                     # pytest (no database needed)
+│   ├── requirements.txt           # runtime deps, pinned with ==
+│   ├── requirements-dev.txt       # pytest, ruff, httpx
+│   ├── pyproject.toml             # ruff + pytest config
+│   ├── Dockerfile + docker-entrypoint.sh
+│   └── .env.example
+├── frontend/
+│   ├── src/app/page.tsx           # home page with the status panel
+│   ├── Dockerfile + docker-entrypoint.sh
+│   └── .env.example
+├── scripts/                       # cross-platform Node helpers used by package.json
+│   ├── setup.mjs  dev.mjs  doctor.mjs
+│   ├── run.mjs                    # runs backend/frontend tasks with the right venv paths
+│   └── lib.mjs                    # shared helpers
+├── docker-compose.yml
+├── package.json                   # root scripts (+ concurrently)
+├── .env.example                   # ports + Postgres credentials
+├── .nvmrc  .python-version        # pinned Node / Python versions
+└── .gitattributes  .editorconfig  .gitignore
+```
+
+Versions are pinned exactly: `==` in `requirements*.txt`, exact versions plus `package-lock.json`
+for npm (`save-exact=true` in `.npmrc`), and exact Docker image tags.
+
+---
+
+## Troubleshooting
+
+**A port is already in use (3000 / 8000 / 5433).**
+`npm run doctor` shows which ports are taken. Find the process with `lsof -i :8000`
+(macOS/Linux) or `netstat -ano | findstr :8000` (Windows), then stop it. You can also change the
+port in the root `.env` (and the matching URLs, see [Configuration](#configuration)). An old
+`docker compose` stack is a common cause, so try `docker compose down`. Postgres uses host port
+5433 so it doesn't clash with a local Postgres on 5432.
+
+**`/api/health` shows `manim: false`.**
+Natively, Manim needs Cairo and Pango to install. On macOS run `brew install cairo pango pkg-config`.
+On Ubuntu run `sudo apt install build-essential pkg-config libcairo2-dev libpango1.0-dev`. Then
+run `npm run setup` again. Or use Docker, where it's preinstalled.
+
+**`/api/health` shows `latex: false`, or MathTex fails.**
+The check needs both `latex` and `dvisvgm` on your PATH. Install MiKTeX/TeX Live (Windows),
+MacTeX/BasicTeX (macOS) or the `texlive-*` + `dvisvgm` packages (Ubuntu), then **open a new
+terminal** so the PATH updates. On MiKTeX, allow on-the-fly package installs. The first MathTex
+render may pause while packages download.
+
+**`/api/health` shows `ffmpeg: false`.** Install FFmpeg (see Prerequisites) and open a new terminal.
+
+**`/api/health` shows `database: false`.** Postgres isn't running or `DATABASE_URL` is wrong.
+Run `docker compose up -d db`, then check `DATABASE_URL` in `backend/.env` (it uses port 5433).
+
+**Windows line endings / `sh: docker-entrypoint.sh: not found` / `\r` errors in containers.**
+`.gitattributes` forces LF line endings, so a fresh clone is fine. If your working copy still has
+CRLF files, commit or stash your changes first (the next command discards uncommitted work), then:
+`git config core.autocrlf false && git rm --cached -r -q . && git reset --hard`.
+Make sure your editor saves files with LF (`.editorconfig` asks it to).
+
+**Hot reload doesn't notice changes in Docker (mostly Windows).**
+Keep the repo inside the WSL2 filesystem (e.g. `\\wsl$\Ubuntu\home\<you>\fourierlearn`), not
+under `C:\`. Or set `DOCKER_FILE_POLLING=true` in the root `.env` and restart the stack.
+
+**Activating the venv** (only needed when you run commands by hand; the npm scripts don't need it):
+
+| OS / shell              | Command                              |
+| ----------------------- | ------------------------------------ |
+| Windows PowerShell      | `backend\.venv\Scripts\Activate.ps1` |
+| Windows cmd             | `backend\.venv\Scripts\activate.bat` |
+| Windows Git Bash        | `source backend/.venv/Scripts/activate` |
+| macOS / Linux           | `source backend/.venv/bin/activate`  |
+
+If PowerShell refuses to run `Activate.ps1`, run
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once. Leave the venv with `deactivate`.
+
+**`npm run setup` says Python 3.11 was not found.** Install Python 3.11 (see Prerequisites). On
+Windows, check that `py -3.11 --version` works. Elsewhere, check `python3.11 --version`.
+
+**Strange dependency errors in Docker.** Reset the dependency volumes with `docker compose down -v`
+(this also deletes the local database), then `docker compose up --build`.
