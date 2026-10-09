@@ -7,10 +7,10 @@ import {
   BACKEND, FRONTEND, NPM, ROOT, VENV, VENV_PYTHON, c, capture, fail, isWindows, ok, run, step, warn,
 } from "./lib.mjs";
 
-const PY_VERSION = readFileSync(path.join(ROOT, ".python-version"), "utf8").trim(); // e.g. 3.11.17
-const PY_MINOR = PY_VERSION.split(".").slice(0, 2).join("."); // e.g. 3.11
+const PY_VERSION = readFileSync(path.join(ROOT, ".python-version"), "utf8").trim(); // e.g. 3.12.15
+const PY_MINOR = PY_VERSION.split(".").slice(0, 2).join("."); // e.g. 3.12
 
-/** Find a Python 3.11 interpreter: the Windows `py` launcher first, then common names. */
+/** Find a Python interpreter of the pinned minor version: the Windows `py` launcher first, then common names. */
 function findPython() {
   const candidates = isWindows
     ? [["py", [`-${PY_MINOR}`]], ["python", []], ["python3", []]]
@@ -27,11 +27,21 @@ async function main() {
 
   step(`Python ${PY_MINOR} virtual environment (backend/.venv)`);
   if (existsSync(VENV_PYTHON)) {
+    // Rebuild a venv made with another Python version (e.g. before .python-version changed).
+    const res = capture(VENV_PYTHON, ["-c", "import sys; print('%d.%d' % sys.version_info[:2])"]);
+    const venvMinor = res.status === 0 ? res.stdout.trim() : "unknown";
+    if (venvMinor !== PY_MINOR) {
+      warn(`backend/.venv uses Python ${venvMinor}, not ${PY_MINOR}. Recreating it...`);
+      rmSync(VENV, { recursive: true, force: true });
+    }
+  }
+  if (existsSync(VENV_PYTHON)) {
     ok("backend/.venv already exists");
   } else {
     const python = findPython();
     if (!python) {
-      fail(`Python ${PY_MINOR} not found. Install Python ${PY_VERSION} (see README → Prerequisites) and re-run.`);
+      fail(`Python ${PY_MINOR} not found. Install any Python ${PY_MINOR}.x (see README → Prerequisites), open a new terminal and re-run.`);
+      if (isWindows) console.log(`    ${c.dim("fix:")} winget install Python.Python.${PY_MINOR}`);
       process.exit(1);
     }
     const [cmd, pre] = python;

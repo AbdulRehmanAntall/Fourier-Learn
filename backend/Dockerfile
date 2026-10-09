@@ -1,5 +1,5 @@
 # Development image for the FourierLearn backend (source is bind-mounted by docker-compose).
-FROM python:3.11.17-slim-bookworm
+FROM python:3.12.15-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
