@@ -8,12 +8,12 @@ adapted by a learner model (Bayesian Knowledge Tracing).
 > migrations yet) and a Manim smoke test. Lesson generation, LLM calls, BKT and auth are **not**
 > implemented. The packages under `backend/app/` for those parts are empty placeholders.
 
-| Part     | Stack                                                                                   |
-| -------- | --------------------------------------------------------------------------------------- |
+| Part     | Stack                                                                                                |
+| -------- | ---------------------------------------------------------------------------------------------------- |
 | Backend  | Python 3.12, FastAPI, Uvicorn, Pydantic Settings, SQLAlchemy 2 + Alembic, psycopg 3, SymPy, Manim CE |
-| Frontend | Next.js 16 (App Router), TypeScript, ESLint, Tailwind CSS                               |
-| Database | PostgreSQL 16                                                                           |
-| Tooling  | Docker + Docker Compose, Node scripts (cross-platform), Git                             |
+| Frontend | Next.js 16 (App Router), TypeScript, ESLint, Tailwind CSS                                            |
+| Database | PostgreSQL 16                                                                                        |
+| Tooling  | Docker + Docker Compose, Node scripts (cross-platform), Git                                          |
 
 There are two ways to run the project. Pick one:
 
@@ -33,7 +33,7 @@ and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pang
 ### Windows 10/11
 
 1. **Git:** <https://git-scm.com/download/win>
-2. **Docker Desktop:** install WSL2 first. In an *admin* PowerShell run `wsl --install`, then reboot.
+2. **Docker Desktop:** install WSL2 first. In an _admin_ PowerShell run `wsl --install`, then reboot.
    Then install Docker Desktop (<https://docs.docker.com/desktop/setup/install/windows-install/>)
    and keep "Use WSL 2 based engine" ticked.
 3. **Native only:**
@@ -158,22 +158,30 @@ npm run dev
 
 ---
 
+## Working as a team
+
+Read **[CONTRIBUTING.md](CONTRIBUTING.md)** before your first change. It covers branches, pull
+requests, code formatting, adding dependencies and database migrations. Every pull request is
+checked automatically by GitHub Actions (`.github/workflows/`).
+
 ## Commands
 
 All commands run from the repo root and work on Windows, macOS and Linux.
 
-| Command                 | What it does                                                                     |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| `docker compose up --build` | Run the whole stack in Docker (db + backend + frontend) with hot reload     |
-| `npm run setup`         | One-time native setup (venv, deps, `.env` files)                                  |
-| `npm run dev`           | Start Postgres (Docker), backend and frontend together                           |
-| `npm run dev:backend`   | Backend only (`uvicorn --reload` on port 8000)                                    |
-| `npm run dev:frontend`  | Frontend only (`next dev` on port 3000)                                           |
-| `npm run doctor`        | Check Python, Node, Docker, FFmpeg, LaTeX, Manim and free ports, with fix hints   |
-| `npm run test`          | Backend tests (pytest), then frontend lint and type-check                         |
-| `npm run lint:backend`  | Ruff lint for the backend                                                        |
-| `npm run manim:smoke`   | Render a tiny Manim scene (axes + `y = x^2`) at low quality and print the video path |
-| `npm run db:migrate`    | `alembic upgrade head`                                                           |
+| Command                     | What it does                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `docker compose up --build` | Run the whole stack in Docker (db + backend + frontend) with hot reload              |
+| `npm run setup`             | One-time native setup (venv, deps, `.env` files)                                     |
+| `npm run dev`               | Start Postgres (Docker), backend and frontend together                               |
+| `npm run dev:backend`       | Backend only (`uvicorn --reload` on port 8000)                                       |
+| `npm run dev:frontend`      | Frontend only (`next dev` on port 3000)                                              |
+| `npm run doctor`            | Check Python, Node, Docker, FFmpeg, LaTeX, Manim and free ports, with fix hints      |
+| `npm run test`              | Everything CI checks: lint + format check, pytest, frontend type-check               |
+| `npm run lint`              | Ruff (Python), ESLint and Prettier checks only                                       |
+| `npm run format`            | Auto-format all code (Ruff for Python, Prettier for the rest)                        |
+| `npm run deps:lock`         | Regenerate `backend/requirements*.txt` after editing `requirements*.in`              |
+| `npm run manim:smoke`       | Render a tiny Manim scene (axes + `y = x^2`) at low quality and print the video path |
+| `npm run db:migrate`        | `alembic upgrade head`                                                               |
 
 The npm scripts call `backend/.venv`'s Python directly, so you don't need to activate the venv for
 them.
@@ -183,11 +191,11 @@ them.
 Every setting comes from environment variables or `.env` files. Real `.env` files are git-ignored,
 and only the `.env.example` files are committed.
 
-| File                    | Variables                                                                                    |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `.env` (root)           | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING` |
-| `backend/.env`          | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet)     |
-| `frontend/.env`         | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                              |
+| File            | Variables                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING` |
+| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet)                          |
+| `frontend/.env` | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                                                   |
 
 If you change a port in the root `.env`, also update `DATABASE_URL` and `CORS_ORIGINS` in
 `backend/.env` and `NEXT_PUBLIC_API_URL` in `frontend/.env`. Docker Compose derives these from the
@@ -217,8 +225,9 @@ root `.env` automatically.
 │   ├── alembic/ + alembic.ini     # migrations (none yet); URL comes from DATABASE_URL
 │   ├── scripts/manim_smoke.py     # Manim + LaTeX + FFmpeg smoke test
 │   ├── tests/                     # pytest (no database needed)
-│   ├── requirements.txt           # runtime deps, pinned with ==
-│   ├── requirements-dev.txt       # pytest, ruff, httpx
+│   ├── requirements.in            # direct runtime deps (edit this)
+│   ├── requirements.txt           # generated lockfile: every package pinned, all OSes
+│   ├── requirements-dev.in/.txt   # pytest, ruff, httpx, uv (same pattern)
 │   ├── pyproject.toml             # ruff + pytest config
 │   ├── Dockerfile + docker-entrypoint.sh
 │   └── .env.example
@@ -230,14 +239,17 @@ root `.env` automatically.
 │   ├── setup.mjs  dev.mjs  doctor.mjs
 │   ├── run.mjs                    # runs backend/frontend tasks with the right venv paths
 │   └── lib.mjs                    # shared helpers
+├── .github/                       # CI workflows + pull request template
 ├── docker-compose.yml
-├── package.json                   # root scripts (+ concurrently)
+├── package.json                   # root scripts (+ concurrently, prettier)
+├── CONTRIBUTING.md                # team workflow: branches, PRs, deps, migrations
 ├── .env.example                   # ports + Postgres credentials
 ├── .nvmrc  .python-version        # pinned Node / Python versions
-└── .gitattributes  .editorconfig  .gitignore
+└── .gitattributes  .editorconfig  .gitignore  .prettierrc.json
 ```
 
-Versions are pinned exactly: `==` in `requirements*.txt`, exact versions plus `package-lock.json`
+Versions are pinned exactly: full lockfiles in `backend/requirements*.txt` (generated from the
+`.in` files by `npm run deps:lock`), exact versions plus `package-lock.json`
 for npm (`save-exact=true` in `.npmrc`), and exact Docker image tags.
 
 ---
@@ -279,12 +291,12 @@ under `C:\`. Or set `DOCKER_FILE_POLLING=true` in the root `.env` and restart th
 
 **Activating the venv** (only needed when you run commands by hand; the npm scripts don't need it):
 
-| OS / shell              | Command                              |
-| ----------------------- | ------------------------------------ |
-| Windows PowerShell      | `backend\.venv\Scripts\Activate.ps1` |
-| Windows cmd             | `backend\.venv\Scripts\activate.bat` |
-| Windows Git Bash        | `source backend/.venv/Scripts/activate` |
-| macOS / Linux           | `source backend/.venv/bin/activate`  |
+| OS / shell         | Command                                 |
+| ------------------ | --------------------------------------- |
+| Windows PowerShell | `backend\.venv\Scripts\Activate.ps1`    |
+| Windows cmd        | `backend\.venv\Scripts\activate.bat`    |
+| Windows Git Bash   | `source backend/.venv/Scripts/activate` |
+| macOS / Linux      | `source backend/.venv/bin/activate`     |
 
 If PowerShell refuses to run `Activate.ps1`, run
 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once. Leave the venv with `deactivate`.

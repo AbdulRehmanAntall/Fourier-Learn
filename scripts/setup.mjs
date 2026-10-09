@@ -4,7 +4,20 @@ import { copyFileSync, existsSync, readFileSync, rmSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
-  BACKEND, FRONTEND, NPM, ROOT, VENV, VENV_PYTHON, c, capture, fail, isWindows, ok, run, step, warn,
+  BACKEND,
+  FRONTEND,
+  NPM,
+  ROOT,
+  VENV,
+  VENV_PYTHON,
+  c,
+  capture,
+  fail,
+  isWindows,
+  ok,
+  run,
+  step,
+  warn,
 } from "./lib.mjs";
 
 const PY_VERSION = readFileSync(path.join(ROOT, ".python-version"), "utf8").trim(); // e.g. 3.12.15
@@ -13,8 +26,16 @@ const PY_MINOR = PY_VERSION.split(".").slice(0, 2).join("."); // e.g. 3.12
 /** Find a Python interpreter of the pinned minor version: the Windows `py` launcher first, then common names. */
 function findPython() {
   const candidates = isWindows
-    ? [["py", [`-${PY_MINOR}`]], ["python", []], ["python3", []]]
-    : [[`python${PY_MINOR}`, []], ["python3", []], ["python", []]];
+    ? [
+        ["py", [`-${PY_MINOR}`]],
+        ["python", []],
+        ["python3", []],
+      ]
+    : [
+        [`python${PY_MINOR}`, []],
+        ["python3", []],
+        ["python", []],
+      ];
   for (const [cmd, pre] of candidates) {
     const res = capture(cmd, [...pre, "-c", "import sys; print('%d.%d' % sys.version_info[:2])"]);
     if (res.status === 0 && res.stdout.trim() === PY_MINOR) return [cmd, pre];
@@ -40,7 +61,9 @@ async function main() {
   } else {
     const python = findPython();
     if (!python) {
-      fail(`Python ${PY_MINOR} not found. Install any Python ${PY_MINOR}.x (see README → Prerequisites), open a new terminal and re-run.`);
+      fail(
+        `Python ${PY_MINOR} not found. Install any Python ${PY_MINOR}.x (see README → Prerequisites), open a new terminal and re-run.`,
+      );
       if (isWindows) console.log(`    ${c.dim("fix:")} winget install Python.Python.${PY_MINOR}`);
       process.exit(1);
     }
@@ -59,14 +82,32 @@ async function main() {
   if ((await run(VENV_PYTHON, pipArgs, { cwd: BACKEND })) !== 0) {
     // Usually Manim failing to build pycairo/manimpango because Cairo/Pango aren't installed.
     // Install everything else so the app still runs; /api/health will report manim=false.
-    warn("Full install failed (usually Manim: Cairo/Pango system libraries missing). Retrying without Manim...");
-    const reqs = readFileSync(path.join(BACKEND, "requirements.txt"), "utf8")
+    warn(
+      "Full install failed (usually Manim: Cairo/Pango system libraries missing). Retrying without Manim...",
+    );
+    // Install the direct deps minus manim, pinned to the lockfile versions via -c (constraints),
+    // so manim's own dependencies (pycairo, manimpango, ...) are skipped too.
+    const reqs = readFileSync(path.join(BACKEND, "requirements.in"), "utf8")
       .split(/\r?\n/)
       .filter((line) => !/^\s*manim\b/i.test(line))
       .join("\n");
     const tmpReqs = path.join(tmpdir(), "fourierlearn-requirements-no-manim.txt");
     writeFileSync(tmpReqs, reqs);
-    const code = await run(VENV_PYTHON, ["-m", "pip", "install", "-r", tmpReqs, "-r", "requirements-dev.txt"], { cwd: BACKEND });
+    const code = await run(
+      VENV_PYTHON,
+      [
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        tmpReqs,
+        "-c",
+        "requirements.txt",
+        "-r",
+        "requirements-dev.txt",
+      ],
+      { cwd: BACKEND },
+    );
     rmSync(tmpReqs, { force: true });
     if (code !== 0) {
       fail("pip install failed. See the output above.");
@@ -74,10 +115,17 @@ async function main() {
     }
     manimMissing = true;
   }
-  ok(manimMissing ? "Python dependencies installed (without Manim)" : "Python dependencies installed");
+  ok(
+    manimMissing
+      ? "Python dependencies installed (without Manim)"
+      : "Python dependencies installed",
+  );
 
   step("npm dependencies");
-  for (const [dir, label] of [[ROOT, "root"], [FRONTEND, "frontend"]]) {
+  for (const [dir, label] of [
+    [ROOT, "root"],
+    [FRONTEND, "frontend"],
+  ]) {
     if ((await run(NPM, ["install", "--no-audit", "--no-fund"], { cwd: dir })) !== 0) {
       fail(`npm install failed in ${label}.`);
       process.exit(1);
@@ -100,9 +148,13 @@ async function main() {
 
   console.log(`\n${c.green(c.bold("Setup complete."))}`);
   if (manimMissing) {
-    warn(`Manim is not installed. Install Cairo/Pango (see README), then run ${c.bold("npm run setup")} again.`);
+    warn(
+      `Manim is not installed. Install Cairo/Pango (see README), then run ${c.bold("npm run setup")} again.`,
+    );
   }
-  console.log(`Next: ${c.bold("npm run doctor")} to check system tools, then ${c.bold("npm run dev")}.`);
+  console.log(
+    `Next: ${c.bold("npm run doctor")} to check system tools, then ${c.bold("npm run dev")}.`,
+  );
 }
 
 main();

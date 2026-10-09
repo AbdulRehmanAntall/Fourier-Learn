@@ -1,0 +1,8 @@
+# Python is formatted by ruff (npm run format runs both).
+backend/
+node_modules/
+.next/
+package-lock.json
+**/media/
+frontend/next-env.d.ts
+frontend/AGENTS.md
