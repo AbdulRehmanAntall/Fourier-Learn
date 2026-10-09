@@ -40,7 +40,7 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
     `Python ${PY_MINOR}`,
     version ? `${version}${venv ? ", backend/.venv" : ", no venv yet: run npm run setup"}` : "not found",
     hint({
-      windows: `install Python ${PY_VERSION} from https://www.python.org/downloads/ (tick "Add to PATH")`,
+      windows: `winget install Python.Python.${PY_MINOR} (any ${PY_MINOR}.x is fine; python.org's last Windows installer is 3.11.9)`,
       macos: "brew install python@3.11",
       linux: "sudo apt install python3.11 python3.11-venv (Ubuntu < 24.04), or use pyenv / uv",
     }),
