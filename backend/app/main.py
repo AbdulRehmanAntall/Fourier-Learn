@@ -4,9 +4,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app import __version__
-from app.api.routes import health
+from app.api.routes import health, variants
 from app.core.config import get_settings
 
 
@@ -29,6 +30,9 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health.router, prefix="/api")
+    app.include_router(variants.router, prefix="/api")
+    # Rendered beats and modules; manifests give paths relative to media/variants/<key>/.
+    app.mount("/media", StaticFiles(directory=settings.media_dir, check_dir=False), name="media")
     return app
 
 

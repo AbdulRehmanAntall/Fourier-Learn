@@ -37,7 +37,13 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-6 py-16">
       <header>
         <h1 className="text-4xl font-bold tracking-tight">FourierLearn</h1>
-        <p className="mt-2 text-sm opacity-70">Project skeleton — no lesson features yet.</p>
+        <p className="mt-2 text-sm opacity-70">
+          Lessons are not generated yet. Rendered modules can be played in the{" "}
+          <a href="/dev/modules" className="underline">
+            developer viewer
+          </a>
+          .
+        </p>
       </header>
 
       <section className="rounded-lg border border-black/10 p-5 dark:border-white/15">
