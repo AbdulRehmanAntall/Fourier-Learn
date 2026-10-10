@@ -3,13 +3,30 @@
   "concept_id": 12,
   "segments": [
     {
+      "primitive_id": "FunctionGraph",
+      "content": {
+        "y": "2*x",
+        "point_a": "(1, 2)",
+        "point_b": "(4, 8)"
+      },
+      "narration_intent": "The graph of y = 2x is a straight line through the points (1, 2) and (4, 8).",
+      "glossary_terms": [
+        "graph",
+        "coordinates"
+      ]
+    },
+    {
       "primitive_id": "GradientTriangle",
       "content": {
         "point_a": "(1, 2)",
         "point_b": "(4, 8)"
       },
       "narration_intent": "The gradient of a line is the rise between two of its points divided by the run.",
-      "glossary_terms": ["gradient", "rise", "run"]
+      "glossary_terms": [
+        "gradient",
+        "rise",
+        "run"
+      ]
     },
     {
       "primitive_id": "EquationTransform",
@@ -19,10 +36,14 @@
         "step_3": "2"
       },
       "narration_intent": "Substituting the coordinates of the two points gives the gradient of the line.",
-      "glossary_terms": ["gradient"]
+      "glossary_terms": [
+        "gradient"
+      ]
     }
   ],
-  "check_items": [101],
+  "check_items": [
+    101
+  ],
   "branch_options": [
     {
       "kind": "worked_example",
@@ -38,10 +59,14 @@
               "step_3": "2"
             },
             "narration_intent": "An exam-style question: find the gradient of the line through (-1, -1) and (3, 7).",
-            "glossary_terms": ["gradient"]
+            "glossary_terms": [
+              "gradient"
+            ]
           }
         ],
-        "check_items": [102]
+        "check_items": [
+          102
+        ]
       }
     }
   ]

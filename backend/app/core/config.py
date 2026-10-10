@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     # Relative paths are resolved against the backend/ directory.
     media_dir: Path = Path("media")
 
+    # Narration voice: "espeak" (local espeak-ng) or "fake" (silent clips, for tests).
+    tts_provider: str = "espeak"
+    # Video quality of rendered beats: 480p30, 720p30 or 1080p30 (see docs/benchmarks.md).
+    render_quality: str = "720p30"
+    # Beats rendered in parallel. 0 means one per CPU core.
+    render_workers: int = 0
+
     # Not used yet.
     llm_api_key: str = ""
     tts_api_key: str = ""

@@ -1,0 +1,76 @@
+{
+  "module_id": 1,
+  "level": 3,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beats": [
+    {
+      "primitive_id": "FunctionGraph",
+      "params": {
+        "expression": "2*x",
+        "x_min": -1,
+        "x_max": 5,
+        "marked_x": [
+          1,
+          4
+        ]
+      },
+      "narration": [
+        "Here is the graph of y equals 2 x, a straight line through the origin.",
+        "It passes through the points 1, 2 and 4, 8."
+      ],
+      "glossary_terms": [
+        "graph",
+        "coordinates"
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "primitive_id": "GradientTriangle",
+      "params": {
+        "point_a": [
+          1,
+          2
+        ],
+        "point_b": [
+          4,
+          8
+        ]
+      },
+      "narration": [
+        "Take the line through these two points.",
+        "The rise is 6 and the run is 3, so the gradient is 6 over 3, which is 2."
+      ],
+      "glossary_terms": [
+        "gradient",
+        "rise",
+        "run"
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "primitive_id": "EquationTransform",
+      "params": {
+        "expressions": [
+          "(8 - 2)/(4 - 1)",
+          "6/3",
+          "2"
+        ]
+      },
+      "narration": [
+        "Using the coordinates, the gradient is 8 minus 2 over 4 minus 1.",
+        "That is 6 over 3, so the gradient is 2."
+      ],
+      "glossary_terms": [
+        "gradient"
+      ],
+      "concept_ids": [
+        12
+      ]
+    }
+  ]
+}

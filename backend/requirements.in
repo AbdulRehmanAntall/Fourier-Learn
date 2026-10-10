@@ -7,5 +7,7 @@ SQLAlchemy==2.1.4
 alembic==1.20.0
 psycopg[binary]==3.3.6
 sympy==1.14.0
+# Audio track assembly in the render engine (also a Manim dependency).
+numpy==2.5.3
 # Manim needs Cairo/Pango (and LaTeX + FFmpeg at render time). See README.
 manim==0.22.0

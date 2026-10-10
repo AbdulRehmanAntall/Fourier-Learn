@@ -6,7 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# System tools Manim needs: FFmpeg, LaTeX (for MathTex), Cairo/Pango + build tools for pycairo.
+# System tools Manim needs: FFmpeg, LaTeX (for MathTex), Cairo/Pango + build tools for pycairo,
+# and espeak-ng, the local narration voice.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         pkg-config \
@@ -19,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         texlive-science \
         cm-super \
         dvisvgm \
+        espeak-ng \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
