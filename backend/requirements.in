@@ -11,3 +11,5 @@ sympy==1.14.0
 numpy==2.5.3
 # Manim needs Cairo/Pango (and LaTeX + FFmpeg at render time). See README.
 manim==0.22.0
+# The Kokoro narration voice (ONNX Runtime on the CPU).
+kokoro-onnx==0.6.1

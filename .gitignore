@@ -25,6 +25,7 @@ npm-debug.log*
 
 # Media and Manim output
 backend/media/
+backend/models/
 media/
 **/media/videos/
 **/media/images/
