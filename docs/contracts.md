@@ -26,13 +26,11 @@ Section numbers (§) refer to the project report.
 | Stream events                                 | `stream.py`      | §6.4.12        | application server    | player                            |
 | `LessonStatus`, `RenderStatus`, `ModuleStyle` | `status.py`      | Table 4.8      | —                     | database, API                     |
 
-Two worked examples, which the tests load, are in `backend/examples/`:
+Worked examples, which the tests load, are in `backend/examples/`:
 
-- `gradient_of_line.plan.json`: a scene plan with two segments and a worked-example branch.
-- `gradient_of_line.render.json`: the render request for that plan at Level 2.
-
-The `params` in the render request are illustrative. Each primitive defines its own parameter
-schema in Phase 1, and the example is updated to match.
+- `gradient_of_line.plan.json`: a scene plan with three segments and a worked-example branch.
+- `gradient_of_line.L1.render.json`, `.L2.`, `.L3.`: the render requests for that plan at each
+  level, with narration written to Table 5.3. Render one with `npm run render -- <file>`.
 
 ## What each contract guarantees
 
@@ -85,10 +83,12 @@ It also has:
 - `animate(scene, params, level, run_times, carried)`: plays the steps with the run times the
   engine computed from the audio (§5.4.4). After each step it yields the visible objects by name,
   so the engine can run the layout check and record the step's timing.
-- `add_final_state(scene, params, level)`: draws the segment's end state without animation. The
-  next segment, rendered as its own scene, starts from this state, so the joined video shows no
-  break (§5.3.4).
 - `primitive_id`, `version` and `topic` (Table 5.2).
+
+Each segment is rendered as its own scene, so it must start from the picture the previous
+segment ended on (§5.3.4). The engine does this by replaying the earlier segments' `animate` in
+a skipped section: their final state is added without animation. `animate` must therefore draw
+the same picture whatever run times it is given. `docs/primitives.md` explains how to write one.
 
 Contracts never import Manim at runtime, so they stay light to test.
 
@@ -179,9 +179,23 @@ Please check them together, because a change later costs more.
 1. **Ids are positive integers**, as in the data dictionary (Table 4.8).
 2. **Expressions are SymPy-syntax strings**, for example `"x**2"` or `"(8 - 2)/(4 - 1)"`.
 3. **A frame region is given in fractions of the frame** (0 to 1 from the bottom left), so it does
-   not depend on render resolution. Allowed overlaps are listed as pairs of object names, and `"*"`
-   means any object.
+   not depend on render resolution. Allowed overlaps are listed as pairs of object names, which
+   may use wildcards: `"*"` means any object and `"point_*"` any name starting with `point_`.
 4. **Manifest times are relative to each beat's own video**, as described above.
 5. **`render_from_beat`** is how a request asks for beats _j_ onward after an "I'm Lost" press.
 6. **Playback rates** run from 0.25× to 4×.
 7. **An event batch** holds at most 100 events.
+
+## Changes made in Phase 1
+
+Building the render engine and the first three primitives tested the contracts against real
+Manim code. Two changes came out of it:
+
+1. **`add_final_state` was removed from `Primitive`.** It duplicated what `animate` draws, so the
+   two could drift apart and leave a visible jump between beats. The engine now replays the
+   earlier beats' `animate` without rendering them, which gives the exact final picture (§5.3.4).
+2. **Layout contracts accept wildcards** in object names (`"point_*"`), because a primitive's
+   number of objects depends on its parameters, such as the number of marked points.
+
+Narration text is deliberately not part of the cache key (§4.2.3). Rendering a request again
+after editing only its narration returns the cached variant; pass `--force` to re-render.

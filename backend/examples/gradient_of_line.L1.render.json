@@ -1,0 +1,85 @@
+{
+  "module_id": 1,
+  "level": 1,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beats": [
+    {
+      "primitive_id": "FunctionGraph",
+      "params": {
+        "expression": "2*x",
+        "x_min": -1,
+        "x_max": 5,
+        "marked_x": [
+          1,
+          4
+        ]
+      },
+      "narration": [
+        "First, the axes. The x axis goes across, and the y axis goes up.",
+        "The equation is y equals 2 x. Each y value is double its x value.",
+        "Now we draw the graph from left to right. It is a straight line.",
+        "Here is the point 1, 2. When x is 1, y is 2.",
+        "And here is the point 4, 8. When x is 4, y is 8."
+      ],
+      "glossary_terms": [
+        "graph",
+        "coordinates"
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "primitive_id": "GradientTriangle",
+      "params": {
+        "point_a": [
+          1,
+          2
+        ],
+        "point_b": [
+          4,
+          8
+        ]
+      },
+      "narration": [
+        "Let's draw the axes again, to measure how steep the line is.",
+        "Here is our first point, 1, 2.",
+        "And our second point, 4, 8.",
+        "This straight line goes through both points.",
+        "The run is how far we move across. From 1 to 4 is 3 across.",
+        "The rise is how far we move up. From 2 to 8 is 6 up.",
+        "The gradient tells us how steep a line is. It is the rise divided by the run: 6 over 3, which is 2."
+      ],
+      "glossary_terms": [
+        "gradient",
+        "rise",
+        "run"
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "primitive_id": "EquationTransform",
+      "params": {
+        "expressions": [
+          "(8 - 2)/(4 - 1)",
+          "6/3",
+          "2"
+        ]
+      },
+      "narration": [
+        "Here is the same working with numbers: 8 minus 2, over 4 minus 1.",
+        "8 minus 2 is 6, and 4 minus 1 is 3, so we have 6 over 3.",
+        "6 divided by 3 is 2. The line goes up 2 for every 1 across."
+      ],
+      "glossary_terms": [
+        "gradient"
+      ],
+      "concept_ids": [
+        12
+      ]
+    }
+  ]
+}
