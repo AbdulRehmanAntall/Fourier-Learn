@@ -201,11 +201,11 @@ them.
 Every setting comes from environment variables or `.env` files. Real `.env` files are git-ignored,
 and only the `.env.example` files are committed.
 
-| File            | Variables                                                                                                                                     |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                            |
-| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `RENDER_QUALITY`, `RENDER_WORKERS`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet) |
-| `frontend/.env` | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                                                                              |
+| File            | Variables                                                                                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                                             |
+| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `TTS_MODEL_DIR`, `RENDER_QUALITY`, `RENDER_WORKERS`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet) |
+| `frontend/.env` | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                                                                                               |
 
 If you change a port in the root `.env`, also update `DATABASE_URL` and `CORS_ORIGINS` in
 `backend/.env` and `NEXT_PUBLIC_API_URL` in `frontend/.env`. Docker Compose derives these from the
@@ -225,8 +225,16 @@ This renders the example module (gradient of a straight line, Level 2) and print
 stored and how long each stage took. Then start the app (`npm run dev` or Docker) and open
 <http://localhost:3000/dev/modules> to play it with its captions and concept chips. A second
 render of the same request comes from the cache; add `--force` to render again. Options:
-`--tts fake` (silent narration, no voice needed), `--quality 480p30|720p30|1080p30`,
-`--workers N`.
+`--tts kokoro|espeak|fake` (`fake` is silent narration and needs no voice),
+`--quality 480p30|720p30|1080p30`, `--workers N`.
+
+The default voice is Kokoro, a free, local neural voice (Apache 2.0). Its model files (about
+350 MB) are downloaded into `backend/models/kokoro/` the first time you render, and that folder is
+git-ignored. espeak-ng is still available as `--tts espeak`.
+
+If a render stops with `BrokenProcessPool` or `OpenBLAS error: Memory allocation still failed`,
+the machine is short of memory: close other apps, or render with `--workers 1` and the environment
+variable `OPENBLAS_NUM_THREADS=1`.
 
 How the engine works is described in `backend/app/renderer/engine.py`; measured render times are
 in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
@@ -249,7 +257,7 @@ in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 │   │   ├── code_generator/        # placeholder: scene plan → primitive parameters (no free code)
 │   │   ├── primitives/            # validated Manim primitives, SymPy checks, harness
 │   │   ├── renderer/              # render engine: beats → narrated, cached module video
-│   │   ├── audio_pipeline/        # TTS (espeak-ng, fake); narration scripts come in Phase 3
+│   │   ├── audio_pipeline/        # TTS (Kokoro, espeak-ng, fake); narration scripts come in Phase 3
 │   │   ├── scheduler/             # placeholder: render queue / prefetching
 │   │   ├── learner_state/         # placeholder: Bayesian Knowledge Tracing
 │   │   └── workers/               # placeholder: render workers

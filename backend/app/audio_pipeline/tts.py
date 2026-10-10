@@ -5,7 +5,9 @@ render engine can place clips on a beat's audio track without resampling. Clips 
 provider, voice, speech rate and text, so a passage is synthesised once.
 
 Providers:
-- `EspeakTTS`: the local espeak-ng voice. Free and offline; good enough for development.
+- `KokoroTTS`: the local Kokoro-82M neural voice (Apache 2.0). Free and offline, and far more
+  natural than espeak-ng. Its model files are downloaded on first use.
+- `EspeakTTS`: the local espeak-ng voice. Free and offline, but robotic.
 - `FakeTTS`: silent clips whose length follows the word count. Used by tests and CI.
 
 A hosted voice is added as another `TTSProvider` once one is chosen (see docs/PLAN.md, Phase 1).
@@ -16,6 +18,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+import urllib.request
 import uuid
 import wave
 from abc import ABC, abstractmethod
@@ -23,7 +26,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
 
+import numpy as np
+
 from app.contracts import Level
+from app.core.config import get_settings
 
 SAMPLE_RATE = 24_000
 
@@ -107,6 +113,67 @@ class EspeakTTS(TTSProvider):
             _run(_to_canonical_wav(raw, out))
 
 
+class KokoroTTS(TTSProvider):
+    """The local Kokoro-82M voice (https://github.com/thewh1teagle/kokoro-onnx).
+
+    Runs on the CPU with ONNX Runtime. The model (about 330 MB) and the voices file are downloaded
+    into `settings.tts_model_dir` on first use. Kokoro speaks at SAMPLE_RATE already, so its audio
+    is written as is.
+    """
+
+    name = "kokoro"
+    RELEASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
+    MODEL = "kokoro-v1.0.onnx"
+    VOICES_FILE = "voices-v1.0.bin"
+    # Lessons follow the Cambridge syllabus, so "default" is a British English voice.
+    VOICES = {"default": "bf_emma"}
+
+    def __init__(self, model_dir: Path | None = None) -> None:
+        self.model_dir = model_dir or get_settings().tts_model_dir
+        self._kokoro = None
+
+    def write_wav(self, text: str, voice: str, rate: float, out: Path) -> None:
+        name = self.VOICES.get(voice, voice)
+        # Voice names start with the accent: "b" British English, "a" American English.
+        lang = "en-gb" if name.startswith("b") else "en-us"
+        try:
+            samples, sample_rate = self._model().create(text, voice=name, speed=rate, lang=lang)
+        except (KeyError, ValueError) as error:
+            raise TTSError(f"kokoro failed: {error}") from error
+        if sample_rate != SAMPLE_RATE:
+            raise TTSError(f"kokoro returned {sample_rate} Hz audio, expected {SAMPLE_RATE} Hz")
+        pcm = (np.clip(samples, -1.0, 1.0) * 32767).astype("<i2")
+        with wave.open(str(out), "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)
+            wav.setframerate(SAMPLE_RATE)
+            wav.writeframes(pcm.tobytes())
+
+    def _model(self):
+        if self._kokoro is None:
+            try:
+                from kokoro_onnx import Kokoro
+            except ImportError:
+                raise TTSError("kokoro-onnx is not installed") from None
+            model = self._download(self.MODEL)
+            voices = self._download(self.VOICES_FILE)
+            self._kokoro = Kokoro(str(model), str(voices))
+        return self._kokoro
+
+    def _download(self, filename: str) -> Path:
+        path = self.model_dir / filename
+        if not path.is_file():
+            self.model_dir.mkdir(parents=True, exist_ok=True)
+            partial = path.with_name(f"{filename}.{uuid.uuid4().hex}.partial")
+            try:
+                urllib.request.urlretrieve(f"{self.RELEASE}/{filename}", partial)
+            except OSError as error:
+                partial.unlink(missing_ok=True)
+                raise TTSError(f"could not download {filename}: {error}") from error
+            partial.replace(path)
+        return path
+
+
 def _to_canonical_wav(source: Path, out: Path) -> list[str]:
     return [
         "ffmpeg",
@@ -132,7 +199,11 @@ def _run(command: list[str], stdin: str | None = None) -> None:
         raise TTSError(f"{command[0]} failed: {result.stderr.strip()[:500]}")
 
 
-PROVIDERS: dict[str, type[TTSProvider]] = {"espeak": EspeakTTS, "fake": FakeTTS}
+PROVIDERS: dict[str, type[TTSProvider]] = {
+    "kokoro": KokoroTTS,
+    "espeak": EspeakTTS,
+    "fake": FakeTTS,
+}
 
 
 def get_provider(name: str) -> TTSProvider:

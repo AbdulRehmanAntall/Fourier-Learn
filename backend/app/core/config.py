@@ -24,8 +24,11 @@ class Settings(BaseSettings):
     # Relative paths are resolved against the backend/ directory.
     media_dir: Path = Path("media")
 
-    # Narration voice: "espeak" (local espeak-ng) or "fake" (silent clips, for tests).
-    tts_provider: str = "espeak"
+    # Narration voice: "kokoro" (local neural voice), "espeak" (local espeak-ng) or "fake"
+    # (silent clips, for tests).
+    tts_provider: str = "kokoro"
+    # Where the Kokoro model files are downloaded on first use.
+    tts_model_dir: Path = Path("models/kokoro")
     # Video quality of rendered beats: 480p30, 720p30 or 1080p30 (see docs/benchmarks.md).
     render_quality: str = "720p30"
     # Beats rendered in parallel. 0 means one per CPU core.
@@ -42,9 +45,9 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
-    @field_validator("media_dir")
+    @field_validator("media_dir", "tts_model_dir")
     @classmethod
-    def _resolve_media_dir(cls, value: Path) -> Path:
+    def _resolve_path(cls, value: Path) -> Path:
         return value if value.is_absolute() else BACKEND_DIR / value
 
 

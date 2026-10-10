@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     DEBIAN_FRONTEND=noninteractive
 
 # System tools Manim needs: FFmpeg, LaTeX (for MathTex), Cairo/Pango + build tools for pycairo,
-# and espeak-ng, the local narration voice.
+# and espeak-ng (the espeak narration voice; Kokoro, the default voice, needs no system package).
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         pkg-config \
