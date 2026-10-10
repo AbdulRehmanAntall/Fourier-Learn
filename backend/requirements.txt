@@ -65,6 +65,7 @@ networkx==3.7
     # via manim
 numpy==2.5.3
     # via
+    #   -r requirements.in
     #   isosurfaces
     #   manim
     #   mapbox-earcut

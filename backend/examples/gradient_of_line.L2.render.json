@@ -1,0 +1,80 @@
+{
+  "module_id": 1,
+  "level": 2,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beats": [
+    {
+      "primitive_id": "FunctionGraph",
+      "params": {
+        "expression": "2*x",
+        "x_min": -1,
+        "x_max": 5,
+        "marked_x": [
+          1,
+          4
+        ]
+      },
+      "narration": [
+        "Here are the x and y axes, with the equation of our line at the top: y equals 2 x.",
+        "Drawing the graph from left to right gives a straight line through the origin, rising as it goes.",
+        "Two points on this line are 1, 2 and 4, 8. We will use them to measure how steep the line is."
+      ],
+      "glossary_terms": [
+        "graph",
+        "coordinates"
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "primitive_id": "GradientTriangle",
+      "params": {
+        "point_a": [
+          1,
+          2
+        ],
+        "point_b": [
+          4,
+          8
+        ]
+      },
+      "narration": [
+        "Let's look at those two points again on a fresh pair of axes.",
+        "This is the straight line that passes through both of them.",
+        "From the first point to the second, the line runs 3 across and rises 6 up. Together they make a right-angled triangle.",
+        "The gradient is the rise divided by the run: 6 over 3, which is 2."
+      ],
+      "glossary_terms": [
+        "gradient",
+        "rise",
+        "run"
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "primitive_id": "EquationTransform",
+      "params": {
+        "expressions": [
+          "(8 - 2)/(4 - 1)",
+          "6/3",
+          "2"
+        ]
+      },
+      "narration": [
+        "We can write the same calculation with the coordinates: 8 minus 2, over 4 minus 1.",
+        "The top is 6 and the bottom is 3, so this is 6 over 3.",
+        "That simplifies to 2. So the gradient of the line is 2, which means it goes up 2 for every 1 across."
+      ],
+      "glossary_terms": [
+        "gradient"
+      ],
+      "concept_ids": [
+        12
+      ]
+    }
+  ]
+}

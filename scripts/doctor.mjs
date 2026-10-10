@@ -131,6 +131,22 @@ console.log(c.bold(`FourierLearn doctor (${os})\n`));
   );
 }
 
+// espeak-ng (the local narration voice, TTS_PROVIDER=espeak)
+{
+  const res = capture("espeak-ng", ["--version"]);
+  report(
+    res.status === 0,
+    "espeak-ng (narration voice)",
+    res.status === 0 ? firstLine(res).split(" ").slice(0, 4).join(" ") : "not found",
+    hint({
+      windows:
+        "winget install eSpeak-NG.eSpeak-NG, then add its folder (e.g. C:\\Program Files\\eSpeak NG) to PATH",
+      macos: "brew install espeak-ng",
+      linux: "sudo apt install espeak-ng",
+    }),
+  );
+}
+
 // Manim
 {
   const venv = existsSync(VENV_PYTHON);
@@ -181,6 +197,6 @@ console.log("");
 if (failed.length === 0) console.log(c.green(c.bold("All checks passed.")));
 else
   console.log(
-    `${failed.length} check(s) need attention. The app still starts without FFmpeg/LaTeX/Manim/Postgres.`,
+    `${failed.length} check(s) need attention. The app still starts without FFmpeg/LaTeX/Manim/espeak-ng/Postgres.`,
   );
 process.exitCode = results.some((r) => r.required && !r.passed) ? 1 : 0;

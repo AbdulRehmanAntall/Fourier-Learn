@@ -3,6 +3,9 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "render: renders real video with Manim, LaTeX and FFmpeg (skipped where they are missing)",
+]
 filterwarnings = [
     # Starlette now prefers the `httpx2` package for TestClient; plain httpx still works.
     "ignore:Using `httpx` with `starlette.testclient` is deprecated",

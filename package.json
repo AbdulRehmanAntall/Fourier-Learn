@@ -2,7 +2,7 @@
   "name": "fourierlearn",
   "version": "0.1.0",
   "private": true,
-  "description": "FourierLearn: narrated, animated O-Level maths lessons (project skeleton).",
+  "description": "FourierLearn: narrated, animated O-Level maths lessons.",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -22,6 +22,8 @@
     "format": "node scripts/run.mjs backend:format && prettier --write .",
     "deps:lock": "node scripts/run.mjs deps:lock",
     "manim:smoke": "node scripts/run.mjs manim:smoke",
+    "render": "node scripts/run.mjs render",
+    "primitives:check": "node scripts/run.mjs primitives:check",
     "db:migrate": "node scripts/run.mjs db:migrate"
   },
   "devDependencies": {

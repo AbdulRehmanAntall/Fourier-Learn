@@ -16,6 +16,7 @@ parameter values and nothing else.
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping, Sequence
+from fnmatch import fnmatchcase
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PositiveFloat, model_validator
@@ -80,7 +81,8 @@ class LayoutContract(BaseModel):
 
     The layout check rejects a segment if any visible object leaves the frame or the region, or
     if two objects intersect that this contract does not allow to overlap. Objects are the names
-    a primitive yields from `animate`; "*" matches any object.
+    a primitive yields from `animate`. A name in `allowed_overlaps` may use shell-style wildcards:
+    "*" matches any object, "point_*" any object whose name starts with "point_".
     """
 
     model_config = ConfigDict(frozen=True)
@@ -90,7 +92,9 @@ class LayoutContract(BaseModel):
 
     def may_overlap(self, a: str, b: str) -> bool:
         for x, y in self.allowed_overlaps:
-            if (x in (a, "*") and y in (b, "*")) or (x in (b, "*") and y in (a, "*")):
+            if (fnmatchcase(a, x) and fnmatchcase(b, y)) or (
+                fnmatchcase(b, x) and fnmatchcase(a, y)
+            ):
                 return True
         return False
 
@@ -170,15 +174,13 @@ class Primitive[P: PrimitiveParams](ABC):
     ) -> Iterator[NamedObjects]:
         """Play the steps of the segment in `scene`, one per entry of `run_times`.
 
+        Each step must take exactly its run time, so the narration stays aligned (§5.4.4).
         `carried` holds the objects the previous segment left on screen; the primitive may keep,
         transform or remove them. After each step, yield every visible object by name, so the
         engine can run the layout check and record the step's end time.
-        """
 
-    @abstractmethod
-    def add_final_state(self, scene: "Scene", params: P, level: Level) -> NamedObjects:
-        """Add the objects left on screen at the end of the segment, without animation.
-
-        Each segment is rendered as a separate scene, so the next segment starts from this
-        state and the joined video shows no break at segment boundaries (§5.3.4).
+        Each segment is rendered as a separate scene. To start it from the state the previous
+        segment ended in, the engine replays the earlier segments' `animate` without rendering
+        them, which adds their final state without animation (§5.3.4). `animate` must therefore
+        draw the same picture whatever run times it is given.
         """

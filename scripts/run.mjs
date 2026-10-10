@@ -71,6 +71,9 @@ const tasks = {
   ),
   "db:migrate": python(["-m", "alembic", "upgrade", "head"]),
   "manim:smoke": python(["scripts/manim_smoke.py"]),
+  // Extra arguments after `--` are passed through, e.g. npm run render -- examples/x.json
+  render: python(["-m", "app.renderer", ...process.argv.slice(3)]),
+  "primitives:check": python(["-m", "app.primitives.harness", ...process.argv.slice(3)]),
   "frontend:dev": () => run(NPM, ["run", "dev", "--", "--port", frontendPort], { cwd: FRONTEND }),
 };
 
