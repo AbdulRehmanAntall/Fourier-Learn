@@ -75,6 +75,9 @@ Choose who takes which lane. A suits whoever already owns the repo tooling.
 
 ## 3. Phase 0 — Contracts (week 1, all three, together)
 
+> **Status: done** (merged in PR #6). Two contract changes came out of Phase 1; see the end of
+> [docs/contracts.md](contracts.md).
+
 Agree on these before writing feature code. Then the three lanes can work in parallel and fit
 together later. They live in `backend/app/contracts/` as Pydantic models, and
 **[docs/contracts.md](contracts.md)** explains each one with its report section. After week 1, a
@@ -85,7 +88,8 @@ change to them needs a PR that all three review.
 2. **`Primitive` interface** (§5.3.1): the four elements of a primitive (parameter schema,
    validation predicates, layout contract, difficulty hooks), plus the validated default
    parameters, the SymPy-computed on-screen values, `animate` (plays the steps and yields the
-   visible objects after each one) and `add_final_state` (so stitched beats show no jump).
+   visible objects after each one). (Phase 0 also had `add_final_state`; Phase 1 replaced it by
+   replaying earlier beats, see docs/contracts.md.)
 3. **`ScenePlan`** (Table 5.1): `module_id`, `concept_id`, `segments[]` with `primitive_id`,
    `content` (expressions), `narration_intent` and `glossary_terms`, then `check_items` and
    `branch_options`. A plan has **no level**, because one plan renders at all three levels.
@@ -112,6 +116,11 @@ committed under `backend/examples/`.
 **Goal:** given primitive code, parameters and narration text, produce a narrated module at any
 level, with no LLM, database or frontend involved.
 
+> **Status: done, except the hosted-voice bake-off.** Everything below is built and tested; see
+> "What Phase 1 delivered" at the end of this section. The narration voice is espeak-ng, which
+> is free and local but robotic. Comparing hosted voices needs API keys and a budget decision,
+> so lane C still owes that comparison; a hosted voice plugs in as one more `TTSProvider`.
+
 ```mermaid
 flowchart LR
   req["ModuleRenderRequest"] --> tts["TTS per step: clip and duration"]
@@ -132,7 +141,8 @@ flowchart LR
    `run_time = max(audio_duration, step.min_run_time(level))`. At Level 1, add a short pause after
    each step.
 3. **One Manim scene per beat**, built from a fixed scene template:
-   - Add the previous beats' `final_state` without animation.
+   - Replay the previous beats without rendering them, which adds their final state without
+     animation.
    - Run the steps with the computed run times.
    - Record the actual scene time at each step boundary for the manifest.
 4. **Layout check** at the end of every step. Compute the bounding box of every visible mobject and
@@ -164,7 +174,7 @@ flowchart LR
     the provider has no speed setting, change the rate with ffmpeg `atempo`.
   - `manim-voiceover` does a similar job and is useful to read, but we keep TTS outside the render
     process so that audio can be cached and timed before rendering.
-- Add a developer CLI. `npm run render -- backend/examples/gradient_of_line.render.json` should
+- Add a developer CLI. `npm run render -- backend/examples/gradient_of_line.L2.render.json` should
   print the module path and timings.
 - Tests:
   - Unit tests for the timing math, audio assembly, manifest, cache key and ffmpeg command
@@ -174,23 +184,39 @@ flowchart LR
 
 ### Lane tasks
 
-| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                 |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** | `app/renderer/`: scene template and runner, timing, process pool with per-beat callback, layout check, audio track assembly, mux, stitch, manifest, cache key and storage, CLI, render-time benchmark (`docs/benchmarks.md`)                                                                                                                          |
-| **B** | `Primitive` base class (pair with A in week 1). First primitives at all three levels: **FunctionGraph**, **EquationTransform**, **GradientTriangle**, each with SymPy predicates, `computed_values`, layout region and `final_state`. Skeleton of the parameter-grid validation harness                                                               |
-| **C** | `audio_pipeline/tts.py`: adapter, `FakeTTS`, provider bake-off, real provider, rates for the 3 levels, duration measurement. First SQLAlchemy models and Alembic migration (data model in §11). A dev page in Next.js (`/dev/modules`) that plays a rendered module and shows its manifest: captions, chips per beat and a progress bar split by beat |
+| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                         |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | `app/renderer/`: scene template and runner, timing, process pool with per-beat callback, layout check, audio track assembly, mux, stitch, manifest, cache key and storage, CLI, render-time benchmark (`docs/benchmarks.md`)                                                                                                                  |
+| **B** | `Primitive` base class (pair with A in week 1). First primitives at all three levels: **FunctionGraph**, **EquationTransform**, **GradientTriangle**, each with SymPy predicates, `computed_values` and layout region. Skeleton of the parameter-grid validation harness                                                                      |
+| **C** | `audio_pipeline/tts.py`: adapter, `FakeTTS`, provider bake-off, real provider, rates for the 3 levels, duration measurement. First SQLAlchemy models and Alembic migration (Table 4.8). A dev page in Next.js (`/dev/modules`) that plays a rendered module and shows its manifest: captions, chips per beat and a progress bar split by beat |
 
 ### Done when (milestone **M0: engine demo**)
 
-- [ ] One hand-written request (gradient of a line, 3 beats) renders at **L1, L2 and L3**. L2 is
+- [x] One hand-written request (gradient of a line, 3 beats) renders at **L1, L2 and L3**. L2 is
       about 60 s, L1 is at most 90 s, L3 is under 60 s, and the narration is real.
-- [ ] Each step starts in the video within ±50 ms of its narration start. Check this from the
+- [x] Each step starts in the video within ±50 ms of its narration start. Check this from the
       manifest against ffprobe.
-- [ ] Beats render in parallel, the first-beat callback fires before the module finishes, and there
+- [x] Beats render in parallel, the first-beat callback fires before the module finishes, and there
       is no visual jump at beat boundaries.
-- [ ] A deliberately overlapping request fails the layout check, and the error names the objects.
-- [ ] Rendering the same request a second time is a cache hit with no render.
-- [ ] Render time per beat and per module is recorded at each quality setting.
+- [x] A deliberately overlapping request fails the layout check, and the error names the objects.
+- [x] Rendering the same request a second time is a cache hit with no render.
+- [x] Render time per beat and per module is recorded at each quality setting.
+
+### What Phase 1 delivered
+
+| Area          | Where                                   | Notes                                                                                                                                |
+| ------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Render engine | `backend/app/renderer/`                 | `npm run render -- <request.json>`. Narration first, steps fitted to it, beats in parallel processes, layout check, mux, join, cache |
+| Primitives    | `backend/app/primitives/`               | FunctionGraph, GradientTriangle, EquationTransform at three levels; safe SymPy parsing; [docs/primitives.md](primitives.md)          |
+| Validation    | `npm run primitives:check`              | 6 parameter sets × 3 levels per primitive; review sheets with frames (§5.3.2)                                                        |
+| Voice         | `backend/app/audio_pipeline/tts.py`     | espeak-ng (local) and a silent fake for tests; speech rate per level                                                                 |
+| Database      | `backend/app/db/models.py` + migration  | The nine tables of Table 4.8, checked against the data dictionary by a test                                                          |
+| Dev viewer    | `frontend/src/app/dev/modules/page.tsx` | Plays a variant beat by beat with captions, chips and a progress bar split by beat                                                   |
+| Measurements  | [docs/benchmarks.md](benchmarks.md)     | Render times per level and quality, and narration sync                                                                               |
+
+The validation harness earned its keep: it found labels colliding at extreme coordinates, and
+reviewing its frames found a fraction that SymPy's printer had rewritten (`(3/4)*(8/9)` shown as
+`3 · 1/4 · 8 · 1/9`). Both are fixed.
 
 ---
 
