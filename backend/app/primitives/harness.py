@@ -1,0 +1,143 @@
+"""Offline validation of the primitive library (report §5.3.2).
+
+Before a primitive enters the library it is rendered across a grid of parameter values spanning
+its permitted ranges, at every level. Every render is checked for execution errors and layout
+violations by the render engine, and the last frame of each is saved so a sample can be reviewed
+by hand against the mathematics it is meant to show. Run it again whenever a primitive changes.
+
+    python -m app.primitives.harness                      every primitive
+    python -m app.primitives.harness GradientTriangle     one primitive
+    npm run primitives:check -- GradientTriangle          the same, from the repo root
+
+Writes media/harness/<primitive>/review.md. Exits with 1 if any case fails.
+"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+from app.audio_pipeline.tts import FakeTTS
+from app.contracts import Level, ModuleRenderRequest
+from app.core.config import get_settings
+from app.primitives.library import LIBRARY_VERSION, PRIMITIVES, get_primitive
+from app.renderer.beat import QUALITIES
+from app.renderer.engine import render_module
+from app.renderer.errors import RenderError
+
+# Parameter sets spanning each primitive's permitted ranges: small and large values, negative
+# values, fractions, and shapes that crowd the frame. Add a case whenever a bug is found.
+GRIDS: dict[str, list[dict]] = {
+    "FunctionGraph": [
+        {"expression": "x**2", "x_min": -3, "x_max": 3, "marked_x": [2]},
+        {"expression": "x**3 - 3*x", "x_min": -2.5, "x_max": 2.5, "marked_x": [-1, 1]},
+        {"expression": "sin(x)", "x_min": -6, "x_max": 6},
+        {"expression": "1/x", "x_min": 0.5, "x_max": 8, "marked_x": [1, 4]},
+        {"expression": "-0.5*x + 4", "x_min": -10, "x_max": 10, "marked_x": [-6, 6]},
+        {"expression": "x**2 - 20", "x_min": -20, "x_max": 20, "marked_x": [0]},
+    ],
+    "GradientTriangle": [
+        {"point_a": [1, 2], "point_b": [4, 8]},
+        {"point_a": [-3, 4], "point_b": [5, -2]},
+        {"point_a": [0, 0], "point_b": [2, 7]},
+        {"point_a": [-15, -10], "point_b": [15, 12]},
+        {"point_a": [0.5, 0.5], "point_b": [1.5, 3]},
+        {"point_a": [2, 9], "point_b": [3, 1]},
+    ],
+    "EquationTransform": [
+        {"expressions": ["(8 - 2)/(4 - 1)", "6/3", "2"]},
+        {"expressions": ["2*x + 3 = 7", "2*x = 4", "x = 2"]},
+        {"expressions": ["x**2 - 5*x + 6", "(x - 2)*(x - 3)"]},
+        {"expressions": ["3*(x - 4) = 2*x + 1", "3*x - 12 = 2*x + 1", "x - 12 = 1", "x = 13"]},
+        {"expressions": ["(3/4)*(8/9)", "24/36", "2/3"]},
+        {"expressions": ["(x + 1)**2", "x**2 + 2*x + 1"]},
+    ],
+}
+
+
+def check_primitive(primitive_id: str, media_dir: Path, quality: str) -> bool:
+    primitive = get_primitive(primitive_id)
+    out_dir = media_dir / "harness" / primitive_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rows, ok = [], True
+    for case, raw in enumerate(GRIDS[primitive_id], start=1):
+        params = primitive.parse_params(raw)
+        failures = primitive.validate(params)
+        for level in Level:
+            outcome, video, frame = "ok", "", ""
+            if failures:
+                outcome = "rejected: " + "; ".join(f.predicate for f in failures)
+            else:
+                request = ModuleRenderRequest(
+                    module_id=1,
+                    level=level,
+                    voice="default",
+                    library_version=LIBRARY_VERSION,
+                    # Narration that matches the steps, so the timing follows the step minimums.
+                    beats=[
+                        {
+                            "primitive_id": primitive_id,
+                            "params": raw,
+                            "narration": [s.description for s in primitive.steps(params, level)],
+                        }
+                    ],
+                )
+                try:
+                    result = render_module(
+                        request,
+                        media_dir=media_dir / "harness" / "renders",
+                        tts=FakeTTS(),
+                        library_version=LIBRARY_VERSION,
+                        quality=quality,
+                        workers=1,
+                        force=True,  # always test the code as it is now, never a cached render
+                    )
+                    video_path = result.directory / result.manifest.beats[0].video
+                    frame_path = out_dir / f"case{case}_L{int(level)}.png"
+                    _last_frame(video_path, frame_path)
+                    video, frame = str(video_path), frame_path.name
+                except RenderError as error:
+                    outcome = f"FAILED: {error}"
+            ok = ok and outcome == "ok"
+            rows.append((case, level.label, raw, outcome, video, frame))
+            print(f"{primitive_id} case {case} {level.label}: {outcome}")
+
+    lines = [
+        f"# {primitive_id} validation",
+        "",
+        f"Library {LIBRARY_VERSION}, primitive version {primitive.version}, {quality}.",
+        "Review a sample of frames against the mathematics each case should show (§5.3.2).",
+        "",
+        "| Case | Level | Parameters | Outcome | Last frame |",
+        "| ---- | ----- | ---------- | ------- | ---------- |",
+    ]
+    for case, level, raw, outcome, _video, frame in rows:
+        image = f"![]({frame})" if frame else ""
+        lines.append(f"| {case} | {level} | `{raw}` | {outcome} | {image} |")
+    (out_dir / "review.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"Review sheet: {out_dir / 'review.md'}")
+    return ok
+
+
+def _last_frame(video: Path, out: Path) -> None:
+    subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-sseof", "-0.1", "-i", str(video)]
+        + ["-frames:v", "1", str(out)],
+        check=True,
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="python -m app.primitives.harness", description=__doc__)
+    parser.add_argument("primitives", nargs="*", choices=[[], *sorted(PRIMITIVES)], default=[])
+    parser.add_argument("--quality", default="480p30", choices=sorted(QUALITIES))
+    args = parser.parse_args(argv)
+    media_dir = get_settings().media_dir
+    results = [
+        check_primitive(pid, media_dir, args.quality) for pid in args.primitives or PRIMITIVES
+    ]
+    return 0 if all(results) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
