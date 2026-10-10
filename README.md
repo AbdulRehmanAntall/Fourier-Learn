@@ -3,10 +3,11 @@
 Turn plain-text maths prompts into narrated, animated O-Level maths lessons (Manim), with difficulty
 adapted by a learner model (Bayesian Knowledge Tracing).
 
-> **Status: project skeleton only.** There is a FastAPI backend with one real endpoint
-> (`GET /api/health`), a Next.js page that shows that health status, Postgres, Alembic (no
-> migrations yet) and a Manim smoke test. Lesson generation, LLM calls, BKT and auth are **not**
-> implemented. The packages under `backend/app/` for those parts are empty placeholders.
+> **Status: Phase 1 of [the plan](docs/PLAN.md) is done.** The render engine turns a module
+> request (validated primitives, parameters and narration) into a narrated, cached module video
+> at any of the three difficulty levels, and `/dev/modules` in the frontend plays it. The
+> database tables of the data dictionary exist. Lesson planning with an LLM, the learner model
+> (BKT), auth and the student-facing player are **not** implemented yet.
 
 | Part     | Stack                                                                                                |
 | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -17,10 +18,11 @@ adapted by a learner model (Bayesian Knowledge Tracing).
 
 There are two ways to run the project. Pick one:
 
-- **Docker (recommended):** you only need Git and Docker Desktop. FFmpeg, LaTeX, Cairo and Pango are
-  installed inside the backend image, so Manim works the same on every OS.
-- **Native:** faster reloads and easier debugging, but you install Python, Node, FFmpeg and LaTeX
-  yourself.
+- **Docker (recommended):** you only need Git and Docker Desktop. FFmpeg, LaTeX, Cairo, Pango and
+  the espeak-ng voice are installed inside the backend image, so rendering works the same on
+  every OS.
+- **Native:** faster reloads and easier debugging, but you install Python, Node, FFmpeg, LaTeX and
+  espeak-ng yourself.
 
 ---
 
@@ -28,7 +30,8 @@ There are two ways to run the project. Pick one:
 
 Always needed: **Git**. For Docker you also need **Docker Desktop**. For native you also need
 **Python 3.12** (exact version in `.python-version`), **Node 24 LTS** (exact version in `.nvmrc`),
-and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pango**.
+and, if you want to render natively, **FFmpeg**, **LaTeX**, **Cairo/Pango** and **espeak-ng** (the
+narration voice).
 
 ### Windows 10/11
 
@@ -47,12 +50,15 @@ and, if you want Manim to work natively, **FFmpeg**, **LaTeX**, and **Cairo/Pang
      packages on-the-fly" to **Yes**. **TeX Live** (<https://tug.org/texlive/windows.html>) also
      works.
    - Cairo/Pango: nothing to do, because the Windows wheels for Manim's dependencies include them.
+   - espeak-ng: `winget install eSpeak-NG.eSpeak-NG`, or the installer from
+     <https://github.com/espeak-ng/espeak-ng/releases>. Add its folder (for example
+     `C:\Program Files\eSpeak NG`) to PATH, then open a new terminal.
 
 ### macOS (Homebrew)
 
 ```bash
 # Install Homebrew first if needed: https://brew.sh
-brew install git python@3.12 node@24 ffmpeg cairo pango pkg-config
+brew install git python@3.12 node@24 ffmpeg cairo pango pkg-config espeak-ng
 brew install --cask mactex-no-gui        # full LaTeX (~5 GB), or the smaller: brew install --cask basictex
 brew install --cask docker               # Docker Desktop (or download from docker.com)
 ```
@@ -67,7 +73,8 @@ Open a new terminal after installing LaTeX so `latex` is on your PATH.
 sudo apt update
 sudo apt install -y git python3.12 python3.12-venv ffmpeg \
   build-essential pkg-config libcairo2-dev libpango1.0-dev \
-  texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science cm-super dvisvgm
+  texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-science cm-super dvisvgm \
+  espeak-ng
 ```
 
 - Python 3.12 is the default on Ubuntu 24.04. On 22.04, add `ppa:deadsnakes/ppa` first, or install
@@ -169,20 +176,22 @@ checked automatically by GitHub Actions (`.github/workflows/`).
 
 All commands run from the repo root and work on Windows, macOS and Linux.
 
-| Command                     | What it does                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `docker compose up --build` | Run the whole stack in Docker (db + backend + frontend) with hot reload              |
-| `npm run setup`             | One-time native setup (venv, deps, `.env` files)                                     |
-| `npm run dev`               | Start Postgres (Docker), backend and frontend together                               |
-| `npm run dev:backend`       | Backend only (`uvicorn --reload` on port 8000)                                       |
-| `npm run dev:frontend`      | Frontend only (`next dev` on port 3000)                                              |
-| `npm run doctor`            | Check Python, Node, Docker, FFmpeg, LaTeX, Manim and free ports, with fix hints      |
-| `npm run test`              | Everything CI checks: lint + format check, pytest, frontend type-check               |
-| `npm run lint`              | Ruff (Python), ESLint and Prettier checks only                                       |
-| `npm run format`            | Auto-format all code (Ruff for Python, Prettier for the rest)                        |
-| `npm run deps:lock`         | Regenerate `backend/requirements*.txt` after editing `requirements*.in`              |
-| `npm run manim:smoke`       | Render a tiny Manim scene (axes + `y = x^2`) at low quality and print the video path |
-| `npm run db:migrate`        | `alembic upgrade head`                                                               |
+| Command                     | What it does                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| `docker compose up --build` | Run the whole stack in Docker (db + backend + frontend) with hot reload               |
+| `npm run setup`             | One-time native setup (venv, deps, `.env` files)                                      |
+| `npm run dev`               | Start Postgres (Docker), backend and frontend together                                |
+| `npm run dev:backend`       | Backend only (`uvicorn --reload` on port 8000)                                        |
+| `npm run dev:frontend`      | Frontend only (`next dev` on port 3000)                                               |
+| `npm run doctor`            | Check Python, Node, Docker, FFmpeg, LaTeX, espeak-ng, Manim and ports, with fix hints |
+| `npm run test`              | Everything CI checks: lint + format check, pytest, frontend type-check                |
+| `npm run lint`              | Ruff (Python), ESLint and Prettier checks only                                        |
+| `npm run format`            | Auto-format all code (Ruff for Python, Prettier for the rest)                         |
+| `npm run deps:lock`         | Regenerate `backend/requirements*.txt` after editing `requirements*.in`               |
+| `npm run manim:smoke`       | Render a tiny Manim scene (axes + `y = x^2`) at low quality and print the video path  |
+| `npm run db:migrate`        | `alembic upgrade head`                                                                |
+| `npm run render -- <file>`  | Render a module request (e.g. `backend/examples/gradient_of_line.L2.render.json`)     |
+| `npm run primitives:check`  | Validate every primitive across its parameter grid at all levels (docs/primitives.md) |
 
 The npm scripts call `backend/.venv`'s Python directly, so you don't need to activate the venv for
 them.
@@ -192,17 +201,36 @@ them.
 Every setting comes from environment variables or `.env` files. Real `.env` files are git-ignored,
 and only the `.env.example` files are committed.
 
-| File            | Variables                                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING` |
-| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet)                          |
-| `frontend/.env` | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                                                   |
+| File            | Variables                                                                                                                                     |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                            |
+| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `RENDER_QUALITY`, `RENDER_WORKERS`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet) |
+| `frontend/.env` | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                                                                              |
 
 If you change a port in the root `.env`, also update `DATABASE_URL` and `CORS_ORIGINS` in
 `backend/.env` and `NEXT_PUBLIC_API_URL` in `frontend/.env`. Docker Compose derives these from the
 root `.env` automatically.
 
-`MEDIA_DIR` (default `backend/media`) is created on startup and is git-ignored.
+`MEDIA_DIR` (default `backend/media`) is created on startup and is git-ignored. Rendered modules
+go to `media/variants/<cache key>/`, narration clips to `media/tts/`, compiled formulas to
+`media/tex/`.
+
+## Rendering a module
+
+```bash
+npm run render -- backend/examples/gradient_of_line.L2.render.json
+```
+
+This renders the example module (gradient of a straight line, Level 2) and prints where it was
+stored and how long each stage took. Then start the app (`npm run dev` or Docker) and open
+<http://localhost:3000/dev/modules> to play it with its captions and concept chips. A second
+render of the same request comes from the cache; add `--force` to render again. Options:
+`--tts fake` (silent narration, no voice needed), `--quality 480p30|720p30|1080p30`,
+`--workers N`.
+
+How the engine works is described in `backend/app/renderer/engine.py`; measured render times are
+in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
+[docs/primitives.md](docs/primitives.md).
 
 ---
 
@@ -214,18 +242,19 @@ root `.env` automatically.
 │   ├── app/
 │   │   ├── main.py                # FastAPI app, CORS, router registration
 │   │   ├── core/config.py         # settings from env / backend/.env (pydantic-settings)
-│   │   ├── db/                    # engine, session, Base (no models yet)
-│   │   ├── api/routes/health.py   # GET /api/health, the only real endpoint
+│   │   ├── db/                    # engine, session, Base, models of the data dictionary
+│   │   ├── api/routes/            # /api/health, /api/variants/<key>/manifest, /api/dev/variants
 │   │   ├── prompt_interpreter/    # placeholder: prompt → structured lesson plan
 │   │   ├── contracts/             # data shapes shared by all components (docs/contracts.md)
 │   │   ├── code_generator/        # placeholder: scene plan → primitive parameters (no free code)
-│   │   ├── primitives/            # placeholder: validated Manim primitives library
-│   │   ├── audio_pipeline/        # placeholder: TTS narration
+│   │   ├── primitives/            # validated Manim primitives, SymPy checks, harness
+│   │   ├── renderer/              # render engine: beats → narrated, cached module video
+│   │   ├── audio_pipeline/        # TTS (espeak-ng, fake); narration scripts come in Phase 3
 │   │   ├── scheduler/             # placeholder: render queue / prefetching
 │   │   ├── learner_state/         # placeholder: Bayesian Knowledge Tracing
 │   │   └── workers/               # placeholder: render workers
-│   ├── alembic/ + alembic.ini     # migrations (none yet); URL comes from DATABASE_URL
-│   ├── examples/                  # example scene plan and render request (JSON)
+│   ├── alembic/ + alembic.ini     # migrations; URL comes from DATABASE_URL
+│   ├── examples/                  # example scene plan and render requests at L1, L2, L3
 │   ├── scripts/manim_smoke.py     # Manim + LaTeX + FFmpeg smoke test
 │   ├── tests/                     # pytest (no database needed)
 │   ├── requirements.in            # direct runtime deps (edit this)
@@ -236,6 +265,8 @@ root `.env` automatically.
 │   └── .env.example
 ├── frontend/
 │   ├── src/app/page.tsx           # home page with the status panel
+│   ├── src/app/dev/modules/       # developer viewer for rendered modules
+│   ├── src/lib/contracts.ts       # TypeScript mirror of the backend contracts
 │   ├── Dockerfile + docker-entrypoint.sh
 │   └── .env.example
 ├── scripts/                       # cross-platform Node helpers used by package.json
@@ -245,6 +276,7 @@ root `.env` automatically.
 ├── .github/                       # CI workflows + pull request template
 ├── docker-compose.yml
 ├── package.json                   # root scripts (+ concurrently, prettier)
+├── docs/                          # plan, contracts, writing primitives, benchmarks
 ├── CONTRIBUTING.md                # team workflow: branches, PRs, deps, migrations
 ├── .env.example                   # ports + Postgres credentials
 ├── .nvmrc  .python-version        # pinned Node / Python versions
