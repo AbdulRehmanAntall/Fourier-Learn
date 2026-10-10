@@ -76,39 +76,30 @@ Choose who takes which lane. A suits whoever already owns the repo tooling.
 ## 3. Phase 0 — Contracts (week 1, all three, together)
 
 Agree on these before writing feature code. Then the three lanes can work in parallel and fit
-together later. Put them in `backend/app/contracts/` as Pydantic models. After week 1, a change to
-them needs a PR that all three review.
+together later. They live in `backend/app/contracts/` as Pydantic models, and
+**[docs/contracts.md](contracts.md)** explains each one with its report section. After week 1, a
+change to them needs a PR that all three review.
 
-1. **`Level`**: `IntEnum` with `SUPPORTED = 1`, `STANDARD = 2`, `CONCISE = 3`. Store it as a
-   smallint, not as the `Varchar(15)` in Table 4.8.
-2. **`Primitive` interface** (§5.3.1). Each primitive is a Python class with:
-   - `id`, `version`
-   - `Params`: a Pydantic model giving the parameter schema, with types and allowed ranges. We
-     export it as JSON Schema for constrained decoding.
-   - `default_params`: the validated fallback (§5.3.3)
-   - `validate(params) -> list[PredicateFailure]`: the SymPy parsing, domain and consistency
-     predicates
-   - `computed_values(params) -> dict[str, str]`: every on-screen number, computed by SymPy. These
-     also fill the narration slots.
-   - `region`: the layout contract, meaning the part of the frame the primitive may occupy
-   - `steps(params, level) -> list[Step]`: the difficulty hooks. Each `Step` has a name, an
-     `animate(scene, run_time)` callable, `min_run_time(level)`, and the objects it labels or
-     highlights.
-   - `final_state(params, level)`: the mobjects left on screen. The next beat adds these without
-     animation, so stitched beats show no jump.
+1. **`Level`**: `IntEnum` with `SUPPORTED = 1`, `STANDARD = 2`, `CONCISE = 3`. `Level.label` gives
+   the "Level 1" text that MODULE.difficulty_level stores (Table 4.8).
+2. **`Primitive` interface** (§5.3.1): the four elements of a primitive (parameter schema,
+   validation predicates, layout contract, difficulty hooks), plus the validated default
+   parameters, the SymPy-computed on-screen values, `animate` (plays the steps and yields the
+   visible objects after each one) and `add_final_state` (so stitched beats show no jump).
 3. **`ScenePlan`** (Table 5.1): `module_id`, `concept_id`, `segments[]` with `primitive_id`,
    `content` (expressions), `narration_intent` and `glossary_terms`, then `check_items` and
    `branch_options`. A plan has **no level**, because one plan renders at all three levels.
 4. **`ModuleRenderRequest`**: `module_id`, `level`, `voice`, `library_version`, and `beats[]`. Each
    beat has `primitive_id`, validated `params`, `narration: list[str]` (one passage per step),
    `glossary_terms` and `concept_ids`. This is the engine's input.
-5. **`ModuleManifest`** (§5.4.4): the duration, plus for each beat its file, start and end, step
-   start and end times with the passage text, chip intervals and concept ids. The player, the
-   interaction log and the "I'm Lost" logic all read it.
+5. **`ModuleManifest`** (§5.4.4): for each beat its video, duration, step start and end times with
+   the passage text, chip intervals and concept ids. The player, the interaction log and the
+   "I'm Lost" logic all read it.
 6. **`variant_cache_key()`**: the sha256 of the canonical JSON of the primitive ids, parameter
    sets, level, narration voice and primitive library version (§4.2.3, §5.3.4).
-7. **`InteractionEvent`**: the type, module, beat index, video position, timestamp and a payload.
-   The payload holds things like the speed before and after, or the dwell time in ms.
+7. **`InteractionEvent`**: the six event types of Table 4.8 (rewind, speed change, pause, chip view,
+   I'm Lost, branch choice), each with its module, beat, position and timestamp. A speed change
+   carries the rate before and after, and a pause carries its duration.
 8. **API sketch**: REST over HTTPS plus Server-Sent Events for progress (§6.4.12).
 
 Done when: the models are merged with unit tests, and one example `ModuleRenderRequest` JSON is
@@ -173,7 +164,7 @@ flowchart LR
     the provider has no speed setting, change the rate with ffmpeg `atempo`.
   - `manim-voiceover` does a similar job and is useful to read, but we keep TTS outside the render
     process so that audio can be cached and timed before rendering.
-- Add a developer CLI. `npm run render -- backend/examples/gradient_of_line.json --level 2` should
+- Add a developer CLI. `npm run render -- backend/examples/gradient_of_line.render.json` should
   print the module path and timings.
 - Tests:
   - Unit tests for the timing math, audio assembly, manifest, cache key and ffmpeg command
@@ -326,7 +317,7 @@ not blocked. Fix the report text when you next revise it.
    → Use a ready ℓ−1 variant if one exists (the δ prefetch sometimes makes one), and otherwise
    render beats _j_ onward. Correct the wording of §6.3.1.3.
 2. **The README says the Code Generator "compiles a lesson plan into Manim scene code".** The
-   report says the model writes **parameters only**. → Update the README and the package
+   report says the model writes **parameters only**. → Fixed in the README and the package
    docstring.
 3. **The data model (Table 4.8) is missing things the design needs.** Add:
    - `concept_prerequisite (concept_id, prerequisite_id)`: needed for planning and readiness.
@@ -342,11 +333,11 @@ not blocked. Fix the report text when you next revise it.
    - `render_job` (priority, status, attempts, error, timings), which serves the admin's render
      logs.
    - `primitive` (id, version, status), so the admin can retire primitives.
-   - `interaction_event`: add `beat_index`, `position_ms` and `payload`. Split "speed change" into
-     slowed and sped up, because they are evidence in opposite directions (Table 5.4).
+   - `interaction_event`: add `beat_index`, `position_s` and a payload. A speed change keeps the
+     single type of Table 4.8 and stores the rate before and after, which tells slowing down
+     (difficulty) from speeding up (ease) (Table 5.4).
    - `student.role` (student or admin) and diagnostic progress, so the diagnostic can resume.
    - `prediction_log` (estimate before each check), needed for the AUC.
-   - `difficulty_level` as a smallint, not `Varchar(15)`.
 4. **The diagnostic has two definitions.** UC 4.2 says at most five questions at first use. §5.7.2
    says one item for the target concept plus one per prerequisite, per query. → Use both: a
    first-use diagnostic of at most 5 items, plus per-query top-ups for concepts not yet assessed.

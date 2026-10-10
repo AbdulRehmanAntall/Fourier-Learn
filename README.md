@@ -217,13 +217,15 @@ root `.env` automatically.
 │   │   ├── db/                    # engine, session, Base (no models yet)
 │   │   ├── api/routes/health.py   # GET /api/health, the only real endpoint
 │   │   ├── prompt_interpreter/    # placeholder: prompt → structured lesson plan
-│   │   ├── code_generator/        # placeholder: lesson plan → Manim code
+│   │   ├── contracts/             # data shapes shared by all components (docs/contracts.md)
+│   │   ├── code_generator/        # placeholder: scene plan → primitive parameters (no free code)
 │   │   ├── primitives/            # placeholder: validated Manim primitives library
 │   │   ├── audio_pipeline/        # placeholder: TTS narration
 │   │   ├── scheduler/             # placeholder: render queue / prefetching
 │   │   ├── learner_state/         # placeholder: Bayesian Knowledge Tracing
 │   │   └── workers/               # placeholder: render workers
 │   ├── alembic/ + alembic.ini     # migrations (none yet); URL comes from DATABASE_URL
+│   ├── examples/                  # example scene plan and render request (JSON)
 │   ├── scripts/manim_smoke.py     # Manim + LaTeX + FFmpeg smoke test
 │   ├── tests/                     # pytest (no database needed)
 │   ├── requirements.in            # direct runtime deps (edit this)
