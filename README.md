@@ -160,6 +160,7 @@ npm run dev
 
 ## Working as a team
 
+The build plan (what to build, in which order, by whom) is in **[docs/PLAN.md](docs/PLAN.md)**.
 Read **[CONTRIBUTING.md](CONTRIBUTING.md)** before your first change. It covers branches, pull
 requests, code formatting, adding dependencies and database migrations. Every pull request is
 checked automatically by GitHub Actions (`.github/workflows/`).
