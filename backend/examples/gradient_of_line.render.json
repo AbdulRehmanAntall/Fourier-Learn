@@ -1,0 +1,34 @@
+{
+  "module_id": 1,
+  "level": 2,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beats": [
+    {
+      "primitive_id": "GradientTriangle",
+      "params": {
+        "point_a": [1, 2],
+        "point_b": [4, 8]
+      },
+      "narration": [
+        "Here is a straight line through the points one, two and four, eight.",
+        "Going from the first point to the second, the line rises by 6 while it runs across by 3.",
+        "The gradient is the rise divided by the run, so the gradient of this line is 2."
+      ],
+      "glossary_terms": ["gradient", "rise", "run"],
+      "concept_ids": [12]
+    },
+    {
+      "primitive_id": "EquationTransform",
+      "params": {
+        "expressions": ["(8 - 2)/(4 - 1)", "6/3", "2"]
+      },
+      "narration": [
+        "Put the coordinates into the formula: eight minus two, over four minus one.",
+        "That simplifies to six over three, which is 2."
+      ],
+      "glossary_terms": ["gradient"],
+      "concept_ids": [12]
+    }
+  ]
+}
