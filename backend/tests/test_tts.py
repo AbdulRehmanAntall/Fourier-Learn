@@ -1,11 +1,13 @@
 import wave
 
+import numpy as np
 import pytest
 
 from app.audio_pipeline.tts import (
     SAMPLE_RATE,
     SPEECH_RATE,
     FakeTTS,
+    KokoroTTS,
     TTSError,
     get_provider,
     synthesize,
@@ -49,3 +51,21 @@ def test_clips_are_cached_by_text_voice_and_rate(tmp_path):
 def test_unknown_provider_is_refused():
     with pytest.raises(TTSError, match="unknown TTS provider"):
         get_provider("nonexistent")
+
+
+def test_kokoro_writes_canonical_wav_in_the_voice_accent(tmp_path):
+    class StubKokoro:
+        def create(self, text, voice, speed, lang):
+            StubKokoro.call = (voice, speed, lang)
+            return np.full(SAMPLE_RATE // 2, 0.5, dtype=np.float32), SAMPLE_RATE
+
+    tts = KokoroTTS(model_dir=tmp_path)
+    tts._kokoro = StubKokoro()
+    clip = synthesize(tts, "the gradient is 2", "default", Level.SUPPORTED, tmp_path)
+    assert StubKokoro.call == ("bf_emma", SPEECH_RATE[Level.SUPPORTED], "en-gb")
+    assert clip.duration_s == pytest.approx(0.5)
+    with wave.open(str(clip.path)) as wav:
+        assert (wav.getnchannels(), wav.getsampwidth(), wav.getframerate()) == (1, 2, SAMPLE_RATE)
+
+    synthesize(tts, "the gradient is 2", "am_michael", Level.STANDARD, tmp_path)
+    assert StubKokoro.call == ("am_michael", 1.0, "en-us")

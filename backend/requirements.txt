@@ -8,6 +8,8 @@ anyio==4.15.1
     # via
     #   starlette
     #   watchfiles
+attrs==26.1.0
+    # via phonemizer
 audioop-lts==0.2.2 ; python_full_version >= '3.13'
     # via manim
 av==19.0.1
@@ -19,6 +21,8 @@ click==8.5.0
     #   cloup
     #   manim
     #   uvicorn
+cloudpickle==3.1.2
+    # via joblib
 cloup==4.0.0
     # via manim
 colorama==0.4.6 ; sys_platform == 'win32'
@@ -27,8 +31,14 @@ cython==3.3.0 ; sys_platform == 'darwin'
     # via screeninfo
 decorator==5.3.1
     # via manim
+dlinfo==2.0.0
+    # via phonemizer
+espeakng-loader==0.2.4
+    # via kokoro-onnx
 fastapi==0.143.0
     # via -r requirements.in
+flatbuffers==25.12.19
+    # via onnxruntime
 glcontext==3.1.0
     # via moderngl
 h11==0.16.0
@@ -39,6 +49,10 @@ idna==3.20
     # via anyio
 isosurfaces==0.1.2
     # via manim
+joblib==1.6.0
+    # via phonemizer
+kokoro-onnx==0.6.1
+    # via -r requirements.in
 mako==1.4.3
     # via alembic
 manim==0.22.0
@@ -67,16 +81,26 @@ numpy==2.5.3
     # via
     #   -r requirements.in
     #   isosurfaces
+    #   kokoro-onnx
     #   manim
     #   mapbox-earcut
     #   moderngl-window
+    #   onnxruntime
     #   scipy
+onnxruntime==1.31.0
+    # via kokoro-onnx
 opentelemetry-api==1.45.1
     # via fastapi
+packaging==26.3
+    # via onnxruntime
+phonemizer==3.4.0
+    # via kokoro-onnx
 pillow==12.3.0
     # via
     #   manim
     #   moderngl-window
+protobuf==7.36.2
+    # via onnxruntime
 psycopg==3.3.6
     # via -r requirements.in
 psycopg-binary==3.3.6 ; implementation_name != 'pypy'
@@ -143,6 +167,7 @@ typing-extensions==4.16.0
     #   fastapi
     #   manim
     #   opentelemetry-api
+    #   phonemizer
     #   psycopg
     #   pydantic
     #   pydantic-core

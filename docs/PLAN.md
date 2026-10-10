@@ -117,8 +117,8 @@ committed under `backend/examples/`.
 level, with no LLM, database or frontend involved.
 
 > **Status: done, except the hosted-voice bake-off.** Everything below is built and tested; see
-> "What Phase 1 delivered" at the end of this section. The narration voice is espeak-ng, which
-> is free and local but robotic. Comparing hosted voices needs API keys and a budget decision,
+> "What Phase 1 delivered" at the end of this section. The narration voice is Kokoro-82M, a free,
+> local neural voice (Apache 2.0) that replaced the robotic espeak-ng. Comparing hosted voices needs API keys and a budget decision,
 > so lane C still owes that comparison; a hosted voice plugs in as one more `TTSProvider`.
 
 ```mermaid
@@ -209,7 +209,7 @@ flowchart LR
 | Render engine | `backend/app/renderer/`                 | `npm run render -- <request.json>`. Narration first, steps fitted to it, beats in parallel processes, layout check, mux, join, cache |
 | Primitives    | `backend/app/primitives/`               | FunctionGraph, GradientTriangle, EquationTransform at three levels; safe SymPy parsing; [docs/primitives.md](primitives.md)          |
 | Validation    | `npm run primitives:check`              | 6 parameter sets × 3 levels per primitive; review sheets with frames (§5.3.2)                                                        |
-| Voice         | `backend/app/audio_pipeline/tts.py`     | espeak-ng (local) and a silent fake for tests; speech rate per level                                                                 |
+| Voice         | `backend/app/audio_pipeline/tts.py`     | Kokoro (local neural voice), espeak-ng and a silent fake for tests; speech rate per level                                            |
 | Database      | `backend/app/db/models.py` + migration  | The nine tables of Table 4.8, checked against the data dictionary by a test                                                          |
 | Dev viewer    | `frontend/src/app/dev/modules/page.tsx` | Plays a variant beat by beat with captions, chips and a progress bar split by beat                                                   |
 | Measurements  | [docs/benchmarks.md](benchmarks.md)     | Render times per level and quality, and narration sync                                                                               |
