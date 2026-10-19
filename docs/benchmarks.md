@@ -34,14 +34,14 @@ Speech synthesis shows 0.0 s where the clips were already in the narration cache
   720p30 a Level 2 module renders in about a third of its playing time.
 - **First module within 90 s (§4.4.1).** Rendering reaches the first playable beat in about 16 s
   at 720p (24 s with a cold LaTeX cache). That leaves most of the 90 s for planning, parameter
-  generation and narration writing, which arrive in Phase 3 and must be measured then.
+  generation and narration writing, which arrive in Phase 4 and must be measured then.
 - **"I'm Lost" within 90 s (§4.4.1).** The simpler variant renders from the current beat onward
   (`render_from_beat`), so the wait is about one beat's render time, well inside the limit.
 - **Choice of quality.** 720p30 is the default (`RENDER_QUALITY`). 480p30 is a fallback when
   many students render at once; 1080p30 costs almost twice as much as 720p.
 - **Load.** These numbers are for one module using every core. With several students at once,
   modules share the cores, so throughput depends on the worker limits added with the job queue
-  in Phase 2, and must be measured with several concurrent lessons (§5.9.2).
+  in Phase 3, and must be measured with several concurrent lessons (§5.9.2).
 
 ## Narration and video alignment
 

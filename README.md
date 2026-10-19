@@ -8,6 +8,9 @@ adapted by a learner model (Bayesian Knowledge Tracing).
 > at any of the three difficulty levels, and `/dev/modules` in the frontend plays it. The
 > database tables of the data dictionary exist. Lesson planning with an LLM, the learner model
 > (BKT), auth and the student-facing player are **not** implemented yet.
+>
+> **Next: Phase 2, the complete frontend on a stub API.** The frontend team's guide is
+> [docs/frontend.md](docs/frontend.md).
 
 | Part     | Stack                                                                                                |
 | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -257,7 +260,7 @@ in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 │   │   ├── code_generator/        # placeholder: scene plan → primitive parameters (no free code)
 │   │   ├── primitives/            # validated Manim primitives, SymPy checks, harness
 │   │   ├── renderer/              # render engine: beats → narrated, cached module video
-│   │   ├── audio_pipeline/        # TTS (Kokoro, espeak-ng, fake); narration scripts come in Phase 3
+│   │   ├── audio_pipeline/        # TTS (Kokoro, espeak-ng, fake); narration scripts come in Phase 4
 │   │   ├── scheduler/             # placeholder: render queue / prefetching
 │   │   ├── learner_state/         # placeholder: Bayesian Knowledge Tracing
 │   │   └── workers/               # placeholder: render workers
