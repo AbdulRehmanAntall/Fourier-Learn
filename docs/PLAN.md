@@ -11,6 +11,10 @@ modelling._ The first thing we build is the **render engine**. It takes primitiv
 parameters and the narration, renders each beat with Manim, fits the animation to the audio, and
 joins the beats into a narrated module.
 
+After the engine, **Phase 2 builds the complete frontend** against a stub API that already has
+the final endpoints. The backend phases that follow then fill in the real behaviour behind
+screens that already work, one endpoint at a time.
+
 ---
 
 ## 1. What the report commits us to
@@ -70,6 +74,9 @@ longest single task and does not need code. **All three** of you add to it every
 coordinates it.
 
 Choose who takes which lane. A suits whoever already owns the repo tooling.
+
+> **Phase 2 is the exception.** B and C both work on the frontend, and A writes the API and its
+> stub. See [docs/frontend.md §3](frontend.md#3-who-does-what).
 
 ---
 
@@ -220,16 +227,48 @@ reviewing its frames found a fraction that SymPy's printer had rewritten (`(3/4)
 
 ---
 
-## 5. Phase 2 — Jobs, primitive library and player v1 (weeks 5–8)
+## 5. Phase 2 — The complete frontend on a stub API (weeks 5–8)
 
-**Goal (milestone M1):** a **hand-written scene plan** becomes a narrated module that plays in the
-browser and starts at the first beat. This is a good demo for the FYP-I evaluation.
+**Goal (milestone M1):** every screen and interaction in the report works in the browser. That
+covers:
 
-| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** | **Job queue in Postgres.** The report names no queue, and a Postgres table avoids running Redis (KISS, §6.2.3): a `render_job` table, `SELECT … FOR UPDATE SKIP LOCKED`, and priority, status and attempts columns. A `workers/` process run with `npm run worker`, stateless and scaled by running more copies. 3 retries, with failures logged (§6.4.6). Cache lookup before enqueueing. Media served with FastAPI `StaticFiles`. API: `POST /api/dev/render` (plan JSON → module), `GET /api/modules/{id}` (status and manifest), `GET /api/lessons/{id}/events` (SSE: beat ready, module ready, failed) |
-| **B** | Finish the initial library (Table 5.2): **TangentSlide, SecantToTangent, TravelGraph, AreaUnderCurve**. **Offline validation harness**: render each primitive across a grid of parameter values at all levels, run the layout check, and produce a sheet for manual review (§5.3.2). Write a library version stamp into the cache key. Pydantic `ScenePlan` with the **schema check and reference check** (§5.2.3). Start the **concept taxonomy**: syllabus points, prerequisite edges and syllabus codes                                                                                                  |
-| **C** | **Player v1** (wireframe Fig. 4.3): plays beat by beat from the manifest, using two `<video>` elements that swap so the next beat is preloaded (preload only a few beats, §6.4.7). Pause, rewind, speed control, a progress bar split by beat, a level badge, "Preparing next module…" driven by SSE, captions, and chips shown at the times in the manifest. **Interaction logger**: batched `POST /api/events`, every event tagged with module, beat and position                                                                                                                                         |
+- the landing page, auth and the diagnostic
+- the home screen, the lesson player with chips, "I'm Lost", rewind and speed
+- the checks and branch points between modules
+- resume, history and progress
+- the admin area
+
+Behind the screens is a **stub** backend. Every endpoint exists at its final path with its final
+request and response shapes, but the data comes from an in-memory store and real pre-rendered
+example videos. Phases 3–7 replace the stub inside each endpoint with the real code; the frontend
+does not change.
+
+> **The full guide for this phase is [docs/frontend.md](frontend.md).** It covers the rules,
+> every screen, the player's behaviour in detail, the API catalogue with request and response
+> shapes, the stub's behaviour, the tools, the tests, the week-by-week split and the done-when
+> checklist. Read it before starting.
+
+Why the frontend comes now:
+
+- **The API shapes get fixed early,** while changing them is cheap.
+- **Two people work in parallel without waiting for the backend.**
+- **Each backend phase has a working screen to test against,** and the player, the part students
+  judge the project by, gets the most time to mature.
+
+| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | **API schemas** for every endpoint (Pydantic models in `backend/app/api/schemas/`, frontend.md §7) and the **stub service** (frontend.md §8): an in-memory store with seed data, the example module committed as fixture variants at all three levels, a timed SSE stream, "I'm Lost" substitution between the fixture levels, and test triggers for slow and failed modules. **`npm run api:types`** generates the frontend types from the OpenAPI schema, and CI fails when they are out of date. **Next.js rewrites** for `/api` and `/media`. From week 7, start Phase 3 |
+| **B** | Design system and layout. Landing page and topics page. Register, login, logout and route guards. **Onboarding diagnostic** (Fig. 4.1). **Home** (Fig. 4.2) with the out-of-scope reply. Lesson history, **progress** (Fig. 4.6) and account. **Admin** (§4.2.2): overview, primitives, glossary, check questions, render jobs, students                                                                                                                                                                                                                                     |
+| **C** | **Lesson player** (Fig. 4.3): two videos taking turns, segmented progress bar, rewind, speed, captions, fullscreen and keyboard. **Concept chips** with an overlay while the video keeps playing. **"I'm Lost"**: the substitution with a progress indicator, and the Level 1 replay. Generating and preparing screens. **Check** (Fig. 4.4) and **branch** (Fig. 4.5) with its timeout. Lesson summary, failed-module fallback, saving the position and resuming. **Event logger** and SSE hook. Static study mode                                                          |
+
+### Done when (milestone **M1: frontend**)
+
+- [ ] A new student registers, finishes the diagnostic, asks a question and watches a lesson to
+      the end, with checks, a branch and an "I'm Lost" press, using only the UI.
+- [ ] Every admin page works against the stub.
+- [ ] The frontend calls the backend only through `src/lib/api/`, with generated types, and has
+      no mock data of its own.
+- [ ] The full checklist in [frontend.md §13](frontend.md#13-done-when-milestone-m1) is met.
 
 Not code, but start now: **contact a partner school and apply for ethics approval** (§4.10 and
 §5.9.4 need parent consent and student assent). Approval takes weeks, and the study cannot start
@@ -237,18 +276,32 @@ without it.
 
 ---
 
-## 6. Phase 3 — From a query to a generated lesson (weeks 9–14)
+## 6. Phase 3 — Job queue, primitive library, first real module (weeks 9–12)
 
-**Goal (milestone M2):** the student types _"explain the gradient of a curve"_ and gets an
+**Goal (milestone M2):** a **hand-written scene plan** goes through the real job queue and render
+workers. It becomes a narrated module that plays in the Phase 2 player and starts at the first
+beat. This is a good demo for the FYP-I evaluation.
+
+| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | **Job queue in Postgres.** The report names no queue, and a Postgres table avoids running Redis (KISS, §6.2.3): a `render_job` table, `SELECT … FOR UPDATE SKIP LOCKED`, and priority, status and attempts columns. A `workers/` process run with `npm run worker`, stateless and scaled by running more copies. 3 retries, with failures logged (§6.4.6). Cache lookup before enqueueing. Media served with FastAPI `StaticFiles`. API: `POST /api/dev/render` (plan JSON → a lesson), and the real `GET /api/lessons/{id}/current-module` and `GET /api/lessons/{id}/events` (SSE: beat ready, module ready, failed) in place of their stubs |
+| **B** | Finish the initial library (Table 5.2): **TangentSlide, SecantToTangent, TravelGraph, AreaUnderCurve**. **Offline validation harness**: render each primitive across a grid of parameter values at all levels, run the layout check, and produce a sheet for manual review (§5.3.2). Write a library version stamp into the cache key. Pydantic `ScenePlan` with the **schema check and reference check** (§5.2.3). Start the **concept taxonomy**: syllabus points, prerequisite edges and syllabus codes                                                                                                                                     |
+| **C** | **First stubs replaced by the database:** `POST /api/events` writes INTERACTION_EVENT rows (with beat, position and payload, §13 gap 3); `GET /api/topics` and `GET /api/glossary/{term}` read the CONCEPT and GLOSSARY_TERM tables. An idempotent seed command, `npm run db:seed`, for the taxonomy and glossary. Fix what the player shows up against real renders and real render times                                                                                                                                                                                                                                                     |
+
+---
+
+## 7. Phase 4 — From a query to a generated lesson (weeks 13–18)
+
+**Goal (milestone M3):** the student types _"explain the gradient of a curve"_ and gets an
 automatically planned, parameterised, narrated lesson. Everything runs at one level for now.
 First-module wait is measured against the 90 s target.
 
 | Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A** | **Code Generator** (§5.3.3): the parameter model's output is restricted to the primitive's JSON Schema (constrained decoding or structured output), so it cannot produce a name or value outside the schema. Derive the parameters the content does not fix, such as axis ranges. Run the SymPy predicates and send any failing predicate back to the model by name. After 3 attempts, use `default_params`. Also feed layout-check rejections back to the model. **Pipeline orchestrator**: plan → parameters → narration → render, with the first module's beats in parallel and playback from beat 0                                                                                                                                        |
-| **B** | **LLM client** with structured output that logs every prompt and response for evaluation. **Prompt Interpreter** (§5.2.2): the prompt holds all concept names and glossary definitions with no retrieval step, and the model returns a concept id or out-of-scope plus the nearest concepts. **Lesson planner** (§5.2.3): the prerequisite ordering is deterministic, with the mastery filter stubbed until Phase 4. The model writes one scene plan per concept with chain-of-thought, and only the final plan is kept. Two-stage validation, 3 retries with the error attached, then a cached variant of the concept, or the glossary definition as a last resort. Write the **development query set**, covering every concept at least once |
-| **C** | **Narration generation** (§5.4.2–5.4.3): one passage per step from the narration intent, computed values and steps at the chosen level. Numbers only come in through `{slots}`. Vocabulary follows Table 5.3. A readability check confirms L1 is easier than L2, and L2 easier than L3; if not, regenerate. A final check rejects any expression that is not on screen. **Home screen** (Fig. 4.2): query box, "Generate lesson", recent lessons. Out-of-scope reply with the list of topics. Generation progress UI                                                                                                                                                                                                                           |
-| All   | Content: a **glossary definition for every concept** and **check items** (MCQ and true/false with verified answers). Load them with an idempotent seed command (`npm run db:seed`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **B** | **LLM client** with structured output that logs every prompt and response for evaluation. **Prompt Interpreter** (§5.2.2): the prompt holds all concept names and glossary definitions with no retrieval step, and the model returns a concept id or out-of-scope plus the nearest concepts. **Lesson planner** (§5.2.3): the prerequisite ordering is deterministic, with the mastery filter stubbed until Phase 5. The model writes one scene plan per concept with chain-of-thought, and only the final plan is kept. Two-stage validation, 3 retries with the error attached, then a cached variant of the concept, or the glossary definition as a last resort. Write the **development query set**, covering every concept at least once |
+| **C** | **Narration generation** (§5.4.2–5.4.3): one passage per step from the narration intent, computed values and steps at the chosen level. Numbers only come in through `{slots}`. Vocabulary follows Table 5.3. A readability check confirms L1 is easier than L2, and L2 easier than L3; if not, regenerate. A final check rejects any expression that is not on screen. **Lesson endpoints** in place of their stubs: `POST /api/lessons` (interpreter and planner, with the out-of-scope reply), `GET /api/lessons` and `GET /api/lessons/{id}`, and the `generation_progress` events. The home and generating screens exist since Phase 2                                                                                                    |
+| All   | Content: a **glossary definition for every concept** and **check items** (MCQ and true/false with verified answers). Add them to the seed command (`npm run db:seed`, Phase 3)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 **Model choice:** start with a hosted API that supports JSON-schema output, so that nothing is
 blocked. Pick the planning model by its plan validity rate on the dev query set (§5.2). Pick the
@@ -257,83 +310,92 @@ prompting is not enough (§5.3.3).
 
 ---
 
-## 7. Phase 4 — Learner model and adaptation (weeks 15–18)
+## 8. Phase 5 — Learner model and adaptation (weeks 19–22)
 
-**Goal (milestone M3):** each module's level comes from the learner's BKT estimates, the next
+**Goal (milestone M4):** each module's level comes from the learner's BKT estimates, the next
 module is prefetched at that level, and checks between modules update the estimates.
 
 | Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **B** | **`learner_state/`**: BKT posterior updates (Eqs. 5.1 and 5.2), and the transition (Eq. 5.3) applied **once when a module ends**. The onboarding diagnostic updates estimates with no transition (§5.7.2). Signal evidence (Eq. 5.4) uses the likelihoods in Table 5.4: one signal moves the estimate less than one check answer, and "I'm Lost" moves it more than any other signal. Per-concept parameters are set by hand, with P(G) and P(S) below 0.5. **Difficulty policy** (Eqs. 5.5 and 5.6) applies four rules in order, then limits the change to one level from the previous level (taken after any substitution), and flags when readiness is within δ of a threshold. Log the **prediction before each check**, which is needed for the AUC (§5.9.3). Unit tests against values worked out by hand (§6.6.7) |
 | **A** | **Scheduler (Algorithm 1)**: a lesson state machine. Priority 1 is the next module at `SelectLevel`; if readiness is within δ of a threshold, both neighbouring levels are queued. Priority 2 is the favoured branch: the worked example at L1 or L2, the extra theory at L3. When a module ends, recompute the level. Play a ready variant if there is one; otherwise play an adjacent level and **log a prefetch miss**; otherwise wait. Insert review modules (at most one per prerequisite per lesson). Use the manifest to attribute each event to its beat's concepts. Connect the planner's mastery filter (≥ 0.95) to BKT                                                                                                                                                                                        |
-| **C** | **Auth**: register, login and logout, a salted password hash (argon2 or bcrypt), session cookie, and student and admin roles. **Onboarding diagnostic** (Fig. 4.1): at most 5 items, and a student who leaves part-way resumes at their next login. Per-query top-up items for concepts not yet assessed (§5.7.2). **Check screen** (Fig. 4.4): 1–2 items, no repeats within a lesson, never blocks progress. **Progress screen** (Fig. 4.6)                                                                                                                                                                                                                                                                                                                                                                             |
+| **C** | **Real backends behind the Phase 2 screens.** **Auth**: register, login and logout, a salted password hash (argon2 or bcrypt), session cookie, and student and admin roles, replacing the stub accounts. **Onboarding diagnostic** (Fig. 4.1): at most 5 items, and a student who leaves part-way resumes at their next login. Per-query top-up items for concepts not yet assessed (§5.7.2). **Check** (Fig. 4.4): `finish` returns 1–2 items with no repeats within a lesson, and `check-responses` stores CHECK_RESPONSE; it never blocks progress. **Progress** (Fig. 4.6) from CONFIDENCE_RECORD                                                                                                                                                                                                                    |
 
 ---
 
-## 8. Phase 5 — Interactive layer (weeks 19–22)
+## 9. Phase 6 — Interactive layer (weeks 23–26)
 
-**Goal (milestone M4):** every feature in §4.1 works end to end.
+**Goal (milestone M5):** every feature in §4.1 works end to end.
 
 | Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **A** | **"I'm Lost" backend** (§5.6.3):<br>• Find the current beat _j_ and apply strong negative evidence to its concepts.<br>• If a ready ℓ−1 variant exists (for example from the δ prefetch), use it. Otherwise render beats _j_ onward at ℓ−1 in parallel at the **highest priority**, ahead of prefetching.<br>• Send an SSE event when beat _j_ is ready, and measure the substitution delay.<br>• At L1, replay beat _j_ with its chips open and insert a worked-example module.<br>**Branch insertion**, with a timeout that falls back to the default path |
-| **C** | **Player**: the "I'm Lost" button is always visible and needs one tap. It shows a progress indicator, then resumes from the start of beat _j_ in the new variant. **Chip overlay** while the video keeps playing, with the view logged. **Branch screen** (Fig. 4.5). Signals for long pauses (threshold set in config), rewinds, and slowing down or speeding up (logged as separate events). **Resume an unfinished lesson** and **lesson history**. When SSE reconnects, fetch the lesson status first (§6.4.12)                                          |
+| **C** | The player's features exist since Phase 2. Now **connect them to the real backend** and test them with real render times. "I'm Lost" with real substitution delays (progress indicator, then resume from the start of beat _j_). Branches with real waits. **Resume** from the lesson state stored on LESSON (§13 gap 3) and **lesson history** from the database. SSE reconnect against the real stream (§6.4.12). The long-pause threshold goes in config, owned by the Learner State Module                                                               |
 | **B** | Scene plans for branch options (extra theory and worked examples, with numbered steps, one per beat) and review modules. Add primitives where plans show gaps. Finish glossary and item-bank coverage                                                                                                                                                                                                                                                                                                                                                        |
 
 ---
 
-## 9. Phase 6 — Admin, hardening, study mode (weeks 23–26)
+## 10. Phase 7 — Admin, hardening, study mode (weeks 27–30)
 
-**Goal (milestone M5):** a release candidate that is deployed over HTTPS and ready for the pilot.
+**Goal (milestone M6):** a release candidate that is deployed over HTTPS and ready for the pilot.
 
-| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **C** | **Admin** (§4.2.2): primitives (enable, retire, metadata and version; new primitive _code_ still arrives by PR and must pass the harness), glossary CRUD, item bank CRUD, render logs and failed generations, student accounts. A **static study mode** that serves the L2 render with the interactive layer and learner model turned off (§5.9.4). Responsive and accessible: tablet, keyboard and contrast (§6.2.2)                                                            |
-| **A** | Reliability: end-to-end retries, preserved lesson state, cleanup of temporary files and media, a budget monitor for LLM and TTS spend (§4.10). Scale workers. A study deployment over HTTPS (this is not production hosting, which is out of scope). Timing instrumentation: first-module wait, render time per level, prefetch hit rate, substitution delay and branch wait, each reported as a median and 90th percentile (§5.9.2). Load test with several concurrent students |
-| **B** | **Evaluation harness** (§5.9.1): the held-out query set; plan validity, parameter validity, render success and layout-rejection rates; a run of the **unmodified Manimator** baseline; the in-scope subset of **TheoremExplainBench**; a manual-review checklist and Cohen's κ; TeachQuiz on the variants with MMMC material                                                                                                                                                     |
-| All   | Integration and system tests across complete lessons (§6.6.5), then a bug bash                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **C** | **Real backends behind the Phase 2 admin pages** (§4.2.2): primitives (enable, retire, metadata and version; new primitive _code_ still arrives by PR and must pass the harness), glossary CRUD, item bank CRUD, render logs and failed generations, student accounts. **Static study mode** on the server: a static lesson serves the L2 render with the interactive layer and learner model turned off (§5.9.4); the player side exists since Phase 2. Accessibility check with real content: tablet, keyboard and contrast (§6.2.2) |
+| **A** | Reliability: end-to-end retries, preserved lesson state, cleanup of temporary files and media, a budget monitor for LLM and TTS spend (§4.10). Scale workers. A study deployment over HTTPS (this is not production hosting, which is out of scope). Timing instrumentation: first-module wait, render time per level, prefetch hit rate, substitution delay and branch wait, each reported as a median and 90th percentile (§5.9.2). Load test with several concurrent students                                                       |
+| **B** | **Evaluation harness** (§5.9.1): the held-out query set; plan validity, parameter validity, render success and layout-rejection rates; a run of the **unmodified Manimator** baseline; the in-scope subset of **TheoremExplainBench**; a manual-review checklist and Cohen's κ; TeachQuiz on the variants with MMMC material                                                                                                                                                                                                           |
+| All   | Integration and system tests across complete lessons (§6.6.5), then a bug bash                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 
-## 10. Phase 7 — Pilot, user study, write-up (weeks 27–32)
+## 11. Phase 8 — Pilot, user study, write-up (weeks 31–36)
 
 | When        | Work                                                                                                                                                                                                                                                                                                                                                      |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Weeks 27–28 | **Pilot study.** Collect logs. Re-estimate the BKT parameters with EM, the signal likelihoods q<sub>s1</sub> and q<sub>s0</sub>, and the thresholds τ<sub>r</sub>, τ<sub>1</sub>, τ<sub>2</sub> and δ (tuned against the rate of "I'm Lost" presses per level) (B). Fix what the pilot shows (A, C)                                                       |
-| Before 29   | **Power analysis** to set the number of participants. **Parallel pre-test and post-test forms** in the style of O-Level past papers. Two topics of comparable difficulty, and the 4 counterbalanced groups                                                                                                                                                |
-| Weeks 29–31 | **Crossover user study** (§5.9.4): FourierLearn compared with static mode, plus IMI interest/enjoyment and NASA-TLX after each condition                                                                                                                                                                                                                  |
-| Weeks 31–32 | Analysis (B leads):<br>• normalised gain _g_<br>• Shapiro–Wilk, then a paired t-test or Wilcoxon signed-rank test<br>• Cohen's _d_<br>• AUC for BKT with checks only versus checks plus signals (if signals do not help, keep them for logging only)<br>• the generation-quality and timing reports<br>Also the user manual and the final report chapters |
+| Weeks 31–32 | **Pilot study.** Collect logs. Re-estimate the BKT parameters with EM, the signal likelihoods q<sub>s1</sub> and q<sub>s0</sub>, and the thresholds τ<sub>r</sub>, τ<sub>1</sub>, τ<sub>2</sub> and δ (tuned against the rate of "I'm Lost" presses per level) (B). Fix what the pilot shows (A, C)                                                       |
+| Before 33   | **Power analysis** to set the number of participants. **Parallel pre-test and post-test forms** in the style of O-Level past papers. Two topics of comparable difficulty, and the 4 counterbalanced groups                                                                                                                                                |
+| Weeks 33–35 | **Crossover user study** (§5.9.4): FourierLearn compared with static mode, plus IMI interest/enjoyment and NASA-TLX after each condition                                                                                                                                                                                                                  |
+| Weeks 35–36 | Analysis (B leads):<br>• normalised gain _g_<br>• Shapiro–Wilk, then a paired t-test or Wilcoxon signed-rank test<br>• Cohen's _d_<br>• AUC for BKT with checks only versus checks plus signals (if signals do not help, keep them for logging only)<br>• the generation-quality and timing reports<br>Also the user manual and the final report chapters |
 
 ---
 
-## 11. Sprint view (two-week sprints)
+## 12. Sprint view (two-week sprints)
 
-| Sprint | Weeks | A — Engine & pipeline                    | B — Content & models                     | C — Product & learner UX                   | Milestone       |
-| ------ | ----- | ---------------------------------------- | ---------------------------------------- | ------------------------------------------ | --------------- |
-| 1      | 1–2   | Contracts; renderer timing, mux, stitch  | Contracts; Primitive base, FunctionGraph | Contracts; TTS adapter, FakeTTS, bake-off  |                 |
-| 2      | 3–4   | Parallel beats, layout check, cache, CLI | EquationTransform, GradientTriangle      | DB models and migration; dev module viewer | **M0** engine   |
-| 3      | 5–6   | Job queue, worker, media serving         | 4 more primitives; validation harness    | Player v1                                  |                 |
-| 4      | 7–8   | API and SSE, first-beat start            | ScenePlan schema and checks; taxonomy    | Interaction logger; player polish          | **M1** browser  |
-| 5      | 9–10  | Code Generator: constrained parameters   | LLM client; Prompt Interpreter           | Narration generation and checks            |                 |
-| 6      | 11–12 | SymPy retry loop; layout feedback        | Lesson planner and fallbacks             | Home screen; generation progress           |                 |
-| 7      | 13–14 | Orchestrator end to end; 90 s check      | Dev query set; model comparison          | Narration readability; content seeding     | **M2** query    |
-| 8      | 15–16 | Scheduler and prefetch                   | BKT and signal evidence                  | Auth; onboarding diagnostic                |                 |
-| 9      | 17–18 | Level per module; review insertion       | Difficulty policy; prediction log        | Check screen; progress screen              | **M3** adaptive |
-| 10     | 19–20 | "I'm Lost" re-render path                | Branch and review plans                  | "I'm Lost" UI; chip overlay                |                 |
-| 11     | 21–22 | Branch insertion; priority preemption    | Primitive gaps; content coverage         | Branch screen; resume and history; signals | **M4** features |
-| 12     | 23–24 | Reliability; budget monitor              | Evaluation harness; Manimator baseline   | Admin portal                               |                 |
-| 13     | 25–26 | Deployment; timing instrumentation       | TheoremExplainBench; κ tooling           | Static study mode; accessibility           | **M5** RC       |
-| 14     | 27–28 | Pilot fixes                              | EM re-estimation; thresholds             | Pilot fixes                                | Pilot           |
-| 15     | 29–30 | Study support                            | Study logistics                          | Study support                              | Study           |
-| 16     | 31–32 | Timing report; docs                      | Analysis and statistics                  | User manual; docs                          | Final           |
+In sprints 3 and 4 (Phase 2), lanes B and C both build the frontend; see docs/frontend.md §12 for
+the week-by-week split.
+
+| Sprint | Weeks | A — Engine & pipeline                            | B — Content & models                           | C — Product & learner UX                                  | Milestone       |
+| ------ | ----- | ------------------------------------------------ | ---------------------------------------------- | --------------------------------------------------------- | --------------- |
+| 1      | 1–2   | Contracts; renderer timing, mux, stitch          | Contracts; Primitive base, FunctionGraph       | Contracts; TTS adapter, FakeTTS, bake-off                 |                 |
+| 2      | 3–4   | Parallel beats, layout check, cache, CLI         | EquationTransform, GradientTriangle            | DB models and migration; dev module viewer                | **M0** engine   |
+| 3      | 5–6   | API schemas and stub; fixtures; type generation  | Design system; landing; auth; diagnostic; home | Player; chips; event logger; stream hook                  |                 |
+| 4      | 7–8   | Stub fixes; job queue started                    | History; progress; admin pages                 | Check, branch, "I'm Lost", resume; static mode            | **M1** frontend |
+| 5      | 9–10  | Job queue, worker, media serving                 | 4 more primitives; validation harness          | Events, topics and glossary from the database; seed       |                 |
+| 6      | 11–12 | Real stream and current module; first-beat start | ScenePlan schema and checks; taxonomy          | Player checked against real renders                       | **M2** browser  |
+| 7      | 13–14 | Code Generator: constrained parameters           | LLM client; Prompt Interpreter                 | Narration generation and checks                           |                 |
+| 8      | 15–16 | SymPy retry loop; layout feedback                | Lesson planner and fallbacks                   | Lesson endpoints; generation progress                     |                 |
+| 9      | 17–18 | Orchestrator end to end; 90 s check              | Dev query set; model comparison                | Narration readability; content seeding                    | **M3** query    |
+| 10     | 19–20 | Scheduler and prefetch                           | BKT and signal evidence                        | Auth; onboarding diagnostic                               |                 |
+| 11     | 21–22 | Level per module; review insertion               | Difficulty policy; prediction log              | Check and progress backends                               | **M4** adaptive |
+| 12     | 23–24 | "I'm Lost" re-render path                        | Branch and review plans                        | "I'm Lost" and chips on the real backend                  |                 |
+| 13     | 25–26 | Branch insertion; priority preemption            | Primitive gaps; content coverage               | Branches, resume, history and signals on the real backend | **M5** features |
+| 14     | 27–28 | Reliability; budget monitor                      | Evaluation harness; Manimator baseline         | Admin backends                                            |                 |
+| 15     | 29–30 | Deployment; timing instrumentation               | TheoremExplainBench; κ tooling                 | Static study mode; accessibility                          | **M6** RC       |
+| 16     | 31–32 | Pilot fixes                                      | EM re-estimation; thresholds                   | Pilot fixes                                               | Pilot           |
+| 17     | 33–34 | Study support                                    | Study logistics                                | Study support                                             | Study           |
+| 18     | 35–36 | Timing report; docs                              | Analysis and statistics                        | User manual; docs                                         | Final           |
 
 Map the weeks onto your FYP-I and FYP-II calendar. If a sprint slips, protect the milestones in
-order (M0 → M1 → M2 → M3) and drop polish first. The study needs M3 and the static mode. It can run
-without admin polish.
+order (M0 → M1 → M2 → M3 → M4) and drop polish first. The study needs M4 and the static mode. It
+can run without admin polish.
+
+Adding the frontend phase made the plan four weeks longer (36 weeks instead of 32). Lane C's
+work in Phases 5–7 shrinks, because the screens already exist. If the calendar is tight, take the
+four weeks back from Phases 5–7, not from Phase 2.
 
 ---
 
-## 12. Gaps and contradictions in the report to settle now
+## 13. Gaps and contradictions in the report to settle now
 
 These came up while reading the report closely. Each one has a proposed resolution so the work is
 not blocked. Fix the report text when you next revise it.
@@ -362,7 +424,8 @@ not blocked. Fix the report text when you next revise it.
    - `interaction_event`: add `beat_index`, `position_s` and a payload. A speed change keeps the
      single type of Table 4.8 and stores the rate before and after, which tells slowing down
      (difficulty) from speeding up (ease) (Table 5.4).
-   - `student.role` (student or admin) and diagnostic progress, so the diagnostic can resume.
+   - `student.role` (student or admin), `student.disabled` (the admin can disable an account),
+     and diagnostic progress, so the diagnostic can resume.
    - `prediction_log` (estimate before each check), needed for the AUC.
 4. **The diagnostic has two definitions.** UC 4.2 says at most five questions at first use. §5.7.2
    says one item for the target concept plus one per prerequisite, per query. → Use both: a
@@ -375,37 +438,71 @@ not blocked. Fix the report text when you next revise it.
 7. **HTTPS is required, but production hosting is out of scope (§2.5).** → A single study
    deployment, documented, not run as a service.
 8. **The report says Python 3.11+, and the repo pins 3.12.** This is consistent; no action needed.
+9. **The report does not define the API's request and response bodies.** → Phase 2 fixes them
+   ([docs/frontend.md §7](frontend.md#7-api-catalogue)). The frontend needs a few endpoints beyond
+   the sketch in docs/contracts.md:
+   - `GET /api/auth/me` and `GET /api/topics`
+   - `GET /api/lessons/{id}/current-module` and `POST /api/lessons/{id}/position`
+   - `POST /api/lessons/{id}/modules/{module_id}/finish` and `GET /api/admin/summary`
+
+   The "I'm Lost" and branch endpoints record their own interaction events, so the player's logger
+   never sends those two types.
 
 ---
 
-## 13. Requirement traceability
+## 14. Requirement traceability
 
-| Requirement (§4.2)                                                        | Phase                         |
-| ------------------------------------------------------------------------- | ----------------------------- |
-| Account, login, logout                                                    | 4                             |
-| Onboarding diagnostic                                                     | 4                             |
-| Natural-language topic query, out-of-scope handling                       | 3                             |
-| Playback controls (pause, rewind, speed)                                  | 2                             |
-| Concept chips                                                             | 2 (show), 5 (overlay and log) |
-| "I'm Lost"                                                                | 5                             |
-| Inter-module checks                                                       | 4                             |
-| Branch points                                                             | 5                             |
-| Per-concept confidence and history; resume                                | 4, 5                          |
-| Admin: primitives, glossary, item bank, render logs, accounts             | 6                             |
-| Scene plan mapped to syllabus concepts                                    | 3                             |
-| Primitives only, no unconstrained code                                    | 1–3                           |
-| SymPy checks, retries, default fallback                                   | 1 (predicates), 3 (loop)      |
-| Render at the learner model's level                                       | 4                             |
-| Narration aligned to timestamps at 3 levels                               | 1 (timing), 3 (scripts)       |
-| Background rendering of the next module                                   | 4                             |
-| Variant cache on primitive ids, parameters, level, voice, library version | 1–2                           |
-| Record passive signals                                                    | 2 (logger), 5 (all signals)   |
-| BKT with checks weighted above signals                                    | 4                             |
-| "I'm Lost" re-render from the current beat at ℓ−1                         | 5                             |
+Phase 2 builds every screen against the stub. The later phase number is when the real backend
+replaces the stub.
+
+| Requirement (§4.2)                                                        | Phase                             |
+| ------------------------------------------------------------------------- | --------------------------------- |
+| Account, login, logout                                                    | 2 (screens), 5 (backend)          |
+| Onboarding diagnostic                                                     | 2, 5                              |
+| Natural-language topic query, out-of-scope handling                       | 2, 4                              |
+| Playback controls (pause, rewind, speed)                                  | 2                                 |
+| Concept chips                                                             | 2 (overlay and log), 3 (glossary) |
+| "I'm Lost"                                                                | 2 (player), 6 (re-render)         |
+| Inter-module checks                                                       | 2, 5                              |
+| Branch points                                                             | 2, 6                              |
+| Per-concept confidence and history; resume                                | 2 (screens), 5, 6                 |
+| Admin: primitives, glossary, item bank, render logs, accounts             | 2 (screens), 7 (backend)          |
+| Scene plan mapped to syllabus concepts                                    | 4                                 |
+| Primitives only, no unconstrained code                                    | 1–4                               |
+| SymPy checks, retries, default fallback                                   | 1 (predicates), 4 (loop)          |
+| Render at the learner model's level                                       | 5                                 |
+| Narration aligned to timestamps at 3 levels                               | 1 (timing), 4 (scripts)           |
+| Background rendering of the next module                                   | 5                                 |
+| Variant cache on primitive ids, parameters, level, voice, library version | 1–3                               |
+| Record passive signals                                                    | 2 (logger), 3 (stored)            |
+| BKT with checks weighted above signals                                    | 5                                 |
+| "I'm Lost" re-render from the current beat at ℓ−1                         | 6                                 |
+
+------------------------------------------------------------------------- | ----------------------------- |
+| Account, login, logout | 4 |
+| Onboarding diagnostic | 4 |
+| Natural-language topic query, out-of-scope handling | 3 |
+| Playback controls (pause, rewind, speed) | 2 |
+| Concept chips | 2 (show), 5 (overlay and log) |
+| "I'm Lost" | 5 |
+| Inter-module checks | 4 |
+| Branch points | 5 |
+| Per-concept confidence and history; resume | 4, 5 |
+| Admin: primitives, glossary, item bank, render logs, accounts | 6 |
+| Scene plan mapped to syllabus concepts | 3 |
+| Primitives only, no unconstrained code | 1–3 |
+| SymPy checks, retries, default fallback | 1 (predicates), 3 (loop) |
+| Render at the learner model's level | 4 |
+| Narration aligned to timestamps at 3 levels | 1 (timing), 3 (scripts) |
+| Background rendering of the next module | 4 |
+| Variant cache on primitive ids, parameters, level, voice, library version | 1–2 |
+| Record passive signals | 2 (logger), 5 (all signals) |
+| BKT with checks weighted above signals | 4 |
+| "I'm Lost" re-render from the current beat at ℓ−1 | 5 |
 
 ---
 
-## 14. How we work
+## 15. How we work
 
 - One GitHub issue per row item above, labelled with the lane and the phase. Branch, open a PR,
   get a teammate's review, and merge on green CI, as described in [CONTRIBUTING](../CONTRIBUTING.md).

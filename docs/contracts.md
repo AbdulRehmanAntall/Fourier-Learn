@@ -57,7 +57,7 @@ Worked examples, which the tests load, are in `backend/examples/`:
   module ids are unique.
 - These models are the **schema check** of §5.2.3. The **reference check** (primitives, glossary
   terms and check items exist, and every expression parses) needs the library and the taxonomy,
-  so it belongs to the Prompt Interpreter (Phase 2).
+  so it belongs to the Prompt Interpreter (Phase 3).
 
 ### `QueryInterpretation` (§5.2.2)
 
@@ -152,8 +152,10 @@ If the stream drops, the browser fetches the lesson status first, then reconnect
 ## API sketch
 
 All endpoints are REST over HTTPS, except the event stream (§6.4.12). This sketch fixes what each
-endpoint is for. The exact request and response bodies are decided in the phase that builds each
-endpoint.
+endpoint is for. Phase 2 fixed the exact request and response bodies, and added a few endpoints
+the frontend needs. The full list is the API catalogue in
+[docs/frontend.md §7](frontend.md#7-api-catalogue). The "I'm Lost" and branch endpoints record
+their own interaction events, so the player's logger never sends `im_lost` or `branch_choice`.
 
 | Method and path                                                                       | Purpose                                                                            | Report           |
 | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------- |

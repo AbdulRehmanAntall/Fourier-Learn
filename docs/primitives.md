@@ -13,7 +13,7 @@ The library so far:
 | `EquationTransform` | All topics           | `backend/app/primitives/equation_transform.py` |
 
 Still to write, from Table 5.2: `TangentSlide`, `SecantToTangent`, `TravelGraph` and
-`AreaUnderCurve` (Phase 2). Copy the closest existing primitive and follow the rules below.
+`AreaUnderCurve` (Phase 3). Copy the closest existing primitive and follow the rules below.
 
 ## The four elements (§5.3.1)
 
