@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     # Beats rendered in parallel. 0 means one per CPU core.
     render_workers: int = 0
 
+    # Phase 2: serve the API from the in-memory stub (app/stub, docs/frontend.md §8).
+    stub_api: bool = True
+    # Delay added to every stub response, so the frontend's loading states show and get tested.
+    stub_latency_ms: int = 300
+    # Send the session cookie over HTTPS only. Turn on for any deployment served over HTTPS.
+    session_cookie_secure: bool = False
+
     # Not used yet.
     llm_api_key: str = ""
     tts_api_key: str = ""
