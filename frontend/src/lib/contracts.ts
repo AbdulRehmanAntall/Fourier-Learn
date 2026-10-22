@@ -39,8 +39,7 @@ export type VariantSummary = {
   primitives: string[];
 };
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-/** URL of a file named in a manifest (paths are relative to the variant's directory). */
+/** URL of a file named in a manifest (paths are relative to the variant's directory). Same
+ * origin: Next.js forwards /media to the backend (next.config.ts). */
 export const variantFileUrl = (cacheKey: string, path: string) =>
-  `${API_URL}/media/variants/${cacheKey}/${path}`;
+  `/media/variants/${cacheKey}/${path}`;

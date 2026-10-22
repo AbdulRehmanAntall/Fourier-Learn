@@ -41,8 +41,8 @@ services:
   frontend:
     build: ./frontend
     environment:
-      # Used by the browser on your machine, so it points at the host port.
-      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}
+      # The Next.js server forwards /api and /media to the backend container.
+      BACKEND_URL: http://backend:8000
       WATCHPACK_POLLING: ${DOCKER_FILE_POLLING:-false}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
