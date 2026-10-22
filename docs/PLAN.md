@@ -229,6 +229,18 @@ reviewing its frames found a fraction that SymPy's printer had rewritten (`(3/4)
 
 ## 5. Phase 2 — The complete frontend on a stub API (weeks 5–8)
 
+> **Status: in progress. Lane A's part is done; the screens (lanes B and C) are next.**
+>
+> - Every endpoint of the API catalogue exists, with its final request and response shapes, and
+>   is served by the stub. That covers auth, topics, glossary, diagnostic, lessons, playback,
+>   checks, branches, "I'm Lost", the event stream, interaction events, progress and admin.
+> - The example module is committed as fixture videos at all three levels.
+> - `npm run api:types` generates the frontend's types, and CI checks that they match the backend.
+> - Next.js forwards `/api` and `/media` to the backend, with the event stream checked through it.
+> - The stub has 15 tests that go through the API.
+>
+> The README's "The stub API" section says how to use it.
+
 **Goal (milestone M1):** every screen and interaction in the report works in the browser. That
 covers:
 
@@ -255,11 +267,11 @@ Why the frontend comes now:
 - **Each backend phase has a working screen to test against,** and the player, the part students
   judge the project by, gets the most time to mature.
 
-| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** | **API schemas** for every endpoint (Pydantic models in `backend/app/api/schemas/`, frontend.md §7) and the **stub service** (frontend.md §8): an in-memory store with seed data, the example module committed as fixture variants at all three levels, a timed SSE stream, "I'm Lost" substitution between the fixture levels, and test triggers for slow and failed modules. **`npm run api:types`** generates the frontend types from the OpenAPI schema, and CI fails when they are out of date. **Next.js rewrites** for `/api` and `/media`. From week 7, start Phase 3 |
-| **B** | Design system and layout. Landing page and topics page. Register, login, logout and route guards. **Onboarding diagnostic** (Fig. 4.1). **Home** (Fig. 4.2) with the out-of-scope reply. Lesson history, **progress** (Fig. 4.6) and account. **Admin** (§4.2.2): overview, primitives, glossary, check questions, render jobs, students                                                                                                                                                                                                                                     |
-| **C** | **Lesson player** (Fig. 4.3): two videos taking turns, segmented progress bar, rewind, speed, captions, fullscreen and keyboard. **Concept chips** with an overlay while the video keeps playing. **"I'm Lost"**: the substitution with a progress indicator, and the Level 1 replay. Generating and preparing screens. **Check** (Fig. 4.4) and **branch** (Fig. 4.5) with its timeout. Lesson summary, failed-module fallback, saving the position and resuming. **Event logger** and SSE hook. Static study mode                                                          |
+| Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A** | ✅ **API schemas** for every endpoint (Pydantic models in `backend/app/api/schemas/`, frontend.md §7) and the **stub service** (frontend.md §8): an in-memory store with seed data, the example module committed as fixture variants at all three levels, a timed SSE stream, "I'm Lost" substitution between the fixture levels, and test triggers for slow and failed modules. **`npm run api:types`** generates the frontend types from the OpenAPI schema, and CI fails when they are out of date. **Next.js rewrites** for `/api` and `/media`. From week 7, start Phase 3 |
+| **B** | Design system and layout. Landing page and topics page. Register, login, logout and route guards. **Onboarding diagnostic** (Fig. 4.1). **Home** (Fig. 4.2) with the out-of-scope reply. Lesson history, **progress** (Fig. 4.6) and account. **Admin** (§4.2.2): overview, primitives, glossary, check questions, render jobs, students                                                                                                                                                                                                                                        |
+| **C** | **Lesson player** (Fig. 4.3): two videos taking turns, segmented progress bar, rewind, speed, captions, fullscreen and keyboard. **Concept chips** with an overlay while the video keeps playing. **"I'm Lost"**: the substitution with a progress indicator, and the Level 1 replay. Generating and preparing screens. **Check** (Fig. 4.4) and **branch** (Fig. 4.5) with its timeout. Lesson summary, failed-module fallback, saving the position and resuming. **Event logger** and SSE hook. Static study mode                                                             |
 
 ### Done when (milestone **M1: frontend**)
 
