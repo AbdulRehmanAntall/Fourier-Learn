@@ -1,0 +1,109 @@
+{
+  "cache_key": "888a1bb437b6d07ad898d8cff9d8d063bee90a901a864e65da15a199ac9cfca1",
+  "level": 3,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beat_count": 3,
+  "beats": [
+    {
+      "index": 0,
+      "primitive_id": "FunctionGraph",
+      "video": "beats/0.mp4",
+      "duration_s": 6.3,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 3.867,
+          "narration": "Here is the graph of y equals 2 x, a straight line through the origin."
+        },
+        {
+          "start_s": 3.867,
+          "end_s": 6.3,
+          "narration": "It passes through the points 1, 2 and 4, 8."
+        }
+      ],
+      "chips": [
+        {
+          "term": "graph",
+          "start_s": 0.0,
+          "end_s": 6.3
+        },
+        {
+          "term": "coordinates",
+          "start_s": 0.0,
+          "end_s": 6.3
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "index": 1,
+      "primitive_id": "GradientTriangle",
+      "video": "beats/1.mp4",
+      "duration_s": 6.233,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.0,
+          "narration": "Take the line through these two points."
+        },
+        {
+          "start_s": 2.0,
+          "end_s": 6.233,
+          "narration": "The rise is 6 and the run is 3, so the gradient is 6 over 3, which is 2."
+        }
+      ],
+      "chips": [
+        {
+          "term": "gradient",
+          "start_s": 0.0,
+          "end_s": 6.233
+        },
+        {
+          "term": "rise",
+          "start_s": 0.0,
+          "end_s": 6.233
+        },
+        {
+          "term": "run",
+          "start_s": 0.0,
+          "end_s": 6.233
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "index": 2,
+      "primitive_id": "EquationTransform",
+      "video": "beats/2.mp4",
+      "duration_s": 6.433,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 3.967,
+          "narration": "Using the coordinates, the gradient is 8 minus 2 over 4 minus 1."
+        },
+        {
+          "start_s": 3.967,
+          "end_s": 6.433,
+          "narration": "That is 6 over 3, so the gradient is 2."
+        }
+      ],
+      "chips": [
+        {
+          "term": "gradient",
+          "start_s": 0.0,
+          "end_s": 6.433
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    }
+  ],
+  "module_video": "module.mp4"
+}

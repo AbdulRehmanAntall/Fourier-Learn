@@ -1,0 +1,4531 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FourierLearn API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variants/{cache_key}/manifest": {
+      "get": {
+        "tags": [
+          "variants"
+        ],
+        "summary": "Get Manifest",
+        "operationId": "get_manifest_api_variants__cache_key__manifest_get",
+        "parameters": [
+          {
+            "name": "cache_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cache Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleManifest"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/variants": {
+      "get": {
+        "tags": [
+          "variants"
+        ],
+        "summary": "List Variants",
+        "operationId": "list_variants_api_dev_variants_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VariantSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Variants Api Dev Variants Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/topics": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Topics",
+        "description": "The supported syllabus topics. Public: the landing page lists them.",
+        "operationId": "topics_api_topics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TopicArea"
+                  },
+                  "type": "array",
+                  "title": "Response Topics Api Topics Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/glossary/{term}": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Glossary Term",
+        "description": "The definition shown when a concept chip is opened (UC 4.5).",
+        "operationId": "glossary_term_api_glossary__term__get",
+        "parameters": [
+          {
+            "name": "term",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryDefinition"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostic": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Diagnostic",
+        "operationId": "diagnostic_api_diagnostic_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostic/answers": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Answer Diagnostic",
+        "operationId": "answer_diagnostic_api_diagnostic_answers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiagnosticAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticState"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/progress": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Progress",
+        "description": "Per-concept confidence (Fig. 4.6).",
+        "operationId": "progress_api_progress_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Progress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "List Lessons",
+        "description": "Lesson history, newest first.",
+        "operationId": "list_lessons_api_lessons_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LessonSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Lessons Api Lessons Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Create Lesson",
+        "description": "Submit a topic query. Out-of-scope queries get the list of topics (UC 4.3).",
+        "operationId": "create_lesson_api_lessons_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLessonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LessonCreated"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OutOfScope"
+                    }
+                  ],
+                  "title": "Response Create Lesson Api Lessons Post",
+                  "discriminator": {
+                    "propertyName": "status",
+                    "mapping": {
+                      "created": "#/components/schemas/LessonCreated",
+                      "out_of_scope": "#/components/schemas/OutOfScope"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Get Lesson",
+        "operationId": "get_lesson_api_lessons__lesson_id__get",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lesson"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}/current-module": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Current Module",
+        "description": "What to play now: the first module not yet finished, and whether it is ready.",
+        "operationId": "current_module_api_lessons__lesson_id__current_module_get",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentModule"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}/events": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Lesson Events",
+        "description": "Server-Sent Events for one lesson (§6.4.12). The event names and payloads are the\n`StreamEvent` schemas. Only events after the connection opened are sent, so the browser\nfetches the lesson's state each time the stream (re)opens.",
+        "operationId": "lesson_events_api_lessons__lesson_id__events_get",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "StreamEvent messages",
+            "content": {
+              "text/event-stream": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}/position": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Save Position",
+        "description": "Save where the student is, for resuming. POST, so `navigator.sendBeacon` can call it.",
+        "operationId": "save_position_api_lessons__lesson_id__position_post",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Position"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}/modules/{module_id}/finish": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Finish Module",
+        "description": "The module ended: returns its check items and branch point, if any.",
+        "operationId": "finish_module_api_lessons__lesson_id__modules__module_id__finish_post",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Module Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleEnd"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/check-responses": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Answer Check",
+        "description": "An answer to a check item after a module (UC 4.6).",
+        "operationId": "answer_check_api_check_responses_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckResponseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponseResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}/branch": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Choose Branch",
+        "description": "The option chosen at a branch point (UC 4.7). Records the branch_choice event.",
+        "operationId": "choose_branch_api_lessons__lesson_id__branch_post",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lesson"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lessons/{lesson_id}/im-lost": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Im Lost",
+        "description": "An \"I'm Lost\" press during a module (UC 4.4, §5.6.3). Records the im_lost event.",
+        "operationId": "im_lost_api_lessons__lesson_id__im_lost_post",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImLostRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ImLostSubstitute"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ImLostReplay"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "action",
+                    "mapping": {
+                      "substitute": "#/components/schemas/ImLostSubstitute",
+                      "replay": "#/components/schemas/ImLostReplay"
+                    }
+                  },
+                  "title": "Response Im Lost Api Lessons  Lesson Id  Im Lost Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events": {
+      "post": {
+        "tags": [
+          "events"
+        ],
+        "summary": "Log Events",
+        "description": "A batch of up to 100 events. `im_lost` and `branch_choice` are refused here: their own\nendpoints record them.",
+        "operationId": "log_events_api_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionEventBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/events": {
+      "get": {
+        "tags": [
+          "events"
+        ],
+        "summary": "List Events",
+        "description": "The signed-in user's most recent events, oldest first.",
+        "operationId": "list_events_api_dev_events_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LoggedEvent"
+                  },
+                  "title": "Response List Events Api Dev Events Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/summary": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Summary",
+        "operationId": "summary_api_admin_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/primitives": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Primitives",
+        "operationId": "primitives_api_admin_primitives_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PrimitiveAdmin"
+                  },
+                  "type": "array",
+                  "title": "Response Primitives Api Admin Primitives Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/primitives/{primitive_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Patch Primitive",
+        "operationId": "patch_primitive_api_admin_primitives__primitive_id__patch",
+        "parameters": [
+          {
+            "name": "primitive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Primitive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrimitivePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrimitiveAdmin"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/glossary": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Glossary",
+        "operationId": "glossary_api_admin_glossary_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "concept_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Concept Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create Glossary",
+        "operationId": "create_glossary_api_admin_glossary_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlossaryCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryEntry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/glossary/{term_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Patch Glossary",
+        "operationId": "patch_glossary_api_admin_glossary__term_id__patch",
+        "parameters": [
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlossaryPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryEntry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete Glossary",
+        "operationId": "delete_glossary_api_admin_glossary__term_id__delete",
+        "parameters": [
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/check-questions": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Check Questions",
+        "operationId": "check_questions_api_admin_check_questions_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "concept_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Concept Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckQuestionPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create Check Question",
+        "operationId": "create_check_question_api_admin_check_questions_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckQuestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckQuestion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/check-questions/{item_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Patch Check Question",
+        "operationId": "patch_check_question_api_admin_check_questions__item_id__patch",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckQuestionPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckQuestion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete Check Question",
+        "operationId": "delete_check_question_api_admin_check_questions__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/render-jobs": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Render Jobs",
+        "operationId": "render_jobs_api_admin_render_jobs_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "queued",
+                    "rendering",
+                    "ready",
+                    "failed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderJobPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/render-jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Render Job",
+        "operationId": "render_job_api_admin_render_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenderJobDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/students": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Students",
+        "operationId": "students_api_admin_students_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/students/{student_id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Student",
+        "operationId": "student_api_admin_students__student_id__get",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentAdmin"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Patch Student",
+        "operationId": "patch_student_api_admin_students__student_id__patch",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentAdmin"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete Student",
+        "operationId": "delete_student_api_admin_students__student_id__delete",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminSummary": {
+        "properties": {
+          "students": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Students"
+          },
+          "lessons_today": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Lessons Today"
+          },
+          "renders_failed_24h": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Renders Failed 24H"
+          },
+          "render_success_rate_7d": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Render Success Rate 7D"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "students",
+          "lessons_today",
+          "renders_failed_24h",
+          "render_success_rate_7d"
+        ],
+        "title": "AdminSummary"
+      },
+      "BeatManifest": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Index"
+          },
+          "primitive_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Primitive Id"
+          },
+          "video": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Video"
+          },
+          "duration_s": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Duration S"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepTiming"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Steps"
+          },
+          "chips": {
+            "items": {
+              "$ref": "#/components/schemas/ChipInterval"
+            },
+            "type": "array",
+            "title": "Chips",
+            "default": []
+          },
+          "concept_ids": {
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0.0
+            },
+            "type": "array",
+            "title": "Concept Ids",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "index",
+          "primitive_id",
+          "video",
+          "duration_s",
+          "steps"
+        ],
+        "title": "BeatManifest",
+        "description": "One rendered beat. Times are seconds from the start of the beat's own video."
+      },
+      "BranchChoiceEvent": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "type": {
+            "type": "string",
+            "const": "branch_choice",
+            "title": "Type",
+            "default": "branch_choice"
+          },
+          "option": {
+            "type": "string",
+            "enum": [
+              "theory",
+              "worked_example",
+              "next_step"
+            ],
+            "title": "Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "occurred_at",
+          "option"
+        ],
+        "title": "BranchChoiceEvent",
+        "description": "The option selected at a branch point after the module (§5.6.4)."
+      },
+      "BranchOptionOut": {
+        "properties": {
+          "choice": {
+            "type": "string",
+            "enum": [
+              "theory",
+              "worked_example",
+              "next_step"
+            ],
+            "title": "Choice"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "choice",
+          "title",
+          "description"
+        ],
+        "title": "BranchOptionOut"
+      },
+      "BranchPoint": {
+        "properties": {
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/BranchOptionOut"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 2,
+            "title": "Options"
+          },
+          "default_choice": {
+            "type": "string",
+            "const": "next_step",
+            "title": "Default Choice",
+            "default": "next_step"
+          },
+          "timeout_s": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Timeout S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "options",
+          "timeout_s"
+        ],
+        "title": "BranchPoint",
+        "description": "The choice after a module (§5.6.4, Fig. 4.5). With no answer in time, the default is\ntaken."
+      },
+      "BranchRequest": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "choice": {
+            "type": "string",
+            "enum": [
+              "theory",
+              "worked_example",
+              "next_step"
+            ],
+            "title": "Choice"
+          },
+          "timed_out": {
+            "type": "boolean",
+            "title": "Timed Out",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "choice"
+        ],
+        "title": "BranchRequest"
+      },
+      "CheckItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "mcq",
+              "true_false"
+            ],
+            "title": "Item Type"
+          },
+          "question_text": {
+            "type": "string",
+            "title": "Question Text"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 2,
+            "title": "Options"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "concept_id",
+          "item_type",
+          "question_text",
+          "options"
+        ],
+        "title": "CheckItem",
+        "description": "A bank item as the student sees it: never with its answer (§5.7.3).\n\nText may contain inline LaTeX between `$` signs, which the frontend renders with KaTeX."
+      },
+      "CheckQuestion": {
+        "properties": {
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "mcq",
+              "true_false"
+            ],
+            "title": "Item Type"
+          },
+          "question_text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Question Text"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 2,
+            "title": "Options"
+          },
+          "correct_option": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Correct Option"
+          },
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept_id",
+          "item_type",
+          "question_text",
+          "options",
+          "correct_option",
+          "id"
+        ],
+        "title": "CheckQuestion"
+      },
+      "CheckQuestionCreate": {
+        "properties": {
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "mcq",
+              "true_false"
+            ],
+            "title": "Item Type"
+          },
+          "question_text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Question Text"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 2,
+            "title": "Options"
+          },
+          "correct_option": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Correct Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept_id",
+          "item_type",
+          "question_text",
+          "options",
+          "correct_option"
+        ],
+        "title": "CheckQuestionCreate"
+      },
+      "CheckQuestionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CheckQuestion"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page Size"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "CheckQuestionPage"
+      },
+      "CheckQuestionPatch": {
+        "properties": {
+          "concept_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concept Id"
+          },
+          "item_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "mcq",
+                  "true_false"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Type"
+          },
+          "question_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Text"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          },
+          "correct_option": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CheckQuestionPatch",
+        "description": "Changed fields only. The item is checked again as a whole after the change."
+      },
+      "CheckResponseRequest": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "check_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Check Id"
+          },
+          "selected_option": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Selected Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "check_id",
+          "selected_option"
+        ],
+        "title": "CheckResponseRequest"
+      },
+      "CheckResponseResult": {
+        "properties": {
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct"
+          },
+          "correct_option": {
+            "type": "string",
+            "title": "Correct Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "is_correct",
+          "correct_option"
+        ],
+        "title": "CheckResponseResult"
+      },
+      "ChipInterval": {
+        "properties": {
+          "term": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Term"
+          },
+          "start_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "End S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "term",
+          "start_s",
+          "end_s"
+        ],
+        "title": "ChipInterval",
+        "description": "When a concept chip is shown beside the video, within its beat (§5.6.2)."
+      },
+      "ChipViewEvent": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          },
+          "type": {
+            "type": "string",
+            "const": "chip_view",
+            "title": "Type",
+            "default": "chip_view"
+          },
+          "term": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Term"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "occurred_at",
+          "beat_index",
+          "position_s",
+          "term"
+        ],
+        "title": "ChipViewEvent",
+        "description": "Selecting a concept chip to read its definition (§5.6.2)."
+      },
+      "Concept": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "syllabus_code": {
+            "type": "string",
+            "title": "Syllabus Code"
+          },
+          "topic_area": {
+            "type": "string",
+            "title": "Topic Area"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "syllabus_code",
+          "topic_area"
+        ],
+        "title": "Concept"
+      },
+      "ConceptConfidence": {
+        "properties": {
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "topic_area": {
+            "type": "string",
+            "title": "Topic Area"
+          },
+          "syllabus_code": {
+            "type": "string",
+            "title": "Syllabus Code"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept_id",
+          "name",
+          "topic_area",
+          "syllabus_code",
+          "score",
+          "updated_at"
+        ],
+        "title": "ConceptConfidence"
+      },
+      "CreateLessonRequest": {
+        "properties": {
+          "query_text": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Query Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "query_text"
+        ],
+        "title": "CreateLessonRequest"
+      },
+      "CurrentModule": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "preparing",
+              "failed",
+              "complete"
+            ],
+            "title": "Status"
+          },
+          "module": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModuleSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Level"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cache_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cache Key"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "planning",
+                  "parameters",
+                  "narration",
+                  "rendering"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModuleFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "module",
+          "level",
+          "cache_key"
+        ],
+        "title": "CurrentModule",
+        "description": "What the player should do now.\n\n- `ready`: play `module` from the variant `cache_key` (at least its first beat is ready).\n- `preparing`: wait for the stream; `stage` says how far generation has got.\n- `failed`: show `failure`, then call `finish` for the module to move on.\n- `complete`: the lesson is over."
+      },
+      "DiagnosticAnswer": {
+        "properties": {
+          "check_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Check Id"
+          },
+          "selected_option": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Selected Option"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "check_id",
+          "selected_option"
+        ],
+        "title": "DiagnosticAnswer"
+      },
+      "DiagnosticState": {
+        "properties": {
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "total": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "answered": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Answered"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "complete",
+          "total",
+          "answered",
+          "item"
+        ],
+        "title": "DiagnosticState",
+        "description": "The onboarding diagnostic (UC 4.2): at most five items, resumable."
+      },
+      "GlossaryCreate": {
+        "properties": {
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "term": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Term"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Definition"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept_id",
+          "term",
+          "definition"
+        ],
+        "title": "GlossaryCreate"
+      },
+      "GlossaryDefinition": {
+        "properties": {
+          "term": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Term"
+          },
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          },
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "term",
+          "definition",
+          "concept_id"
+        ],
+        "title": "GlossaryDefinition",
+        "description": "What the chip overlay shows (§5.6.2, UC 4.5). The definition may contain `$…$` math."
+      },
+      "GlossaryEntry": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "term": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Term"
+          },
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "concept_id",
+          "term",
+          "definition"
+        ],
+        "title": "GlossaryEntry"
+      },
+      "GlossaryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GlossaryEntry"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page Size"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "GlossaryPage"
+      },
+      "GlossaryPatch": {
+        "properties": {
+          "concept_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concept Id"
+          },
+          "term": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 60,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term"
+          },
+          "definition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "GlossaryPatch"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthChecks": {
+        "properties": {
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "ffmpeg": {
+            "type": "boolean",
+            "title": "Ffmpeg"
+          },
+          "latex": {
+            "type": "boolean",
+            "title": "Latex"
+          },
+          "manim": {
+            "type": "boolean",
+            "title": "Manim"
+          }
+        },
+        "type": "object",
+        "required": [
+          "database",
+          "ffmpeg",
+          "latex",
+          "manim"
+        ],
+        "title": "HealthChecks"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "checks": {
+            "$ref": "#/components/schemas/HealthChecks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "checks"
+        ],
+        "title": "HealthResponse"
+      },
+      "ImLostEvent": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          },
+          "type": {
+            "type": "string",
+            "const": "im_lost",
+            "title": "Type",
+            "default": "im_lost"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "occurred_at",
+          "beat_index",
+          "position_s"
+        ],
+        "title": "ImLostEvent",
+        "description": "Pressing the \"I'm Lost\" control (§5.6.3)."
+      },
+      "ImLostReplay": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "replay",
+            "title": "Action",
+            "default": "replay"
+          },
+          "resume_beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Resume Beat Index"
+          },
+          "worked_example_added": {
+            "type": "boolean",
+            "title": "Worked Example Added"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resume_beat_index",
+          "worked_example_added"
+        ],
+        "title": "ImLostReplay",
+        "description": "At Level 1: replay the beat with its chips open (§5.6.3)."
+      },
+      "ImLostRequest": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "beat_index",
+          "position_s"
+        ],
+        "title": "ImLostRequest"
+      },
+      "ImLostSubstitute": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "substitute",
+            "title": "Action",
+            "default": "substitute"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "cache_key": {
+            "type": "string",
+            "title": "Cache Key"
+          },
+          "resume_beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Resume Beat Index"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level",
+          "cache_key",
+          "resume_beat_index",
+          "ready"
+        ],
+        "title": "ImLostSubstitute",
+        "description": "The module continues one level lower from the start of `resume_beat_index` (§5.6.3)."
+      },
+      "InteractionEventBatch": {
+        "properties": {
+          "events": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RewindEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/SpeedChangeEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/PauseEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/ChipViewEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/ImLostEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/BranchChoiceEvent"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "branch_choice": "#/components/schemas/BranchChoiceEvent",
+                  "chip_view": "#/components/schemas/ChipViewEvent",
+                  "im_lost": "#/components/schemas/ImLostEvent",
+                  "pause": "#/components/schemas/PauseEvent",
+                  "rewind": "#/components/schemas/RewindEvent",
+                  "speed_change": "#/components/schemas/SpeedChangeEvent"
+                }
+              }
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Events"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "title": "InteractionEventBatch",
+        "description": "The body of one request from the player's event logger."
+      },
+      "Lesson": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "query_text": {
+            "type": "string",
+            "title": "Query Text"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LessonStatus"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "adaptive",
+              "static"
+            ],
+            "title": "Mode"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleSummary"
+            },
+            "type": "array",
+            "title": "Modules"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "query_text",
+          "status",
+          "mode",
+          "started_at",
+          "modules",
+          "position"
+        ],
+        "title": "Lesson"
+      },
+      "LessonCreated": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "created",
+            "title": "Status",
+            "default": "created"
+          },
+          "lesson_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Lesson Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "lesson_id"
+        ],
+        "title": "LessonCreated"
+      },
+      "LessonStatus": {
+        "type": "string",
+        "enum": [
+          "in_progress",
+          "completed",
+          "abandoned"
+        ],
+        "title": "LessonStatus",
+        "description": "LESSON.status: in progress, completed, or abandoned."
+      },
+      "LessonSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "query_text": {
+            "type": "string",
+            "title": "Query Text"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LessonStatus"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "modules_total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Modules Total"
+          },
+          "modules_completed": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Modules Completed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "query_text",
+          "status",
+          "started_at",
+          "modules_total",
+          "modules_completed"
+        ],
+        "title": "LessonSummary"
+      },
+      "Level": {
+        "description": "The three renderings of every micro-module.\n\nThe levels differ in how much of the explanation is shown and how quickly it is delivered,\nnot in what is taught. Level 2 is the reference level.",
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "title": "Level",
+        "type": "integer"
+      },
+      "LoggedEvent": {
+        "properties": {
+          "student_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Student Id"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "event": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RewindEvent"
+              },
+              {
+                "$ref": "#/components/schemas/SpeedChangeEvent"
+              },
+              {
+                "$ref": "#/components/schemas/PauseEvent"
+              },
+              {
+                "$ref": "#/components/schemas/ChipViewEvent"
+              },
+              {
+                "$ref": "#/components/schemas/ImLostEvent"
+              },
+              {
+                "$ref": "#/components/schemas/BranchChoiceEvent"
+              }
+            ],
+            "title": "Event",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "branch_choice": "#/components/schemas/BranchChoiceEvent",
+                "chip_view": "#/components/schemas/ChipViewEvent",
+                "im_lost": "#/components/schemas/ImLostEvent",
+                "pause": "#/components/schemas/PauseEvent",
+                "rewind": "#/components/schemas/RewindEvent",
+                "speed_change": "#/components/schemas/SpeedChangeEvent"
+              }
+            }
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "student_id",
+          "received_at",
+          "event"
+        ],
+        "title": "LoggedEvent"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "ModuleEnd": {
+        "properties": {
+          "check_items": {
+            "items": {
+              "$ref": "#/components/schemas/CheckItem"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Check Items"
+          },
+          "branch": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BranchPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "check_items",
+          "branch"
+        ],
+        "title": "ModuleEnd",
+        "description": "Returned when a module ends: its check items (§5.7.3) and its branch point, if any."
+      },
+      "ModuleFailure": {
+        "properties": {
+          "fallback": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cached_variant",
+                  "glossary_definition"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "definition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "fallback",
+          "message",
+          "definition"
+        ],
+        "title": "ModuleFailure",
+        "description": "Why a module could not be prepared, and what replaces it (§6.4.6)."
+      },
+      "ModuleManifest": {
+        "properties": {
+          "cache_key": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Cache Key"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "voice": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Voice"
+          },
+          "library_version": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Library Version"
+          },
+          "beat_count": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Beat Count"
+          },
+          "beats": {
+            "items": {
+              "$ref": "#/components/schemas/BeatManifest"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Beats"
+          },
+          "module_video": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Video"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cache_key",
+          "level",
+          "voice",
+          "library_version",
+          "beat_count",
+          "beats"
+        ],
+        "title": "ModuleManifest",
+        "description": "The segment manifest of one rendered variant (§5.4.4).\n\nThe Interactive Playback Layer uses it to time the chips, locate beat boundaries, and\nattribute each interaction to the concepts of its beat. A variant is identified by its\ncache key, so the same manifest serves every module that reuses the variant.\n\nAfter an \"I'm Lost\" press a variant may hold only beats j onward; it is complete once all\n`beat_count` beats are present."
+      },
+      "ModuleStyle": {
+        "type": "string",
+        "enum": [
+          "default",
+          "theory",
+          "worked_example"
+        ],
+        "title": "ModuleStyle",
+        "description": "MODULE.style: theory, worked example, or default.\n\nTheory and worked example are the two branch options a scene plan can offer (§5.6.4)."
+      },
+      "ModuleSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "sequence_no": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Sequence No"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "style": {
+            "$ref": "#/components/schemas/ModuleStyle"
+          },
+          "is_review": {
+            "type": "boolean",
+            "title": "Is Review"
+          },
+          "render_status": {
+            "$ref": "#/components/schemas/RenderStatus"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Level"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "sequence_no",
+          "title",
+          "concept_id",
+          "style",
+          "is_review",
+          "render_status",
+          "level",
+          "completed"
+        ],
+        "title": "ModuleSummary"
+      },
+      "OutOfScope": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "out_of_scope",
+            "title": "Status",
+            "default": "out_of_scope"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "nearest_concepts": {
+            "items": {
+              "$ref": "#/components/schemas/Concept"
+            },
+            "type": "array",
+            "title": "Nearest Concepts"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicArea"
+            },
+            "type": "array",
+            "title": "Topics"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "message",
+          "nearest_concepts",
+          "topics"
+        ],
+        "title": "OutOfScope",
+        "description": "The query is outside the supported topics (UC 4.3, alternative flow)."
+      },
+      "PauseEvent": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          },
+          "type": {
+            "type": "string",
+            "const": "pause",
+            "title": "Type",
+            "default": "pause"
+          },
+          "duration_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Duration S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "occurred_at",
+          "beat_index",
+          "position_s",
+          "duration_s"
+        ],
+        "title": "PauseEvent",
+        "description": "A pause, sent when playback resumes. A dwell longer than a set threshold is evidence of\ndifficulty (Table 5.4); the threshold belongs to the Learner State Module."
+      },
+      "Position": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "beat_index",
+          "position_s"
+        ],
+        "title": "Position",
+        "description": "Where the student is in a lesson. `position_s` is seconds into the beat's own video."
+      },
+      "PrimitiveAdmin": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "retired"
+            ],
+            "title": "Status"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "topic",
+          "version",
+          "status",
+          "description"
+        ],
+        "title": "PrimitiveAdmin",
+        "description": "A primitive's metadata. Its code arrives by pull request and must pass the validation\nharness (§5.3.2), so the admin manages only status and description."
+      },
+      "PrimitivePatch": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "enabled",
+                  "retired"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PrimitivePatch"
+      },
+      "Progress": {
+        "properties": {
+          "concepts": {
+            "items": {
+              "$ref": "#/components/schemas/ConceptConfidence"
+            },
+            "type": "array",
+            "title": "Concepts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concepts"
+        ],
+        "title": "Progress"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "RenderJob": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "lesson_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Lesson Id"
+          },
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "priority": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "title": "Priority"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "rendering",
+              "ready",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Attempts"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "lesson_id",
+          "module_id",
+          "level",
+          "priority",
+          "status",
+          "attempts",
+          "created_at",
+          "finished_at",
+          "duration_s",
+          "error"
+        ],
+        "title": "RenderJob"
+      },
+      "RenderJobDetail": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "lesson_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Lesson Id"
+          },
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "priority": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "title": "Priority"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "rendering",
+              "ready",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Attempts"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "log": {
+            "type": "string",
+            "title": "Log"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "lesson_id",
+          "module_id",
+          "level",
+          "priority",
+          "status",
+          "attempts",
+          "created_at",
+          "finished_at",
+          "duration_s",
+          "error",
+          "log"
+        ],
+        "title": "RenderJobDetail"
+      },
+      "RenderJobPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RenderJob"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page Size"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "RenderJobPage"
+      },
+      "RenderStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "rendering",
+          "ready",
+          "failed"
+        ],
+        "title": "RenderStatus",
+        "description": "MODULE.render_status: queued, rendering, ready, or failed."
+      },
+      "RewindEvent": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          },
+          "type": {
+            "type": "string",
+            "const": "rewind",
+            "title": "Type",
+            "default": "rewind"
+          },
+          "to_beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "To Beat Index"
+          },
+          "to_position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "To Position S"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "occurred_at",
+          "beat_index",
+          "position_s",
+          "to_beat_index",
+          "to_position_s"
+        ],
+        "title": "RewindEvent",
+        "description": "Seeking back to an earlier point. Evidence for the concepts of the beat returned to."
+      },
+      "SpeedChangeEvent": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Beat Index"
+          },
+          "position_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Position S"
+          },
+          "type": {
+            "type": "string",
+            "const": "speed_change",
+            "title": "Type",
+            "default": "speed_change"
+          },
+          "from_rate": {
+            "type": "number",
+            "maximum": 4.0,
+            "minimum": 0.25,
+            "title": "From Rate"
+          },
+          "to_rate": {
+            "type": "number",
+            "maximum": 4.0,
+            "minimum": 0.25,
+            "title": "To Rate"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "occurred_at",
+          "beat_index",
+          "position_s",
+          "from_rate",
+          "to_rate"
+        ],
+        "title": "SpeedChangeEvent",
+        "description": "Lowering or raising the playback speed (Table 5.4: slowed is difficulty, sped up is ease)."
+      },
+      "StepTiming": {
+        "properties": {
+          "start_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Start S"
+          },
+          "end_s": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "End S"
+          },
+          "narration": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Narration"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_s",
+          "end_s",
+          "narration"
+        ],
+        "title": "StepTiming",
+        "description": "When a step runs within its beat, and the passage spoken over it."
+      },
+      "StudentAdmin": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_active_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Active At"
+          },
+          "lessons": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Lessons"
+          },
+          "diagnostic_complete": {
+            "type": "boolean",
+            "title": "Diagnostic Complete"
+          },
+          "disabled": {
+            "type": "boolean",
+            "title": "Disabled"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email",
+          "created_at",
+          "last_active_at",
+          "lessons",
+          "diagnostic_complete",
+          "disabled"
+        ],
+        "title": "StudentAdmin"
+      },
+      "StudentPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StudentAdmin"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Page Size"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "StudentPage"
+      },
+      "StudentPatch": {
+        "properties": {
+          "disabled": {
+            "type": "boolean",
+            "title": "Disabled"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "disabled"
+        ],
+        "title": "StudentPatch"
+      },
+      "TopicArea": {
+        "properties": {
+          "topic_area": {
+            "type": "string",
+            "title": "Topic Area"
+          },
+          "concepts": {
+            "items": {
+              "$ref": "#/components/schemas/Concept"
+            },
+            "type": "array",
+            "title": "Concepts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "topic_area",
+          "concepts"
+        ],
+        "title": "TopicArea"
+      },
+      "User": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "student",
+              "admin"
+            ],
+            "title": "Role"
+          },
+          "diagnostic_complete": {
+            "type": "boolean",
+            "title": "Diagnostic Complete"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email",
+          "role",
+          "diagnostic_complete",
+          "created_at"
+        ],
+        "title": "User"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VariantSummary": {
+        "properties": {
+          "cache_key": {
+            "type": "string",
+            "title": "Cache Key"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "beat_count": {
+            "type": "integer",
+            "title": "Beat Count"
+          },
+          "beats_ready": {
+            "type": "integer",
+            "title": "Beats Ready"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "primitives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Primitives"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cache_key",
+          "level",
+          "beat_count",
+          "beats_ready",
+          "complete",
+          "duration_s",
+          "primitives"
+        ],
+        "title": "VariantSummary"
+      },
+      "BeatReady": {
+        "additionalProperties": false,
+        "description": "A beat is stored and can be played. Playback starts when the first beat is ready.",
+        "properties": {
+          "lesson_id": {
+            "exclusiveMinimum": 0,
+            "title": "Lesson Id",
+            "type": "integer"
+          },
+          "module_id": {
+            "exclusiveMinimum": 0,
+            "title": "Module Id",
+            "type": "integer"
+          },
+          "type": {
+            "const": "beat_ready",
+            "default": "beat_ready",
+            "title": "Type",
+            "type": "string"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "beat_index": {
+            "minimum": 0,
+            "title": "Beat Index",
+            "type": "integer"
+          },
+          "cache_key": {
+            "title": "Cache Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lesson_id",
+          "module_id",
+          "level",
+          "beat_index",
+          "cache_key"
+        ],
+        "title": "BeatReady",
+        "type": "object"
+      },
+      "GenerationProgress": {
+        "additionalProperties": false,
+        "description": "Which stage of generation a module has reached, so the interface can show progress.",
+        "properties": {
+          "lesson_id": {
+            "exclusiveMinimum": 0,
+            "title": "Lesson Id",
+            "type": "integer"
+          },
+          "module_id": {
+            "exclusiveMinimum": 0,
+            "title": "Module Id",
+            "type": "integer"
+          },
+          "type": {
+            "const": "generation_progress",
+            "default": "generation_progress",
+            "title": "Type",
+            "type": "string"
+          },
+          "stage": {
+            "enum": [
+              "planning",
+              "parameters",
+              "narration",
+              "rendering"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lesson_id",
+          "module_id",
+          "stage"
+        ],
+        "title": "GenerationProgress",
+        "type": "object"
+      },
+      "ModuleFailed": {
+        "additionalProperties": false,
+        "description": "Generation failed after its retries (§6.4.6).\n\nA module whose plan cannot be validated is replaced by a cached variant of the same concept\nor, failing that, by the glossary definition; `fallback` says which, if either.",
+        "properties": {
+          "lesson_id": {
+            "exclusiveMinimum": 0,
+            "title": "Lesson Id",
+            "type": "integer"
+          },
+          "module_id": {
+            "exclusiveMinimum": 0,
+            "title": "Module Id",
+            "type": "integer"
+          },
+          "type": {
+            "const": "module_failed",
+            "default": "module_failed",
+            "title": "Type",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Level"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cached_variant",
+                  "glossary_definition"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fallback"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lesson_id",
+          "module_id",
+          "message"
+        ],
+        "title": "ModuleFailed",
+        "type": "object"
+      },
+      "ModuleReady": {
+        "additionalProperties": false,
+        "description": "Every beat of the module is ready at this level.",
+        "properties": {
+          "lesson_id": {
+            "exclusiveMinimum": 0,
+            "title": "Lesson Id",
+            "type": "integer"
+          },
+          "module_id": {
+            "exclusiveMinimum": 0,
+            "title": "Module Id",
+            "type": "integer"
+          },
+          "type": {
+            "const": "module_ready",
+            "default": "module_ready",
+            "title": "Type",
+            "type": "string"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "cache_key": {
+            "title": "Cache Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lesson_id",
+          "module_id",
+          "level",
+          "cache_key"
+        ],
+        "title": "ModuleReady",
+        "type": "object"
+      },
+      "StreamEvent": {
+        "discriminator": {
+          "mapping": {
+            "beat_ready": "#/components/schemas/BeatReady",
+            "generation_progress": "#/components/schemas/GenerationProgress",
+            "module_failed": "#/components/schemas/ModuleFailed",
+            "module_ready": "#/components/schemas/ModuleReady"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/GenerationProgress"
+          },
+          {
+            "$ref": "#/components/schemas/BeatReady"
+          },
+          {
+            "$ref": "#/components/schemas/ModuleReady"
+          },
+          {
+            "$ref": "#/components/schemas/ModuleFailed"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  API_URL,
   levelLabel,
   variantFileUrl,
   type BeatManifest,
@@ -20,7 +19,7 @@ type Load<T> = { kind: "loading" } | { kind: "ok"; value: T } | { kind: "error";
 const SPEEDS = [0.75, 1, 1.25, 1.5];
 
 async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, { cache: "no-store" });
+  const res = await fetch(path, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json() as Promise<T>;
 }

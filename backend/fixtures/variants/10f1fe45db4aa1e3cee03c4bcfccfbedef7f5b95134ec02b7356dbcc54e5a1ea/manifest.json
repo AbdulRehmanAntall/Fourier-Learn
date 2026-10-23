@@ -1,0 +1,129 @@
+{
+  "cache_key": "10f1fe45db4aa1e3cee03c4bcfccfbedef7f5b95134ec02b7356dbcc54e5a1ea",
+  "level": 2,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beat_count": 3,
+  "beats": [
+    {
+      "index": 0,
+      "primitive_id": "FunctionGraph",
+      "video": "beats/0.mp4",
+      "duration_s": 15.567,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 5.267,
+          "narration": "Here are the x and y axes, with the equation of our line at the top: y equals 2 x."
+        },
+        {
+          "start_s": 5.267,
+          "end_s": 10.333,
+          "narration": "Drawing the graph from left to right gives a straight line through the origin, rising as it goes."
+        },
+        {
+          "start_s": 10.333,
+          "end_s": 15.567,
+          "narration": "Two points on this line are 1, 2 and 4, 8. We will use them to measure how steep the line is."
+        }
+      ],
+      "chips": [
+        {
+          "term": "graph",
+          "start_s": 0.0,
+          "end_s": 15.567
+        },
+        {
+          "term": "coordinates",
+          "start_s": 0.0,
+          "end_s": 15.567
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "index": 1,
+      "primitive_id": "GradientTriangle",
+      "video": "beats/1.mp4",
+      "duration_s": 17.1,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 3.0,
+          "narration": "Let's look at those two points again on a fresh pair of axes."
+        },
+        {
+          "start_s": 3.0,
+          "end_s": 5.7,
+          "narration": "This is the straight line that passes through both of them."
+        },
+        {
+          "start_s": 5.7,
+          "end_s": 12.633,
+          "narration": "From the first point to the second, the line runs 3 across and rises 6 up. Together they make a right-angled triangle."
+        },
+        {
+          "start_s": 12.633,
+          "end_s": 17.1,
+          "narration": "The gradient is the rise divided by the run: 6 over 3, which is 2."
+        }
+      ],
+      "chips": [
+        {
+          "term": "gradient",
+          "start_s": 0.0,
+          "end_s": 17.1
+        },
+        {
+          "term": "rise",
+          "start_s": 0.0,
+          "end_s": 17.1
+        },
+        {
+          "term": "run",
+          "start_s": 0.0,
+          "end_s": 17.1
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "index": 2,
+      "primitive_id": "EquationTransform",
+      "video": "beats/2.mp4",
+      "duration_s": 14.767,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 5.233,
+          "narration": "We can write the same calculation with the coordinates: 8 minus 2, over 4 minus 1."
+        },
+        {
+          "start_s": 5.233,
+          "end_s": 8.833,
+          "narration": "The top is 6 and the bottom is 3, so this is 6 over 3."
+        },
+        {
+          "start_s": 8.833,
+          "end_s": 14.767,
+          "narration": "That simplifies to 2. So the gradient of the line is 2, which means it goes up 2 for every 1 across."
+        }
+      ],
+      "chips": [
+        {
+          "term": "gradient",
+          "start_s": 0.0,
+          "end_s": 14.767
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    }
+  ],
+  "module_video": "module.mp4"
+}

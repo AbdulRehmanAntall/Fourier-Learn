@@ -1,0 +1,154 @@
+{
+  "cache_key": "14c5760adca9720a70e41d8841c531a1eca0a4ecb99f50adef21f7aecec381d8",
+  "level": 1,
+  "voice": "default",
+  "library_version": "0.1.0",
+  "beat_count": 3,
+  "beats": [
+    {
+      "index": 0,
+      "primitive_id": "FunctionGraph",
+      "video": "beats/0.mp4",
+      "duration_s": 24.5,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 4.8,
+          "narration": "First, the axes. The x axis goes across, and the y axis goes up."
+        },
+        {
+          "start_s": 5.4,
+          "end_s": 10.6,
+          "narration": "The equation is y equals 2 x. Each y value is double its x value."
+        },
+        {
+          "start_s": 11.2,
+          "end_s": 15.1,
+          "narration": "Now we draw the graph from left to right. It is a straight line."
+        },
+        {
+          "start_s": 15.7,
+          "end_s": 19.267,
+          "narration": "Here is the point 1, 2. When x is 1, y is 2."
+        },
+        {
+          "start_s": 19.867,
+          "end_s": 23.9,
+          "narration": "And here is the point 4, 8. When x is 4, y is 8."
+        }
+      ],
+      "chips": [
+        {
+          "term": "graph",
+          "start_s": 0.0,
+          "end_s": 24.5
+        },
+        {
+          "term": "coordinates",
+          "start_s": 0.0,
+          "end_s": 24.5
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "index": 1,
+      "primitive_id": "GradientTriangle",
+      "video": "beats/1.mp4",
+      "duration_s": 29.867,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 3.633,
+          "narration": "Let's draw the axes again, to measure how steep the line is."
+        },
+        {
+          "start_s": 4.233,
+          "end_s": 6.367,
+          "narration": "Here is our first point, 1, 2."
+        },
+        {
+          "start_s": 6.967,
+          "end_s": 9.067,
+          "narration": "And our second point, 4, 8."
+        },
+        {
+          "start_s": 9.667,
+          "end_s": 12.067,
+          "narration": "This straight line goes through both points."
+        },
+        {
+          "start_s": 12.667,
+          "end_s": 17.067,
+          "narration": "The run is how far we move across. From 1 to 4 is 3 across."
+        },
+        {
+          "start_s": 17.667,
+          "end_s": 21.633,
+          "narration": "The rise is how far we move up. From 2 to 8 is 6 up."
+        },
+        {
+          "start_s": 22.233,
+          "end_s": 29.267,
+          "narration": "The gradient tells us how steep a line is. It is the rise divided by the run: 6 over 3, which is 2."
+        }
+      ],
+      "chips": [
+        {
+          "term": "gradient",
+          "start_s": 0.0,
+          "end_s": 29.867
+        },
+        {
+          "term": "rise",
+          "start_s": 0.0,
+          "end_s": 29.867
+        },
+        {
+          "term": "run",
+          "start_s": 0.0,
+          "end_s": 29.867
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    },
+    {
+      "index": 2,
+      "primitive_id": "EquationTransform",
+      "video": "beats/2.mp4",
+      "duration_s": 16.333,
+      "steps": [
+        {
+          "start_s": 0.0,
+          "end_s": 4.933,
+          "narration": "Here is the same working with numbers: 8 minus 2, over 4 minus 1."
+        },
+        {
+          "start_s": 5.533,
+          "end_s": 10.333,
+          "narration": "8 minus 2 is 6, and 4 minus 1 is 3, so we have 6 over 3."
+        },
+        {
+          "start_s": 10.933,
+          "end_s": 15.733,
+          "narration": "6 divided by 3 is 2. The line goes up 2 for every 1 across."
+        }
+      ],
+      "chips": [
+        {
+          "term": "gradient",
+          "start_s": 0.0,
+          "end_s": 16.333
+        }
+      ],
+      "concept_ids": [
+        12
+      ]
+    }
+  ],
+  "module_video": "module.mp4"
+}

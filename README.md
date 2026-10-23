@@ -3,14 +3,14 @@
 Turn plain-text maths prompts into narrated, animated O-Level maths lessons (Manim), with difficulty
 adapted by a learner model (Bayesian Knowledge Tracing).
 
-> **Status: Phase 1 of [the plan](docs/PLAN.md) is done.** The render engine turns a module
-> request (validated primitives, parameters and narration) into a narrated, cached module video
-> at any of the three difficulty levels, and `/dev/modules` in the frontend plays it. The
-> database tables of the data dictionary exist. Lesson planning with an LLM, the learner model
-> (BKT), auth and the student-facing player are **not** implemented yet.
->
-> **Next: Phase 2, the complete frontend on a stub API.** The frontend team's guide is
-> [docs/frontend.md](docs/frontend.md).
+> **Status: Phase 1 of [the plan](docs/PLAN.md) is done, and Phase 2 is under way.** The render
+> engine turns a module request (validated primitives, parameters and narration) into a narrated,
+> cached module video at any of the three difficulty levels. The database tables of the data
+> dictionary exist. **Every API endpoint the frontend needs now exists**, served by a stub with
+> sample data and real example videos ([the stub API](#the-stub-api-phase-2)). The screens are
+> being built in Phase 2; the frontend team's guide is [docs/frontend.md](docs/frontend.md).
+> Lesson planning with an LLM, the render queue and the learner model (BKT) are **not**
+> implemented yet; the stub stands in for them.
 
 | Part     | Stack                                                                                                |
 | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -195,6 +195,7 @@ All commands run from the repo root and work on Windows, macOS and Linux.
 | `npm run db:migrate`        | `alembic upgrade head`                                                                |
 | `npm run render -- <file>`  | Render a module request (e.g. `backend/examples/gradient_of_line.L2.render.json`)     |
 | `npm run primitives:check`  | Validate every primitive across its parameter grid at all levels (docs/primitives.md) |
+| `npm run api:types`         | Regenerate the frontend's API types after changing an API schema (CI checks this)     |
 
 The npm scripts call `backend/.venv`'s Python directly, so you don't need to activate the venv for
 them.
@@ -204,15 +205,19 @@ them.
 Every setting comes from environment variables or `.env` files. Real `.env` files are git-ignored,
 and only the `.env.example` files are committed.
 
-| File            | Variables                                                                                                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                                             |
-| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `TTS_MODEL_DIR`, `RENDER_QUALITY`, `RENDER_WORKERS`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet) |
-| `frontend/.env` | `NEXT_PUBLIC_API_URL` (the URL the browser uses for the backend)                                                                                               |
+| File            | Variables                                                                                                                                                                                                              |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                                                                                                     |
+| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `TTS_MODEL_DIR`, `RENDER_QUALITY`, `RENDER_WORKERS`, `STUB_API`, `STUB_LATENCY_MS`, `SESSION_COOKIE_SECURE`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet) |
+| `frontend/.env` | `BACKEND_URL` (where the Next.js server forwards `/api` and `/media`)                                                                                                                                                  |
+
+The browser only talks to the Next.js app. Next.js forwards `/api/*` and `/media/*` to the
+backend (`frontend/next.config.ts`), so the session cookie works without CORS. Open the app at
+`http://localhost:3000`, not `127.0.0.1`.
 
 If you change a port in the root `.env`, also update `DATABASE_URL` and `CORS_ORIGINS` in
-`backend/.env` and `NEXT_PUBLIC_API_URL` in `frontend/.env`. Docker Compose derives these from the
-root `.env` automatically.
+`backend/.env` and `BACKEND_URL` in `frontend/.env` (`npm run dev` passes the right `BACKEND_URL`
+to the frontend for you). Docker Compose derives these from the root `.env` automatically.
 
 `MEDIA_DIR` (default `backend/media`) is created on startup and is git-ignored. Rendered modules
 go to `media/variants/<cache key>/`, narration clips to `media/tts/`, compiled formulas to
@@ -243,6 +248,33 @@ How the engine works is described in `backend/app/renderer/engine.py`; measured 
 in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 [docs/primitives.md](docs/primitives.md).
 
+## The stub API (Phase 2)
+
+During Phase 2 every endpoint of the API catalogue ([docs/frontend.md §7](docs/frontend.md#7-api-catalogue))
+is served by an in-memory stub (`backend/app/stub/`), so the frontend can be built before the
+planner, render queue and learner model exist. It needs no Postgres, LaTeX, Manim or voice model.
+Stub responses carry the header `X-FourierLearn-Stub: 1`, and all stub data resets when the backend
+restarts.
+
+- **Browse the API** at <http://localhost:8000/docs>. The request and response shapes are in
+  `backend/app/api/schemas/`.
+- **Stub-only test accounts.** All three use the password `password123`:
+  - `student@fourierlearn.test`: has lessons in progress, completed and in study mode
+  - `new@fourierlearn.test`: hasn't done the diagnostic
+  - `admin@fourierlearn.test`: the admin
+- **Lessons:** a query mentioning gradient, slope or line starts a three-module lesson. Anything
+  else gets the out-of-scope reply.
+- **Test words in the query:**
+  - `test:slow`: the first module takes 60 s
+  - `test:fail`: module 2 fails with the glossary fallback
+  - `test:static`: a study-mode lesson
+- **The videos** are the example module at Level 1, 2 and 3, committed in `backend/fixtures/variants/`
+  and copied into `media/variants/` when the backend starts.
+- **Checking the event logger:** `GET /api/dev/events` lists the events your account has sent.
+- **After changing a schema** in `backend/app/api/schemas/`, run `npm run api:types` and commit
+  `frontend/src/lib/api/openapi.json` and `schema.d.ts`. The frontend's types are generated from
+  them, and CI fails if they are out of date.
+
 ---
 
 ## Project structure
@@ -254,7 +286,9 @@ in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 │   │   ├── main.py                # FastAPI app, CORS, router registration
 │   │   ├── core/config.py         # settings from env / backend/.env (pydantic-settings)
 │   │   ├── db/                    # engine, session, Base, models of the data dictionary
-│   │   ├── api/routes/            # /api/health, /api/variants/<key>/manifest, /api/dev/variants
+│   │   ├── api/routes/            # every /api endpoint (docs/frontend.md §7)
+│   │   ├── api/schemas/           # request and response bodies: the API's contract with the frontend
+│   │   ├── stub/                  # Phase 2: in-memory stub behind the API, with seed data
 │   │   ├── prompt_interpreter/    # placeholder: prompt → structured lesson plan
 │   │   ├── contracts/             # data shapes shared by all components (docs/contracts.md)
 │   │   ├── code_generator/        # placeholder: scene plan → primitive parameters (no free code)
@@ -266,7 +300,9 @@ in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 │   │   └── workers/               # placeholder: render workers
 │   ├── alembic/ + alembic.ini     # migrations; URL comes from DATABASE_URL
 │   ├── examples/                  # example scene plan and render requests at L1, L2, L3
+│   ├── fixtures/variants/         # the example module rendered at L1, L2, L3 (the stub's videos)
 │   ├── scripts/manim_smoke.py     # Manim + LaTeX + FFmpeg smoke test
+│   ├── scripts/export_openapi.py  # writes the OpenAPI document for npm run api:types
 │   ├── tests/                     # pytest (no database needed)
 │   ├── requirements.in            # direct runtime deps (edit this)
 │   ├── requirements.txt           # generated lockfile: every package pinned, all OSes
@@ -277,7 +313,9 @@ in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 ├── frontend/
 │   ├── src/app/page.tsx           # home page with the status panel
 │   ├── src/app/dev/modules/       # developer viewer for rendered modules
-│   ├── src/lib/contracts.ts       # TypeScript mirror of the backend contracts
+│   ├── src/lib/contracts.ts       # TypeScript mirror of the manifest (to be replaced by api/)
+│   ├── src/lib/api/               # generated OpenAPI document and TypeScript types
+│   ├── next.config.ts             # forwards /api and /media to the backend
 │   ├── Dockerfile + docker-entrypoint.sh
 │   └── .env.example
 ├── scripts/                       # cross-platform Node helpers used by package.json

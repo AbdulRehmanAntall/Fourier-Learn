@@ -5,6 +5,16 @@ It says what to build, how the pieces fit, and the rules that let us swap the st
 real backend later **without changing the frontend**. Section numbers such as "§5.6.3" and figure
 numbers such as "Fig. 4.3" refer to the project report.
 
+> **Status: lane A's part is done.**
+>
+> - Every endpoint in §7 exists and is served by the stub (§8).
+> - The example videos are committed.
+> - `npm run api:types` generates the frontend's types, and CI checks they are up to date.
+> - Next.js forwards `/api` and `/media` to the backend.
+>
+> Start the backend with `npm run dev` (or `npm run dev:backend`), log in with a test account from
+> §8, and browse every endpoint at <http://localhost:8000/docs>.
+
 ---
 
 ## 1. The goal in one paragraph
@@ -99,14 +109,16 @@ rewrites `/api/:path*` and `/media/:path*` to the backend (`BACKEND_URL`, defaul
 - the study deployment over HTTPS (Phase 7) is also one origin, so dev and deployment behave the
   same
 
-`NEXT_PUBLIC_API_URL` goes away. The API client uses relative URLs (`/api/...`), and media URLs
-come from the manifest as `/media/variants/<cache_key>/<path>`.
+`NEXT_PUBLIC_API_URL` is gone. The API client uses relative URLs (`/api/...`), and media URLs
+come from the manifest as `/media/variants/<cache_key>/<path>`. `npm run dev` passes the right
+`BACKEND_URL` to the frontend; Docker Compose sets it to `http://backend:8000`.
 
-> **Check in week 5 (lane A):** Server-Sent Events must arrive one by one through the rewrite,
-> not in a burst at the end. Test it with the stub's lesson stream in `next dev`. The backend
-> sends `Cache-Control: no-cache, no-transform` and `X-Accel-Buffering: no` on the stream. If
-> events still arrive late, connect `EventSource` straight to the backend for the stream alone,
-> and write down how in this document.
+> **Checked:** in `next dev`, Server-Sent Events arrive through the rewrite one by one, at the
+> moment the backend sends them, not in a burst at the end. Video files support range requests
+> (`206 Partial Content`), so seeking works. The backend sends
+> `Cache-Control: no-cache, no-transform` and `X-Accel-Buffering: no` on the stream. Check the
+> stream again when the study deployment is set up (Phase 7), because a production server or
+> proxy can buffer it.
 
 ### The API client
 
@@ -121,7 +133,8 @@ frontend/src/lib/api/
   beacon.ts        sendBeacon helpers for pagehide
 ```
 
-`npm run api:types` (root script, added by lane A):
+`openapi.json` and `schema.d.ts` exist already. The rest of the folder (`client.ts`, `hooks/`,
+`sse.ts`, `beacon.ts`) is the frontend team's to write. `npm run api:types` (root script):
 
 1. writes `app.openapi()` to `frontend/src/lib/api/openapi.json` **without starting the server**
 2. runs `openapi-typescript` on it to produce `schema.d.ts`
@@ -351,7 +364,8 @@ stateDiagram-v2
   preparing --> playing: module_ready / beat_ready
   nextModule --> complete: lesson complete
   playing --> failed: module_failed
-  failed --> nextModule: student presses Continue
+  nextModule --> failed: current-module is failed
+  failed --> nextModule: Continue (finish the failed module)
   complete --> [*]
 ```
 
@@ -367,8 +381,10 @@ stateDiagram-v2
    - `ready`: fetch `GET /api/variants/{cache_key}/manifest` and play from beat 0 (or the resume
      point).
    - `preparing`, for the first module: show **GeneratingScreen**. It shows "Preparing your
-     lesson…", the stage from `generation_progress` (planning → parameters → narration →
-     rendering), and the seconds elapsed. The report's target is at most 90 s (§4.4.1).
+     lesson…", the stage (planning → parameters → narration → rendering), and the seconds
+     elapsed. The report's target is at most 90 s (§4.4.1). The response's `stage` gives the
+     stage when the page opens; `generation_progress` events update it after that.
+   - `failed`: see "A failed module" in §6.8.
    - `complete`: show **LessonSummary**.
 3. **A manifest may be partial.** Playback starts when beat 0 is ready, and an "I'm Lost" variant
    may begin at beat _j_.
@@ -484,19 +500,25 @@ When the last beat ends:
 4. **Next module.** Call `GET /api/lessons/{id}/current-module`:
    - `ready`: play it.
    - `preparing`: show **PreparingNext** ("Preparing the next module…") until a `module_ready` or
-     the first `beat_ready` for it arrives.
+     the first `beat_ready` for it arrives, then call `current-module` again.
+   - `failed`: see "A failed module" below.
    - `complete`: show **LessonSummary**.
 5. **Lesson summary:**
    - the modules watched
    - the concepts taught, with their confidence from `GET /api/progress`
    - buttons for **Home**, **See progress** and **New lesson**
 
-**A failed module** (`module_failed`, §6.4.6):
+**A failed module** (§6.4.6). The stream sends `module_failed`, and `current-module` then returns
+`status: "failed"` with a `failure`. Read it from `current-module`, so a page reload shows it too.
 
-- If `fallback` is `"cached_variant"`, just play what `current-module` returns.
-- If `fallback` is `"glossary_definition"`, show a card with the concept's glossary definition
-  and **Continue**.
-- If there is no fallback, show the event's `message` and offer **Continue**.
+- If `failure.fallback` is `"cached_variant"`, the server has a replacement, and `current-module`
+  returns it as `ready` instead.
+- If it is `"glossary_definition"`, show a card with `failure.message`, the concept's definition
+  (`failure.definition`, with KaTeX) and **Continue**.
+- With no fallback, show `failure.message` and **Continue**.
+
+**Continue** calls `finish` for the failed module. This returns no checks and no branch, and the
+lesson moves on to the next module.
 
 ### 6.9 Saving the position and resuming (§4.4.3)
 
@@ -552,9 +574,10 @@ carries:
 - Opens one `EventSource('/api/lessons/{id}/events')` per lesson page, and closes it on unmount.
 - The SSE event name is the `type` of the stream contract (`generation_progress`, `beat_ready`,
   `module_ready`, `module_failed`). The data is its JSON.
-- **After a dropped connection**, when the browser reconnects, refetch `GET /api/lessons/{id}` and
-  `current-module` **before** handling new events (§6.4.12). The reconnect shows up as `onopen`
-  firing again after an `onerror`.
+- **The stream only sends events that happen after it opens.** So on **every** `onopen`, the first
+  and each reconnect after an `onerror`, refetch `GET /api/lessons/{id}` and `current-module`
+  before relying on new events (§6.4.12). This also covers events missed between creating the
+  lesson and opening the page.
 
 ### 6.12 Static study mode (§5.9.4)
 
@@ -626,20 +649,21 @@ example `What is the gradient of $y = 2x + 3$?`. The frontend renders it with Ka
 
 ### Lessons (UC 4.3) and playback
 
-| Method and path                                     | Request                                  | Response                                                                                                                                                                                |
-| --------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/lessons`                                 | `{query_text}` (1–300 characters)        | 200, either `{status: "created", lesson_id}` or `{status: "out_of_scope", message, nearest_concepts: Concept[], topics: TopicArea[]}`                                                   |
-| `GET /api/lessons`                                  | —                                        | `LessonSummary[]`, newest first                                                                                                                                                         |
-| `GET /api/lessons/{id}`                             | —                                        | `Lesson`                                                                                                                                                                                |
-| `GET /api/lessons/{id}/current-module`              | —                                        | `{status: "ready" \| "preparing" \| "complete", module: ModuleSummary \| null, level: 1\|2\|3 \| null, cache_key: string \| null}`. `ready` means at least the first beat can be played |
-| `GET /api/lessons/{id}/events`                      | —                                        | `text/event-stream` of the stream contracts (`backend/app/contracts/stream.py`). A `: keep-alive` comment every 15 s                                                                    |
-| `POST /api/lessons/{id}/position`                   | `Position`                               | 204. POST so that `sendBeacon` can call it                                                                                                                                              |
-| `POST /api/lessons/{id}/modules/{module_id}/finish` | —                                        | `{check_items: CheckItem[] (0–2), branch: BranchPoint \| null}`. The server applies the module's learning transition (Eq. 5.3) here                                                     |
-| `POST /api/check-responses`                         | `{module_id, check_id, selected_option}` | `{is_correct, correct_option}`                                                                                                                                                          |
-| `POST /api/lessons/{id}/branch`                     | `{module_id, choice, timed_out}`         | `Lesson` (with the inserted module, if any). Records the `branch_choice` event                                                                                                          |
-| `POST /api/lessons/{id}/im-lost`                    | `{module_id, beat_index, position_s}`    | Either `{action: "substitute", level, cache_key, resume_beat_index, ready}` or `{action: "replay", resume_beat_index, worked_example_added}`. Records the `im_lost` event               |
-| `GET /api/variants/{cache_key}/manifest`            | —                                        | `ModuleManifest` (exists since Phase 1). Beat files are at `/media/variants/{cache_key}/{beat.video}`                                                                                   |
-| `POST /api/events`                                  | `InteractionEventBatch`                  | 202                                                                                                                                                                                     |
+| Method and path                                     | Request                                  | Response                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/lessons`                                 | `{query_text}` (1–300 characters)        | 200, either `{status: "created", lesson_id}` or `{status: "out_of_scope", message, nearest_concepts: Concept[], topics: TopicArea[]}`                                                                                                                                                                                                                           |
+| `GET /api/lessons`                                  | —                                        | `LessonSummary[]`, newest first                                                                                                                                                                                                                                                                                                                                 |
+| `GET /api/lessons/{id}`                             | —                                        | `Lesson`                                                                                                                                                                                                                                                                                                                                                        |
+| `GET /api/lessons/{id}/current-module`              | —                                        | `{status: "ready" \| "preparing" \| "failed" \| "complete", module: ModuleSummary \| null, level: 1\|2\|3 \| null, cache_key: string \| null, stage, failure}`. `ready` means at least the first beat can be played. `stage` (planning, parameters, narration, rendering) is set while `preparing`; `failure` (`{fallback, message, definition}`) when `failed` |
+| `GET /api/lessons/{id}/events`                      | —                                        | `text/event-stream` of the stream contracts (`backend/app/contracts/stream.py`). A `: keep-alive` comment every 15 s                                                                                                                                                                                                                                            |
+| `POST /api/lessons/{id}/position`                   | `Position`                               | 204. POST so that `sendBeacon` can call it                                                                                                                                                                                                                                                                                                                      |
+| `POST /api/lessons/{id}/modules/{module_id}/finish` | —                                        | `{check_items: CheckItem[] (0–2), branch: BranchPoint \| null}`. The server applies the module's learning transition (Eq. 5.3) here                                                                                                                                                                                                                             |
+| `POST /api/check-responses`                         | `{module_id, check_id, selected_option}` | `{is_correct, correct_option}`                                                                                                                                                                                                                                                                                                                                  |
+| `POST /api/lessons/{id}/branch`                     | `{module_id, choice, timed_out}`         | `Lesson` (with the inserted module, if any). Records the `branch_choice` event                                                                                                                                                                                                                                                                                  |
+| `POST /api/lessons/{id}/im-lost`                    | `{module_id, beat_index, position_s}`    | Either `{action: "substitute", level, cache_key, resume_beat_index, ready}` or `{action: "replay", resume_beat_index, worked_example_added}`. Records the `im_lost` event                                                                                                                                                                                       |
+| `GET /api/variants/{cache_key}/manifest`            | —                                        | `ModuleManifest` (exists since Phase 1). Beat files are at `/media/variants/{cache_key}/{beat.video}`                                                                                                                                                                                                                                                           |
+| `POST /api/events`                                  | `InteractionEventBatch`                  | 202. 422 for `im_lost` and `branch_choice` (their endpoints record them); 404 for a module that isn't in the student's lessons                                                                                                                                                                                                                                  |
+| `GET /api/dev/events?limit=`                        | —                                        | Development only: the signed-in user's last events (`{student_id, received_at, event}`), oldest first                                                                                                                                                                                                                                                           |
 
 ### Progress
 
@@ -672,15 +696,20 @@ LaTeX, Manim or voice model**. That way the frontend team can run it on any lapt
 
 ### Where it lives
 
-- `backend/app/stub/`
-  - `store.py`: an in-memory store with seed data. It resets when the server restarts.
-  - `fixtures/`: the seed JSON (users, topics, glossary, item bank, lessons, admin data).
-- `backend/fixtures/variants/<cache_key>/`: **committed** pre-rendered variants of the example
-  module "gradient of a straight line" at Level 1, 2 and 3. They are rendered at 480p30 with the
-  real voice, are about 5 MB together, and each has its `manifest.json` and beat files. On
-  startup the stub copies any that are missing into `backend/media/variants/`.
-- Each route in `backend/app/api/routes/` calls the stub for now. A setting `STUB_API=true` (the
-  default during Phase 2) switches the stub on.
+- **`backend/app/stub/`**
+  - `store.py`: the in-memory store and all the behaviour below. It resets when the server
+    restarts.
+  - `seed.py`: the seed data (topics, glossary, item bank, primitives, accounts).
+  - `fixtures.py`: loads the fixture videos.
+- **`backend/fixtures/variants/<cache_key>/`**: **committed** pre-rendered variants of the example
+  module "gradient of a straight line".
+  - Rendered at Level 1 (71 s), Level 2 (47 s) and Level 3 (19 s), at 480p30 with the Kokoro
+    voice.
+  - 6.7 MB together. Each has its `manifest.json`, the beat files and `module.mp4`.
+  - On startup the stub copies any that are missing into `backend/media/variants/`.
+- **`backend/app/api/schemas/`**: the request and response models.
+- **`backend/app/api/routes/`**: each route calls the stub for now. `STUB_API=true` (the default
+  during Phase 2) switches the stub on.
 - Every stub response carries the header `X-FourierLearn-Stub: 1`, so nobody mistakes stub data for
   real data.
 - `STUB_LATENCY_MS` (default 300) delays every stub response, so that loading states are visible
@@ -721,7 +750,8 @@ also includes:
     - `test:static`: a static-mode lesson
 - **The first module's stream:** `generation_progress` planning, parameters, narration and
   rendering, 2 s apart. Then `beat_ready` for beats 0, 1 and 2, 1 s apart, then `module_ready`.
-  Later modules become ready about 10 s after the previous module starts playing.
+  When `current-module` first returns a module as ready, the stub starts preparing the next one,
+  which is ready 8–10 s later. A module inserted by a branch is ready 6–8 s after the choice.
 - **`im-lost` at Level 2 or 3:** returns `substitute` with the lower level's fixture `cache_key`
   and `ready: false`. About 5 s later, the stream sends `beat_ready` for `resume_beat_index`, then
   for the following beats. At Level 1 it returns `replay` with `worked_example_added: true`, and
@@ -731,8 +761,13 @@ also includes:
 - **`check-responses`:** answers come from the seed item bank. A wrong answer lowers that
   concept's stub score a little, and a right one raises it, so `/progress` visibly changes.
 - **`events`:** validates with `InteractionEventBatch` and keeps the last 1000 events. A dev-only
-  `GET /api/dev/events` lists them, so lane C can check the logger.
+  `GET /api/dev/events` lists them, so lane C can check the logger. `im_lost` and `branch_choice`
+  sent here are refused with 422, so the mistake shows up straight away.
 - **`position`:** stored per lesson and returned by `GET /api/lessons/{id}`.
+- **Branch timeout:** 20 s.
+- **Not simulated:** the stub's manifests are always complete, because every fixture beat exists
+  on disk. The partial-manifest path of §6.2 still needs building. Test it with a unit test, and
+  again against real renders in Phase 3.
 
 ---
 

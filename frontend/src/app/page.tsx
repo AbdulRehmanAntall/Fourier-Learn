@@ -12,15 +12,13 @@ type Health = {
 
 type PanelState = { kind: "loading" } | { kind: "ok"; health: Health } | { kind: "error" };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 export default function Home() {
   const [state, setState] = useState<PanelState>({ kind: "loading" });
 
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`${API_URL}/api/health`, { signal: AbortSignal.timeout(5000), cache: "no-store" })
+    fetch("/api/health", { signal: AbortSignal.timeout(5000), cache: "no-store" })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<Health>;
@@ -48,7 +46,7 @@ export default function Home() {
 
       <section className="rounded-lg border border-black/10 p-5 dark:border-white/15">
         <h2 className="mb-3 text-lg font-semibold">System status</h2>
-        <p className="mb-4 text-xs opacity-60">{API_URL}/api/health</p>
+        <p className="mb-4 text-xs opacity-60">/api/health</p>
 
         {state.kind === "loading" && <p className="text-sm">Checking backend…</p>}
 

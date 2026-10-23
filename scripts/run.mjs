@@ -74,7 +74,18 @@ const tasks = {
   // Extra arguments after `--` are passed through, e.g. npm run render -- examples/x.json
   render: python(["-m", "app.renderer", ...process.argv.slice(3)]),
   "primitives:check": python(["-m", "app.primitives.harness", ...process.argv.slice(3)]),
-  "frontend:dev": () => run(NPM, ["run", "dev", "--", "--port", frontendPort], { cwd: FRONTEND }),
+  // BACKEND_URL follows the root .env's BACKEND_PORT, so the /api rewrites reach the backend.
+  "frontend:dev": () =>
+    run(NPM, ["run", "dev", "--", "--port", frontendPort], {
+      cwd: FRONTEND,
+      env: { ...process.env, BACKEND_URL: `http://localhost:${backendPort}` },
+    }),
+  // The API's OpenAPI document, then the frontend's TypeScript types from it (docs/frontend.md §4).
+  "api:types": async () => {
+    const code = await python(["scripts/export_openapi.py"])();
+    if (code !== 0) return code;
+    return run(NPM, ["run", "api:types"], { cwd: FRONTEND });
+  },
 };
 
 const name = process.argv[2];
