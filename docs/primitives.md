@@ -4,16 +4,25 @@ A visual primitive is a parameterised Manim CE component that draws one type of 
 visual (report §5.3.1). Manim code is written only in primitives, before deployment. At runtime
 a language model chooses a primitive and fills in its parameters, and nothing else (§5.3).
 
-The library so far:
+The library holds the seven primitives of Table 5.2:
 
-| Primitive           | Topic                | File                                           |
-| ------------------- | -------------------- | ---------------------------------------------- |
-| `FunctionGraph`     | Functions and graphs | `backend/app/primitives/function_graph.py`     |
-| `GradientTriangle`  | Coordinate geometry  | `backend/app/primitives/gradient_triangle.py`  |
-| `EquationTransform` | All topics           | `backend/app/primitives/equation_transform.py` |
+| Primitive           | Topic                        | What it shows                                                   | File                                           |
+| ------------------- | ---------------------------- | --------------------------------------------------------------- | ---------------------------------------------- |
+| `FunctionGraph`     | Functions and graphs         | The graph of f on labelled axes, with marked points             | `backend/app/primitives/function_graph.py`     |
+| `GradientTriangle`  | Coordinate geometry          | Rise and run between two points; gradient = rise / run          | `backend/app/primitives/gradient_triangle.py`  |
+| `TangentSlide`      | Introductory calculus        | A tangent sliding along a curve, with its gradient read out     | `backend/app/primitives/tangent_slide.py`      |
+| `SecantToTangent`   | Introductory calculus        | Secants PQ approaching the tangent at P as h shrinks            | `backend/app/primitives/secant_to_tangent.py`  |
+| `TravelGraph`       | Travel graphs and kinematics | Distance-time or speed-time graph; gradients or areas explained | `backend/app/primitives/travel_graph.py`       |
+| `AreaUnderCurve`    | Introductory calculus        | The area under a curve between two limits, by integration       | `backend/app/primitives/area_under_curve.py`   |
+| `EquationTransform` | All topics                   | A derivation step by step, changed terms highlighted            | `backend/app/primitives/equation_transform.py` |
 
-Still to write, from Table 5.2: `TangentSlide`, `SecantToTangent`, `TravelGraph` and
-`AreaUnderCurve` (Phase 3). Copy the closest existing primitive and follow the rules below.
+The three calculus primitives that draw y = f(x) share `backend/app/primitives/curves.py`: the
+parameter schema of f and its interval, the parsing, domain and continuity predicates, the
+check that f has a gradient (no corners), and drawing the axes, curve and equation. Decimals in
+f are made exact first, so 0.5x² differentiates to x, not 1.0x.
+
+New primitives arrive when scene plans show a visual the library cannot draw (§5.3.1). Copy the
+closest existing primitive and follow the rules below.
 
 ## The four elements (§5.3.1)
 
@@ -90,9 +99,11 @@ class TangentSlide(Primitive[TangentSlideParams]):
 
 ## Before it enters the library (§5.3.2)
 
-1. Register the class in `PRIMITIVES` in `backend/app/primitives/library.py`. Bump
-   `LIBRARY_VERSION` whenever any primitive changes how it draws, so cached videos rendered by
-   older code are not reused.
+1. Register the class in `PRIMITIVES` in `backend/app/primitives/library.py`, and add it to
+   the admin stub's list in `backend/app/stub/seed.py` (a test keeps the two in step). Bump
+   `LIBRARY_VERSION` whenever an existing primitive changes how it draws, so cached videos
+   rendered by older code are not reused. Adding a new primitive changes no existing video, so
+   it needs no bump.
 2. Add a grid of parameter sets to `GRIDS` in `backend/app/primitives/harness.py`, spanning the
    permitted ranges: small and large values, negatives, fractions, and shapes that crowd the
    frame.
