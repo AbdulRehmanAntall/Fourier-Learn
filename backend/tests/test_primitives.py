@@ -147,13 +147,12 @@ def test_example_requests_are_valid_for_the_library(level):
         assert len(primitive.steps(params, level)) == len(beat.narration)
 
 
-def test_stub_primitive_list_matches_the_library():
-    # The admin stub lists primitives without importing Manim (app/stub/seed.py).
-    from app.primitives.library import PRIMITIVES
-    from app.stub.seed import PRIMITIVES as LISTED
+def test_catalogue_matches_the_library():
+    # The API and the admin pages read the catalogue, which needs no Manim.
+    from app.primitives.catalog import CATALOGUE
 
     library = {(cls.primitive_id, cls.topic, cls.version) for cls in PRIMITIVES.values()}
-    assert {(pid, topic, version) for pid, topic, version, _ in LISTED} == library
+    assert {(p.primitive_id, p.topic, p.version) for p in CATALOGUE} == library
 
 
 def test_tangent_slide_predicates_and_values():

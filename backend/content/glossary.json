@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "concept_id": 2,
+    "term": "graph",
+    "definition": "A picture of how two quantities are related, drawn on axes. Every point $(x, y)$ on the graph fits its equation."
+  },
+  {
+    "id": 2,
+    "concept_id": 10,
+    "term": "coordinates",
+    "definition": "A pair of numbers $(x, y)$ giving the position of a point: $x$ across, then $y$ up."
+  },
+  {
+    "id": 3,
+    "concept_id": 12,
+    "term": "gradient",
+    "definition": "How steep a line is: the change in $y$ divided by the change in $x$, $m = \\frac{y_2 - y_1}{x_2 - x_1}$."
+  },
+  {
+    "id": 4,
+    "concept_id": 12,
+    "term": "rise",
+    "definition": "How far a line goes up (the change in $y$) between two of its points."
+  },
+  {
+    "id": 5,
+    "concept_id": 12,
+    "term": "run",
+    "definition": "How far a line goes across (the change in $x$) between two of its points."
+  },
+  {
+    "id": 6,
+    "concept_id": 13,
+    "term": "y-intercept",
+    "definition": "Where a line crosses the $y$-axis. For $y = mx + c$ it is the point $(0, c)$."
+  },
+  {
+    "id": 7,
+    "concept_id": 30,
+    "term": "tangent",
+    "definition": "A straight line that just touches a curve at one point and has the same gradient as the curve there."
+  },
+  {
+    "id": 8,
+    "concept_id": 10,
+    "term": "point",
+    "definition": "An exact position, given by its coordinates $(x, y)$."
+  },
+  {
+    "id": 9,
+    "concept_id": 31,
+    "term": "derivative",
+    "definition": "The gradient function of a curve. For $y = x^n$ it is $\\frac{dy}{dx} = nx^{n-1}$."
+  },
+  {
+    "id": 10,
+    "concept_id": 20,
+    "term": "speed",
+    "definition": "Distance travelled per unit of time. On a distance–time graph it is the gradient."
+  },
+  {
+    "id": 11,
+    "concept_id": 41,
+    "term": "area under a curve",
+    "definition": "The area between a curve and the $x$-axis, found by integration."
+  },
+  {
+    "id": 12,
+    "concept_id": 14,
+    "term": "parallel",
+    "definition": "Lines that never meet. Parallel lines have the same gradient."
+  },
+  {
+    "id": 13,
+    "concept_id": 32,
+    "term": "stationary point",
+    "definition": "A point on a curve where the gradient is $0$."
+  }
+]

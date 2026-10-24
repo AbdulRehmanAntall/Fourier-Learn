@@ -1,1 +1,1 @@
-"""Workers (future): background render workers that run Manim jobs from the scheduler queue."""
+"""Render workers: background processes that take render jobs from the queue (§4.4.4)."""

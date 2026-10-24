@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     # Beats rendered in parallel. 0 means one per CPU core.
     render_workers: int = 0
 
+    # Render workers (npm run worker): how often an idle worker looks for a job, how long a job
+    # may run before another worker may take it over (its worker is presumed dead), and how many
+    # attempts a job gets before it is marked failed (§6.4.6).
+    worker_poll_s: float = 1.0
+    job_lease_s: int = 900
+    render_attempts: int = 3
+
     # Phase 2: serve the API from the in-memory stub (app/stub, docs/frontend.md §8).
     stub_api: bool = True
     # Delay added to every stub response, so the frontend's loading states show and get tested.

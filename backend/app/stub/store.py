@@ -89,8 +89,14 @@ from app.contracts import (
     RenderStatus,
 )
 from app.contracts.stream import StreamEvent
+from app.primitives.catalog import CATALOGUE
 from app.stub import seed
 from app.stub.fixtures import FixtureVariant
+
+STUB_IDS_FROM = 1_000_000
+"""The stub numbers its lessons and modules from here. Real lessons in the database (Phase 3
+onwards) are numbered from 1, so an id says which of the two serves it, and the two never
+clash."""
 
 BRANCH_TIMEOUT_S = 20
 MAX_LOGGED_EVENTS = 1000
@@ -217,10 +223,14 @@ class StubStore:
             for g in seed.GLOSSARY
         }
         self.primitives = {
-            p[0]: PrimitiveAdmin(
-                id=p[0], topic=p[1], version=p[2], status="enabled", description=p[3]
+            p.primitive_id: PrimitiveAdmin(
+                id=p.primitive_id,
+                topic=p.topic,
+                version=p.version,
+                status="enabled",
+                description=p.description,
             )
-            for p in seed.PRIMITIVES
+            for p in CATALOGUE
         }
         self.users: dict[int, UserRecord] = {}
         self.sessions: dict[str, int] = {}
@@ -486,7 +496,7 @@ class StubStore:
     ) -> LessonRecord:
         modules = [
             ModuleRecord(
-                id=self._next_id("module"),
+                id=self._next_id("module", start=STUB_IDS_FROM),
                 title=title,
                 concept_id=concept,
                 style=ModuleStyle.DEFAULT,
@@ -498,7 +508,7 @@ class StubStore:
         ]
         title = "Gradient of a straight line" + (" (study mode)" if mode == "static" else "")
         lesson = LessonRecord(
-            id=self._next_id("lesson"),
+            id=self._next_id("lesson", start=STUB_IDS_FROM),
             student_id=user.id,
             title=title,
             query_text=query,
@@ -792,7 +802,7 @@ class StubStore:
             ModuleStyle.WORKED_EXAMPLE: "Worked example: finding a gradient",
         }[style]
         module = ModuleRecord(
-            id=self._next_id("module"),
+            id=self._next_id("module", start=STUB_IDS_FROM),
             title=title,
             concept_id=parent.concept_id,
             style=style,

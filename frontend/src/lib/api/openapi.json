@@ -216,7 +216,7 @@
           "learner"
         ],
         "summary": "Topics",
-        "description": "The supported syllabus topics. Public: the landing page lists them.",
+        "description": "The supported syllabus topics. Public: the landing page lists them.\n\nFrom the database once it is seeded (npm run db:seed); until then from the same content\nfiles, through the stub.",
         "operationId": "topics_api_topics_get",
         "responses": {
           "200": {
@@ -427,6 +427,49 @@
                       "out_of_scope": "#/components/schemas/OutOfScope"
                     }
                   }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/render": {
+      "post": {
+        "tags": [
+          "lessons",
+          "dev"
+        ],
+        "summary": "Create Dev Lesson",
+        "description": "Development only: store a hand-written lesson (scene plans with render requests), check\nit (§5.2.3), and queue its renders. A running worker (npm run worker) renders it. The\nlesson then plays like any other; 422 lists every problem found.",
+        "operationId": "create_dev_lesson_api_dev_render_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevLessonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonCreated"
                 }
               }
             }
@@ -835,7 +878,7 @@
           "events"
         ],
         "summary": "Log Events",
-        "description": "A batch of up to 100 events. `im_lost` and `branch_choice` are refused here: their own\nendpoints record them.",
+        "description": "A batch of up to 100 events. `im_lost` and `branch_choice` are refused here: their own\nendpoints record them. Events for lessons in the database are stored as INTERACTION_EVENT\nrows; the stub keeps its own.",
         "operationId": "log_events_api_events_post",
         "requestBody": {
           "content": {
@@ -1846,6 +1889,57 @@
         "title": "BeatManifest",
         "description": "One rendered beat. Times are seconds from the start of the beat's own video."
       },
+      "BeatRenderSpec": {
+        "properties": {
+          "primitive_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Primitive Id"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params"
+          },
+          "narration": {
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Narration"
+          },
+          "glossary_terms": {
+            "items": {
+              "type": "string",
+              "maxLength": 60,
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Glossary Terms",
+            "default": []
+          },
+          "concept_ids": {
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0.0
+            },
+            "type": "array",
+            "title": "Concept Ids",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "primitive_id",
+          "params",
+          "narration"
+        ],
+        "title": "BeatRenderSpec",
+        "description": "One beat to render: a primitive, its validated parameters and its narration."
+      },
       "BranchChoiceEvent": {
         "properties": {
           "module_id": {
@@ -1883,6 +1977,29 @@
         ],
         "title": "BranchChoiceEvent",
         "description": "The option selected at a branch point after the module (§5.6.4)."
+      },
+      "BranchOption": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "theory",
+              "worked_example"
+            ],
+            "title": "Kind"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/ScenePlan"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "plan"
+        ],
+        "title": "BranchOption",
+        "description": "A branch offered after the module, described by its own scene plan (§5.6.4)."
       },
       "BranchOptionOut": {
         "properties": {
@@ -2529,6 +2646,73 @@
         ],
         "title": "CurrentModule",
         "description": "What the player should do now.\n\n- `ready`: play `module` from the variant `cache_key` (at least its first beat is ready).\n- `preparing`: wait for the stream; `stage` says how far generation has got.\n- `failed`: show `failure`, then call `finish` for the module to move on.\n- `complete`: the lesson is over."
+      },
+      "DevLessonRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "query_text": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Query Text",
+            "default": "development lesson"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level",
+            "default": 2
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/DevModule"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Modules"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "modules"
+        ],
+        "title": "DevLessonRequest"
+      },
+      "DevModule": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/ScenePlan"
+          },
+          "renders": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleRenderRequest"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Renders"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "plan",
+          "renders"
+        ],
+        "title": "DevModule"
       },
       "DiagnosticAnswer": {
         "properties": {
@@ -3367,6 +3551,53 @@
         "title": "ModuleManifest",
         "description": "The segment manifest of one rendered variant (§5.4.4).\n\nThe Interactive Playback Layer uses it to time the chips, locate beat boundaries, and\nattribute each interaction to the concepts of its beat. A variant is identified by its\ncache key, so the same manifest serves every module that reuses the variant.\n\nAfter an \"I'm Lost\" press a variant may hold only beats j onward; it is complete once all\n`beat_count` beats are present."
       },
+      "ModuleRenderRequest": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Level"
+          },
+          "voice": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Voice"
+          },
+          "library_version": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Library Version"
+          },
+          "beats": {
+            "items": {
+              "$ref": "#/components/schemas/BeatRenderSpec"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Beats"
+          },
+          "render_from_beat": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Render From Beat",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "level",
+          "voice",
+          "library_version",
+          "beats"
+        ],
+        "title": "ModuleRenderRequest",
+        "description": "Render one module at one level (§5.3.4)."
+      },
       "ModuleStyle": {
         "type": "string",
         "enum": [
@@ -3971,6 +4202,102 @@
         ],
         "title": "RewindEvent",
         "description": "Seeking back to an earlier point. Evidence for the concepts of the beat returned to."
+      },
+      "ScenePlan": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Module Id"
+          },
+          "concept_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Concept Id"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Segments"
+          },
+          "check_items": {
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0.0
+            },
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 1,
+            "title": "Check Items"
+          },
+          "branch_options": {
+            "items": {
+              "$ref": "#/components/schemas/BranchOption"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Branch Options",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "module_id",
+          "concept_id",
+          "segments",
+          "check_items"
+        ],
+        "title": "ScenePlan",
+        "description": "The plan of one micro-module (Table 5.1).\n\nA scene plan carries no difficulty level: the same plan is rendered at every level, and the\nsegment list fixes the number and order of segments for every variant (§5.2.3). Unknown\nfields such as \"level\" are rejected."
+      },
+      "Segment": {
+        "properties": {
+          "primitive_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Primitive Id"
+          },
+          "content": {
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            },
+            "propertyNames": {
+              "minLength": 1
+            },
+            "type": "object",
+            "minProperties": 1,
+            "title": "Content"
+          },
+          "narration_intent": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Narration Intent"
+          },
+          "glossary_terms": {
+            "items": {
+              "type": "string",
+              "maxLength": 60,
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Glossary Terms",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "primitive_id",
+          "content",
+          "narration_intent"
+        ],
+        "title": "Segment",
+        "description": "One segment (a \"beat\" in Chapter 6) of a micro-module."
       },
       "SpeedChangeEvent": {
         "properties": {

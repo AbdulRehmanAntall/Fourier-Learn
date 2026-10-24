@@ -71,6 +71,11 @@ StreamEvent = Annotated[
 ]
 
 
-def encode_sse(event: GenerationProgress | BeatReady | ModuleReady | ModuleFailed) -> str:
-    """Format an event as one Server-Sent Events message."""
-    return f"event: {event.type.value}\ndata: {event.model_dump_json()}\n\n"
+def encode_sse(
+    event: GenerationProgress | BeatReady | ModuleReady | ModuleFailed, event_id: int | None = None
+) -> str:
+    """Format an event as one Server-Sent Events message, with its id if it has one."""
+    message = f"event: {event.type.value}\ndata: {event.model_dump_json()}\n"
+    if event_id is not None:
+        message += f"id: {event_id}\n"
+    return message + "\n"
