@@ -90,8 +90,19 @@ cd backend
 alembic revision --autogenerate -m "add learner table"
 ```
 
-Review the generated file in `backend/alembic/versions/` (autogenerate isn't perfect), commit it
-with your model changes, and teammates run `npm run db:migrate`.
+Review the generated file in `backend/alembic/versions/` (autogenerate isn't perfect: it misses
+check constraints and server defaults for new NOT NULL columns), commit it with your model
+changes, and teammates run `npm run db:migrate`. A column or table beyond the report's data
+dictionary (Table 4.8) must also be listed in `ADDITIONS` in `backend/tests/test_db_models.py`.
+
+**Database tests.** Tests marked `db` need Postgres and are skipped without it. To run them, point
+`TEST_DATABASE_URL` at an empty database they may wipe, never your development one:
+`TEST_DATABASE_URL=postgresql+psycopg://fourierlearn:fourierlearn@localhost:5433/fourierlearn_test
+npm run test:backend` (create `fourierlearn_test` first). CI always runs them.
+
+**Teaching content** (concepts, glossary, check questions) lives in `backend/content/` as JSON,
+not in code. After editing it, run `npm run db:seed`; the tests check the content for mistakes
+such as a prerequisite cycle or an answer that is not one of the options.
 Never edit a migration that's already merged into `main`. Add a new one instead.
 
 ## Where code goes

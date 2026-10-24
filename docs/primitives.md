@@ -99,11 +99,11 @@ class TangentSlide(Primitive[TangentSlideParams]):
 
 ## Before it enters the library (§5.3.2)
 
-1. Register the class in `PRIMITIVES` in `backend/app/primitives/library.py`, and add it to
-   the admin stub's list in `backend/app/stub/seed.py` (a test keeps the two in step). Bump
-   `LIBRARY_VERSION` whenever an existing primitive changes how it draws, so cached videos
-   rendered by older code are not reused. Adding a new primitive changes no existing video, so
-   it needs no bump.
+1. Register the class in `PRIMITIVES` in `backend/app/primitives/library.py`, and describe it
+   in `backend/app/primitives/catalog.py`, which the API and the admin pages read without
+   importing Manim (a test keeps the two in step). Bump `LIBRARY_VERSION` in `catalog.py`
+   whenever an existing primitive changes how it draws, so cached videos rendered by older code
+   are not reused. Adding a new primitive changes no existing video, so it needs no bump.
 2. Add a grid of parameter sets to `GRIDS` in `backend/app/primitives/harness.py`, spanning the
    permitted ranges: small and large values, negatives, fractions, and shapes that crowd the
    frame.
