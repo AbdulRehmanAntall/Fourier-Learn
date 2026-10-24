@@ -396,6 +396,10 @@ def test_admin_pages(client):
     assert {p["id"] for p in primitives} == {
         "FunctionGraph",
         "GradientTriangle",
+        "TangentSlide",
+        "SecantToTangent",
+        "TravelGraph",
+        "AreaUnderCurve",
         "EquationTransform",
     }
     retired = client.patch("/api/admin/primitives/FunctionGraph", json={"status": "retired"})

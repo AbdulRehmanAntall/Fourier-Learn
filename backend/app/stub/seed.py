@@ -252,6 +252,30 @@ PRIMITIVES = [
         "Draws the rise and run between two points of a line and computes its gradient.",
     ),
     (
+        "TangentSlide",
+        "Introductory calculus",
+        "1",
+        "Slides a tangent along a curve with a read-out of its gradient at each position.",
+    ),
+    (
+        "SecantToTangent",
+        "Introductory calculus",
+        "1",
+        "Draws secants through a point that approach the tangent there as h decreases.",
+    ),
+    (
+        "TravelGraph",
+        "Travel graphs and kinematics",
+        "1",
+        "Draws a distance-time or speed-time graph and interprets its gradients or areas.",
+    ),
+    (
+        "AreaUnderCurve",
+        "Introductory calculus",
+        "1",
+        "Shades the area under a curve between two limits and computes it by integration.",
+    ),
+    (
         "EquationTransform",
         "All topics",
         "1",

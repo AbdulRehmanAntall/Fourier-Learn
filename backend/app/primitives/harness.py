@@ -27,7 +27,7 @@ from app.renderer.errors import RenderError
 
 # Parameter sets spanning each primitive's permitted ranges: small and large values, negative
 # values, fractions, and shapes that crowd the frame. Add a case whenever a bug is found.
-GRIDS: dict[str, list[dict]] = {
+GRIDS: dict[str, list[dict]] = {  # fmt: skip
     "FunctionGraph": [
         {"expression": "x**2", "x_min": -3, "x_max": 3, "marked_x": [2]},
         {"expression": "x**3 - 3*x", "x_min": -2.5, "x_max": 2.5, "marked_x": [-1, 1]},
@@ -43,6 +43,57 @@ GRIDS: dict[str, list[dict]] = {
         {"point_a": [-15, -10], "point_b": [15, 12]},
         {"point_a": [0.5, 0.5], "point_b": [1.5, 3]},
         {"point_a": [2, 9], "point_b": [3, 1]},
+    ],
+    "TangentSlide": [
+        {"expression": "x**2", "x_min": -3, "x_max": 3, "x_start": -2, "x_end": 2},
+        {"expression": "x**3 - 3*x", "x_min": -2.5, "x_max": 2.5, "x_start": -2, "x_end": 2},
+        {"expression": "sin(x)", "x_min": -6, "x_max": 6, "x_start": -5, "x_end": 5},
+        {"expression": "1/x", "x_min": 0.5, "x_max": 8, "x_start": 1, "x_end": 6},
+        {"expression": "0.5*x**2 - 2*x + 1", "x_min": -2, "x_max": 6, "x_start": 5, "x_end": -1},
+        {"expression": "sqrt(x)", "x_min": 0, "x_max": 9, "x_start": 1, "x_end": 8},
+    ],
+    "SecantToTangent": [
+        {"expression": "x**2", "x_min": -1, "x_max": 4, "x0": 1, "h_values": [2, 1, 0.5, 0.1]},
+        {"expression": "x**3", "x_min": -2, "x_max": 3, "x0": 1, "h_values": [1.5, 1, 0.5, 0.2]},
+        {"expression": "sin(x)", "x_min": -1, "x_max": 4, "x0": 0.5, "h_values": [2, 1, 0.25]},
+        {"expression": "1/x", "x_min": 0.2, "x_max": 5, "x0": 1, "h_values": [3, 1, 0.5, 0.1]},
+        {"expression": "-x**2 + 4*x", "x_min": -1, "x_max": 5, "x0": 3, "h_values": [-2, -1, -0.5]},
+        {
+            "expression": "x**2/10 - 5",
+            "x_min": -20,
+            "x_max": 20,
+            "x0": -10,
+            "h_values": [15, 8, 2, 0.5],
+        },
+    ],
+    "TravelGraph": [
+        {
+            "kind": "distance_time",
+            "points": [[0, 0], [10, 6], [15, 6], [30, 0]],
+            "time_unit": "min",
+            "distance_unit": "km",
+        },
+        {"kind": "speed_time", "points": [[0, 0], [4, 8], [10, 8], [12, 0]], "show": "areas"},
+        {"kind": "speed_time", "points": [[0, 0], [5, 10], [15, 10], [20, 0]]},
+        {
+            "kind": "distance_time",
+            "points": [[0, 0], [1, 60], [1.5, 60], [3.5, 0]],
+            "time_unit": "h",
+            "distance_unit": "km",
+        },
+        {"kind": "speed_time", "points": [[0, 5], [10, 25], [30, 25], [40, 0]], "show": "areas"},
+        {
+            "kind": "distance_time",
+            "points": [[0, 0], [5, 200], [10, 200], [15, 500], [20, 500], [30, 0]],
+        },
+    ],
+    "AreaUnderCurve": [
+        {"expression": "x**2", "x_min": -1, "x_max": 4, "lower": 1, "upper": 3},
+        {"expression": "4 - x**2", "x_min": -3, "x_max": 3, "lower": -2, "upper": 2},
+        {"expression": "sin(x)", "x_min": 0, "x_max": 4, "lower": 0, "upper": 3},
+        {"expression": "x**2 - 4", "x_min": -3, "x_max": 3, "lower": -2, "upper": 2},
+        {"expression": "1/x", "x_min": 0.5, "x_max": 6, "lower": 1, "upper": 5},
+        {"expression": "0.5*x + 1", "x_min": -2, "x_max": 10, "lower": 0, "upper": 8},
     ],
     "EquationTransform": [
         {"expressions": ["(8 - 2)/(4 - 1)", "6/3", "2"]},

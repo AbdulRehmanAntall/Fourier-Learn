@@ -16,11 +16,15 @@ from manim import (
     BLUE_C,
     GREEN_C,
     ORANGE,
+    PURPLE_B,
+    RED_C,
+    TEAL_C,
     WHITE,
     YELLOW,
     Animation,
     Axes,
     FadeOut,
+    Line,
     MathTex,
     Mobject,
     Scene,
@@ -38,6 +42,10 @@ RISE_COLOUR = GREEN_C
 RUN_COLOUR = ORANGE
 HIGHLIGHT_COLOUR = YELLOW
 TEXT_COLOUR = WHITE
+TANGENT_COLOUR = RED_C
+SECANT_COLOUR = PURPLE_B
+AREA_COLOUR = TEAL_C
+AREA_OPACITY = 0.45
 
 FONT_SIZE = 40
 LABEL_FONT_SIZE = 30
@@ -162,15 +170,26 @@ def axis_range(values: Sequence[float]) -> tuple[float, float, float]:
 
 
 def make_axes(
-    x_range: tuple[float, float, float], y_range: tuple[float, float, float], box: Box
+    x_range: tuple[float, float, float],
+    y_range: tuple[float, float, float],
+    box: Box,
+    x_label: str = "x",
+    y_label: str = "y",
 ) -> tuple[Axes, Mobject, Mobject]:
-    """Axes with numbered ticks filling `box`, and their x and y labels."""
-    label_room = 0.6
+    """Axes with numbered ticks filling `box`, and their x and y labels.
+
+    The labels are LaTeX, such as a time axis's "t (s)". Room is kept beside the x-axis and above
+    the y-axis for them, more for a long label.
+    """
+    x_tex = MathTex(x_label, font_size=LABEL_FONT_SIZE)
+    y_tex = MathTex(y_label, font_size=LABEL_FONT_SIZE)
+    room_x = max(0.6, x_tex.width + 0.3)
+    room_y = max(0.6, y_tex.height + 0.3)
     axes = Axes(
         x_range=list(x_range),
         y_range=list(y_range),
-        x_length=box.width - label_room,
-        y_length=box.height - label_room,
+        x_length=box.width - room_x,
+        y_length=box.height - room_y,
         tips=False,
         y_axis_config={
             "decimal_number_config": {"num_decimal_places": _decimal_places(y_range[2])}
@@ -182,10 +201,8 @@ def make_axes(
             "decimal_number_config": {"num_decimal_places": _decimal_places(x_range[2])},
         },
     )
-    axes.move_to(box.center + np.array([-label_room / 2, -label_room / 2, 0]))
-    x_label = axes.get_x_axis_label(MathTex("x", font_size=LABEL_FONT_SIZE))
-    y_label = axes.get_y_axis_label(MathTex("y", font_size=LABEL_FONT_SIZE))
-    return axes, x_label, y_label
+    axes.move_to(box.center + np.array([-room_x / 2, -room_y / 2, 0]))
+    return axes, axes.get_x_axis_label(x_tex), axes.get_y_axis_label(y_tex)
 
 
 def _decimal_places(step: float) -> int:
@@ -209,6 +226,35 @@ def graph_boxes(region: Region) -> tuple[Box, Box]:
     return title, plot
 
 
+def title_lines(title: Box, gap: float = 0.1) -> tuple[Box, Box]:
+    """The title band split into two lines: an equation above, a result or read-out below."""
+    middle = (title.top + title.bottom) / 2
+    return (
+        Box(title.left, title.right, middle + gap / 2, title.top),
+        Box(title.left, title.right, title.bottom, middle - gap / 2),
+    )
+
+
+def line_in_axes(
+    axes: Axes,
+    point: tuple[float, float],
+    slope: float,
+    x_range: Sequence[float],
+    y_range: Sequence[float],
+    **line_config,
+) -> Line:
+    """The straight line through `point` with gradient `slope`, cut off at the edges of the axes,
+    so it never leaves the plot however steep it is."""
+    x0, y0 = point
+    lo, hi = x_range[0] - x0, x_range[1] - x0
+    if abs(slope) > 1e-12:
+        ends = sorted(((y_range[0] - y0) / slope, (y_range[1] - y0) / slope))
+        lo, hi = max(lo, ends[0]), min(hi, ends[1])
+    return Line(
+        axes.c2p(x0 + lo, y0 + slope * lo), axes.c2p(x0 + hi, y0 + slope * hi), **line_config
+    )
+
+
 def around(anchor: np.ndarray, label: Mobject, gap: float = 0.25) -> list[np.ndarray]:
     """Centres that put `label` beside `anchor`: up-right first, then up-left, down-right,
     down-left."""
@@ -216,6 +262,16 @@ def around(anchor: np.ndarray, label: Mobject, gap: float = 0.25) -> list[np.nda
         anchor + np.array([dx * (label.width / 2 + gap), dy * (label.height / 2 + gap), 0])
         for dx, dy in ((1, 1), (-1, 1), (1, -1), (-1, -1))
     ]
+
+
+def around_wide(anchor: np.ndarray, label: Mobject) -> list[np.ndarray]:
+    """More centres than `around`, for a crowded spot: the four corners close by, then eight
+    directions further out."""
+    far = [
+        anchor + np.array([dx * (label.width / 2 + 0.6), dy * (label.height / 2 + 0.6), 0])
+        for dx, dy in ((1, 1), (-1, 1), (1, -1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1))
+    ]
+    return around(anchor, label) + far
 
 
 def place_clear(
