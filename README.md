@@ -284,7 +284,9 @@ Then, in <http://localhost:8000/docs>:
    is ready.
 
 Or check the whole path at once: `cd backend && .venv/bin/python scripts/check_dev_lesson.py`
-(Windows: `.venv\Scripts\python`).
+(Windows: `.venv\Scripts\python`). Add `--lesson examples/gradient_of_curve.lesson.json` to
+run the second example, a three-module calculus lesson (secant to tangent, the gradient function
+of $x^2$, stationary points) built with SecantToTangent, TangentSlide and EquationTransform.
 
 How it works:
 
