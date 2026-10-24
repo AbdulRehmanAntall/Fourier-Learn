@@ -10,6 +10,9 @@ For one `ModuleRenderRequest` (report §5.3.4, §5.4.4, §5.5):
 5. Lay each beat's passages on an audio track at the steps' actual start times and mux it in.
 6. Join the beats with FFmpeg once all are present, and write the manifest.
 
+The manifest is rewritten after every beat, so a player (or a worker reporting progress) can
+start on the first beat while the others render; it is complete when every beat is listed.
+
 The result is stored under media/variants/<cache key>/. A later request with the same key is
 served from there without rendering. After an "I'm Lost" press, `render_from_beat` renders
 only the beats from the current one onward; they join the same variant.
@@ -33,7 +36,6 @@ from app.contracts import (
     ModuleManifest,
     ModuleRenderRequest,
     StepTiming,
-    variant_cache_key,
 )
 from app.primitives.library import UnknownPrimitiveError, get_primitive
 from app.renderer import media
@@ -42,8 +44,11 @@ from app.renderer.errors import InvalidParameters, NarrationMismatch, RenderErro
 from app.renderer.store import (
     MANIFEST_FILE,
     MODULE_FILE,
+    cache_key_for,
     load_manifest,
+    playable_beats,
     variant_directory,
+    voice_identity,
     write_atomically,
 )
 
@@ -80,7 +85,7 @@ def render_module(
             f"but this is {library_version}"
         )
 
-    key = variant_cache_key(request)
+    key = cache_key_for(request, tts.name)
     directory = variant_directory(media_dir, key)
     existing = load_manifest(directory)
     stored = {beat.index: beat for beat in existing.beats} if existing else {}
@@ -110,9 +115,26 @@ def render_module(
     new_beats: dict[int, BeatManifest] = {}
     render_started = time.perf_counter()
 
+    def manifest_of(beats: list[BeatManifest], module_video: str | None) -> ModuleManifest:
+        return ModuleManifest(
+            cache_key=key,
+            level=request.level,
+            voice=voice_identity(tts.name, request.voice),
+            library_version=request.library_version,
+            beat_count=len(request.beats),
+            beats=sorted(beats, key=lambda beat: beat.index),
+            module_video=module_video,
+        )
+
     def finish(result: BeatResult) -> None:
         beat = _store_beat(request, result, clips[result.index], directory)
         new_beats[result.index] = beat
+        # Publish what can be played at once, so playback starts before the module is done.
+        first = min([*stored, request.render_from_beat])
+        playable = playable_beats({**stored, **new_beats}, first)
+        if playable:
+            partial = manifest_of(playable, None)
+            write_atomically(directory / MANIFEST_FILE, partial.model_dump_json(indent=2))
         timings[f"beat_{result.index}"] = result.render_seconds
         if result.index == todo[0]:
             timings["first_beat"] = time.perf_counter() - started
@@ -140,11 +162,13 @@ def render_module(
             ]
             _render_in_parallel(jobs, workers, finish)
     except BaseException:
-        # Leave no half-rendered variant behind: drop this call's beats, and the directory
-        # itself unless an earlier render already stored a manifest there.
+        # Leave no half-rendered variant behind: drop this call's beats and put back the
+        # manifest an earlier render stored, or remove the directory if there was none.
         for beat in new_beats.values():
             (directory / beat.video).unlink(missing_ok=True)
-        if not (directory / MANIFEST_FILE).exists():
+        if existing is not None:
+            write_atomically(directory / MANIFEST_FILE, existing.model_dump_json(indent=2))
+        else:
             shutil.rmtree(directory, ignore_errors=True)
         raise
     timings["render"] = time.perf_counter() - render_started
@@ -153,15 +177,7 @@ def render_module(
     complete = beats[0].index == 0 and len(beats) == len(request.beats)
     if complete:
         _join_beats(directory, beats)
-    manifest = ModuleManifest(
-        cache_key=key,
-        level=request.level,
-        voice=request.voice,
-        library_version=request.library_version,
-        beat_count=len(request.beats),
-        beats=beats,
-        module_video=MODULE_FILE if complete else None,
-    )
+    manifest = manifest_of(beats, MODULE_FILE if complete else None)
     write_atomically(directory / MANIFEST_FILE, manifest.model_dump_json(indent=2))
     timings["total"] = time.perf_counter() - started
     return RenderResult(manifest, directory, cache_hit=False, rendered_beats=todo, timings=timings)

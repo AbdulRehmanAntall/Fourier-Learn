@@ -373,7 +373,7 @@ def test_event_batches(client):
     assert client.post("/api/events", json={"events": [im_lost]}).status_code == 422
     forward = dict(events[2], to_beat_index=2)
     assert client.post("/api/events", json={"events": [forward]}).status_code == 422
-    foreign = dict(events[0], module_id=99_999)
+    foreign = dict(events[0], module_id=2_000_000_000)
     assert client.post("/api/events", json={"events": [foreign]}).status_code == 404
     assert client.post("/api/events", json={"events": []}).status_code == 422
 

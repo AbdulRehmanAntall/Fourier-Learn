@@ -1,0 +1,145 @@
+{
+  "topic_areas": [
+    "Functions and graphs",
+    "Coordinate geometry",
+    "Travel graphs",
+    "Differentiation",
+    "Integration"
+  ],
+  "concepts": [
+    {
+      "id": 1,
+      "name": "Function notation",
+      "syllabus_code": "FG.1",
+      "topic_area": "Functions and graphs",
+      "prerequisites": []
+    },
+    {
+      "id": 2,
+      "name": "Graphs of linear functions",
+      "syllabus_code": "FG.2",
+      "topic_area": "Functions and graphs",
+      "prerequisites": [
+        1,
+        10
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Graphs of quadratic functions",
+      "syllabus_code": "FG.3",
+      "topic_area": "Functions and graphs",
+      "prerequisites": [
+        1
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Coordinates of points",
+      "syllabus_code": "CG.1",
+      "topic_area": "Coordinate geometry",
+      "prerequisites": []
+    },
+    {
+      "id": 11,
+      "name": "Length and midpoint of a line segment",
+      "syllabus_code": "CG.2",
+      "topic_area": "Coordinate geometry",
+      "prerequisites": [
+        10
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Gradient of a straight line",
+      "syllabus_code": "CG.3",
+      "topic_area": "Coordinate geometry",
+      "prerequisites": [
+        10
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Equation of a straight line",
+      "syllabus_code": "CG.4",
+      "topic_area": "Coordinate geometry",
+      "prerequisites": [
+        12,
+        2
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Parallel lines",
+      "syllabus_code": "CG.5",
+      "topic_area": "Coordinate geometry",
+      "prerequisites": [
+        13
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Distance–time graphs",
+      "syllabus_code": "TG.1",
+      "topic_area": "Travel graphs",
+      "prerequisites": [
+        12
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Speed–time graphs",
+      "syllabus_code": "TG.2",
+      "topic_area": "Travel graphs",
+      "prerequisites": [
+        20
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Gradient of a curve",
+      "syllabus_code": "DF.1",
+      "topic_area": "Differentiation",
+      "prerequisites": [
+        12,
+        3
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Differentiating powers of x",
+      "syllabus_code": "DF.2",
+      "topic_area": "Differentiation",
+      "prerequisites": [
+        30
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Stationary points",
+      "syllabus_code": "DF.3",
+      "topic_area": "Differentiation",
+      "prerequisites": [
+        31
+      ]
+    },
+    {
+      "id": 40,
+      "name": "Integration as reverse differentiation",
+      "syllabus_code": "IN.1",
+      "topic_area": "Integration",
+      "prerequisites": [
+        31
+      ]
+    },
+    {
+      "id": 41,
+      "name": "Area under a curve",
+      "syllabus_code": "IN.2",
+      "topic_area": "Integration",
+      "prerequisites": [
+        40
+      ]
+    }
+  ]
+}

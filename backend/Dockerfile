@@ -39,4 +39,5 @@ COPY . .
 
 EXPOSE 8000
 ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "app"]
+# Open event streams (a lesson page) would otherwise hold up every reload.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "app", "--timeout-graceful-shutdown", "2"]

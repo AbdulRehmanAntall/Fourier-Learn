@@ -52,6 +52,7 @@ const lock = (input, output) => [
 ];
 
 const tasks = {
+  // Open event streams (a lesson page) would otherwise hold up every reload.
   "backend:dev": python([
     "-m",
     "uvicorn",
@@ -59,6 +60,8 @@ const tasks = {
     "--reload",
     "--reload-dir",
     "app",
+    "--timeout-graceful-shutdown",
+    "2",
     "--port",
     backendPort,
   ]),
@@ -70,6 +73,9 @@ const tasks = {
     lock("requirements-dev.in", "requirements-dev.txt"),
   ),
   "db:migrate": python(["-m", "alembic", "upgrade", "head"]),
+  "db:seed": python(["-m", "app.db.seed"]),
+  // A render worker: takes queued renders from the database (see app/workers/render_worker.py).
+  worker: python(["-m", "app.workers", ...process.argv.slice(3)]),
   "manim:smoke": python(["scripts/manim_smoke.py"]),
   // Extra arguments after `--` are passed through, e.g. npm run render -- examples/x.json
   render: python(["-m", "app.renderer", ...process.argv.slice(3)]),

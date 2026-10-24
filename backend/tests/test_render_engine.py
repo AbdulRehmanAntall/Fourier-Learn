@@ -13,7 +13,7 @@ from app.renderer.errors import (
     NarrationMismatch,
     RenderError,
 )
-from app.renderer.store import variant_directory
+from app.renderer.store import load_manifest, variant_directory
 
 
 def request(**overrides):
@@ -91,7 +91,15 @@ def test_partial_render_after_im_lost_then_full_module_then_cache(tmp_path):
     assert partial.manifest.module_video is None
     assert [beat.index for beat in ready] == [1]
 
-    full = render(request(), tmp_path)
+    # While the rest renders, the manifest on disk always lists beats a player can play in order.
+    published = []
+
+    def check_published(beat):
+        directory = variant_directory(tmp_path, partial.manifest.cache_key)
+        published.append([b.index for b in load_manifest(directory).beats])
+
+    full = render(request(), tmp_path, on_beat_ready=check_published)
+    assert published == [[0, 1]]
     assert full.rendered_beats == [0]  # beat 1 was already in the variant
     manifest = full.manifest
     assert manifest.is_complete

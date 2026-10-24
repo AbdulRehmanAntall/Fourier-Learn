@@ -5,6 +5,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "render: renders real video with Manim, LaTeX and FFmpeg (skipped where they are missing)",
+    "db: needs the Postgres database named by TEST_DATABASE_URL (skipped without it)",
 ]
 filterwarnings = [
     # Starlette now prefers the `httpx2` package for TestClient; plain httpx still works.

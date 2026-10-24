@@ -92,6 +92,12 @@ jobs:
       - name: Render the example module with the espeak-ng voice
         run: docker compose exec -T backend python -m app.renderer examples/gradient_of_line.L3.render.json --quality 480p30
 
+      - name: A hand-written lesson goes through the queue and the worker (milestone M2)
+        run: |
+          docker compose exec -T backend alembic upgrade head
+          docker compose exec -T backend python -m app.db.seed
+          docker compose exec -T backend python scripts/check_dev_lesson.py --timeout 900
+
       - name: Logs on failure
         if: failure()
         run: docker compose logs

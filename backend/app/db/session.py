@@ -3,6 +3,7 @@
 The engine is created lazily, so the app starts even when Postgres is not running.
 """
 
+import time
 from collections.abc import Iterator
 from functools import lru_cache
 
@@ -40,3 +41,25 @@ def database_is_reachable() -> bool:
         return True
     except Exception:
         return False
+
+
+_AVAILABILITY_TTL_S = 30.0
+_availability: tuple[float, bool] | None = None
+
+
+def database_available() -> bool:
+    """Whether the database answers, remembered for 30 s.
+
+    Code that can do without the database (the Phase 2 stub falls back to its own data) asks
+    this, so that without Postgres each request does not wait for a connection to time out.
+    """
+    global _availability
+    now = time.monotonic()
+    if _availability is None or now - _availability[0] > _AVAILABILITY_TTL_S:
+        _availability = (now, database_is_reachable())
+    return _availability[1]
+
+
+def forget_database_availability() -> None:
+    global _availability
+    _availability = None

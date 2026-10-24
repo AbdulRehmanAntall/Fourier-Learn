@@ -105,6 +105,9 @@ Contracts never import Manim at runtime, so they stay light to test.
 
 The key is a sha256 hash of **exactly** the primitive identifiers, parameter sets, difficulty
 level, narration voice and primitive library version, which is the list the report gives. The
+voice is identified with its speech engine (`kokoro:default`, not just `default`): the render
+engine and the queue compute the key with `cache_key_for` (`app/renderer/store.py`), so switching
+engines never reuses a video narrated by the old one. The
 tests check that changing any of these five changes the key, and that nothing else does (module
 id, wording, or `render_from_beat`).
 

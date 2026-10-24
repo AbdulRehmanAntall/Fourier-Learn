@@ -1,0 +1,220 @@
+[
+  {
+    "id": 1,
+    "concept_id": 12,
+    "item_type": "true_false",
+    "question_text": "A line with a gradient of $0$ is horizontal.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "True"
+  },
+  {
+    "id": 2,
+    "concept_id": 12,
+    "item_type": "mcq",
+    "question_text": "What is the gradient of the line through $(1, 2)$ and $(4, 8)$?",
+    "options": [
+      "$2$",
+      "$\\frac{1}{2}$",
+      "$6$",
+      "$3$"
+    ],
+    "correct_option": "$2$"
+  },
+  {
+    "id": 3,
+    "concept_id": 12,
+    "item_type": "mcq",
+    "question_text": "A line rises 6 units for every 3 units it runs to the right. What is its gradient?",
+    "options": [
+      "$2$",
+      "$3$",
+      "$\\frac{1}{2}$",
+      "$18$"
+    ],
+    "correct_option": "$2$"
+  },
+  {
+    "id": 4,
+    "concept_id": 12,
+    "item_type": "true_false",
+    "question_text": "The gradient of a straight line is different at different points on the line.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "False"
+  },
+  {
+    "id": 5,
+    "concept_id": 13,
+    "item_type": "mcq",
+    "question_text": "What is the gradient of the line $y = 2x + 3$?",
+    "options": [
+      "$2$",
+      "$3$",
+      "$2x$",
+      "$x + 3$"
+    ],
+    "correct_option": "$2$"
+  },
+  {
+    "id": 6,
+    "concept_id": 13,
+    "item_type": "mcq",
+    "question_text": "Where does the line $y = 2x + 3$ cross the $y$-axis?",
+    "options": [
+      "$(0, 3)$",
+      "$(3, 0)$",
+      "$(0, 2)$",
+      "$(2, 3)$"
+    ],
+    "correct_option": "$(0, 3)$"
+  },
+  {
+    "id": 7,
+    "concept_id": 14,
+    "item_type": "true_false",
+    "question_text": "The lines $y = 3x + 1$ and $y = 3x - 4$ are parallel.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "True"
+  },
+  {
+    "id": 8,
+    "concept_id": 1,
+    "item_type": "mcq",
+    "question_text": "If $f(x) = 3x - 1$, what is $f(2)$?",
+    "options": [
+      "$5$",
+      "$6$",
+      "$7$",
+      "$1$"
+    ],
+    "correct_option": "$5$"
+  },
+  {
+    "id": 9,
+    "concept_id": 3,
+    "item_type": "true_false",
+    "question_text": "The graph of $y = x^2$ is a straight line.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "False"
+  },
+  {
+    "id": 10,
+    "concept_id": 20,
+    "item_type": "mcq",
+    "question_text": "On a distance–time graph, what does the gradient show?",
+    "options": [
+      "Speed",
+      "Distance",
+      "Time",
+      "Acceleration"
+    ],
+    "correct_option": "Speed"
+  },
+  {
+    "id": 11,
+    "concept_id": 21,
+    "item_type": "true_false",
+    "question_text": "The area under a speed–time graph gives the distance travelled.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "True"
+  },
+  {
+    "id": 12,
+    "concept_id": 30,
+    "item_type": "true_false",
+    "question_text": "The tangent to a curve at a point has the same gradient as the curve at that point.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "True"
+  },
+  {
+    "id": 13,
+    "concept_id": 31,
+    "item_type": "mcq",
+    "question_text": "What is $\\frac{d}{dx}(x^3)$?",
+    "options": [
+      "$3x^2$",
+      "$x^2$",
+      "$3x^3$",
+      "$\\frac{x^4}{4}$"
+    ],
+    "correct_option": "$3x^2$"
+  },
+  {
+    "id": 14,
+    "concept_id": 32,
+    "item_type": "true_false",
+    "question_text": "At a stationary point, the gradient of the curve is $0$.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "True"
+  },
+  {
+    "id": 15,
+    "concept_id": 41,
+    "item_type": "mcq",
+    "question_text": "What is $\\int_0^2 x \\, dx$?",
+    "options": [
+      "$2$",
+      "$4$",
+      "$1$",
+      "$\\frac{1}{2}$"
+    ],
+    "correct_option": "$2$"
+  },
+  {
+    "id": 16,
+    "concept_id": 11,
+    "item_type": "mcq",
+    "question_text": "What is the midpoint of $(2, 4)$ and $(6, 8)$?",
+    "options": [
+      "$(4, 6)$",
+      "$(8, 12)$",
+      "$(4, 4)$",
+      "$(2, 2)$"
+    ],
+    "correct_option": "$(4, 6)$"
+  },
+  {
+    "id": 17,
+    "concept_id": 12,
+    "item_type": "mcq",
+    "question_text": "Which line is the steepest?",
+    "options": [
+      "$y = 3x + 1$",
+      "$y = x + 5$",
+      "$y = \\frac{1}{2}x$",
+      "$y = 2$"
+    ],
+    "correct_option": "$y = 3x + 1$"
+  },
+  {
+    "id": 18,
+    "concept_id": 13,
+    "item_type": "true_false",
+    "question_text": "In $y = mx + c$, the number $c$ is the gradient.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct_option": "False"
+  }
+]

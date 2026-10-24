@@ -1,7 +1,12 @@
-"""The tables must match the data dictionary of the report (Table 4.8)."""
+"""The tables must match the data dictionary of the report (Table 4.8).
+
+Every entity and attribute of Table 4.8 is there, first and in order, with its type, length and
+nullability. The additions the design needs (docs/PLAN.md §13, gap 3) come after them, and only
+those listed in ADDITIONS are allowed, so nothing is added without being documented.
+"""
 
 import pytest
-from sqlalchemy import Boolean, DateTime, Integer, Numeric, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, Numeric, SmallInteger, String, Text
 
 from app.db import Base
 
@@ -75,14 +80,83 @@ DATA_DICTIONARY = {
 }
 
 
-def test_every_entity_and_no_other_table():
-    assert set(Base.metadata.tables) == set(DATA_DICTIONARY)
+# Additions to Table 4.8 (PLAN §13, gap 3): columns after an entity's own, and extra tables.
+ADDITIONS = {
+    "lesson": {
+        "title": (String, 200, False),
+        "mode": (String, 10, False),
+        "position": (JSON, None, True),
+    },
+    "module": {
+        "title": (String, 200, False),
+        "scene_plan": (JSON, None, True),
+        "render_requests": (JSON, None, True),
+        "cache_key": (String, 64, True),
+        "completed_at": (DateTime, None, True),
+    },
+    "interaction_event": {
+        "beat_index": (Integer, None, True),
+        "position_s": (Float, None, True),
+        "payload": (JSON, None, True),
+    },
+    "check_question": {
+        "item_type": (String, 10, False),
+        "options": (JSON, None, True),
+    },
+    "concept_prerequisite": {
+        "concept_id": (Integer, None, False),
+        "prerequisite_id": (Integer, None, False),
+    },
+    "variant": {
+        "cache_key": (String, 64, False),
+        "level": (SmallInteger, None, False),
+        "voice": (String, 100, False),
+        "library_version": (String, 20, False),
+        "beat_count": (Integer, None, False),
+        "duration_s": (Float, None, False),
+        "created_at": (DateTime, None, False),
+    },
+    "render_job": {
+        "job_id": (Integer, None, False),
+        "module_id": (Integer, None, False),
+        "lesson_id": (Integer, None, False),
+        "cache_key": (String, 64, False),
+        "level": (SmallInteger, None, False),
+        "priority": (SmallInteger, None, False),
+        "status": (String, 20, False),
+        "attempts": (Integer, None, False),
+        "request": (JSON, None, False),
+        "worker": (String, 100, True),
+        "error": (Text, None, True),
+        "log": (Text, None, False),
+        "created_at": (DateTime, None, False),
+        "started_at": (DateTime, None, True),
+        "finished_at": (DateTime, None, True),
+        "duration_s": (Float, None, True),
+    },
+    "stream_event": {
+        "event_id": (Integer, None, False),
+        "lesson_id": (Integer, None, False),
+        "payload": (JSON, None, False),
+        "created_at": (DateTime, None, False),
+    },
+}
 
 
-@pytest.mark.parametrize("table_name", sorted(DATA_DICTIONARY))
+def _expected(table_name: str) -> dict:
+    return DATA_DICTIONARY.get(table_name, {}) | ADDITIONS.get(table_name, {})
+
+
+def test_every_entity_and_only_documented_tables():
+    assert set(DATA_DICTIONARY) <= set(Base.metadata.tables)
+    assert set(Base.metadata.tables) == set(DATA_DICTIONARY) | set(ADDITIONS)
+
+
+@pytest.mark.parametrize("table_name", sorted(set(DATA_DICTIONARY) | set(ADDITIONS)))
 def test_attributes_types_and_nullability(table_name):
     table = Base.metadata.tables[table_name]
-    expected = DATA_DICTIONARY[table_name]
+    expected = _expected(table_name)
+    # Table 4.8's own attributes first and in order, then the additions.
     assert list(table.columns.keys()) == list(expected)
     for column_name, (kind, size, nullable) in expected.items():
         column = table.columns[column_name]
@@ -98,4 +172,7 @@ def test_attributes_types_and_nullability(table_name):
 
 def test_primary_keys_are_the_first_attribute():
     for name, table in Base.metadata.tables.items():
-        assert [c.name for c in table.primary_key] == [next(iter(DATA_DICTIONARY[name]))]
+        if name == "concept_prerequisite":  # an edge: both ends together
+            assert [c.name for c in table.primary_key] == ["concept_id", "prerequisite_id"]
+            continue
+        assert [c.name for c in table.primary_key] == [next(iter(_expected(name)))]

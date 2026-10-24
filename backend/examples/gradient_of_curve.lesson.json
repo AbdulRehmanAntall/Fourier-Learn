@@ -1,0 +1,183 @@
+{
+  "title": "The gradient of a curve",
+  "query_text": "how do you find the gradient of a curve",
+  "level": 2,
+  "modules": [
+    {
+      "title": "From a secant to a tangent",
+      "plan": {
+        "module_id": 1,
+        "concept_id": 30,
+        "segments": [
+          {
+            "primitive_id": "SecantToTangent",
+            "content": { "curve": "x**2", "point_p": "(1, 1)" },
+            "narration_intent": "Secants from P(1, 1) on y = x^2 get closer to the tangent at P as Q moves towards P, and their gradients approach 2.",
+            "glossary_terms": ["gradient", "tangent"]
+          },
+          {
+            "primitive_id": "TangentSlide",
+            "content": { "curve": "x**2", "start": "(-2, 4)", "end": "(2, 4)" },
+            "narration_intent": "Sliding the tangent along y = x^2 shows that the gradient of a curve changes from point to point.",
+            "glossary_terms": ["tangent"]
+          }
+        ],
+        "check_items": [12]
+      },
+      "renders": [
+        {
+          "module_id": 1,
+          "level": 2,
+          "voice": "default",
+          "library_version": "0.1.0",
+          "beats": [
+            {
+              "primitive_id": "SecantToTangent",
+              "params": {
+                "expression": "x**2",
+                "x_min": -1,
+                "x_max": 4,
+                "x0": 1,
+                "h_values": [2, 1, 0.5, 0.1]
+              },
+              "narration": [
+                "Here is the curve y equals x squared. Unlike a straight line, it gets steeper as it goes, so we cannot use one rise over run for the whole curve.",
+                "Mark the point P at 1, 1, and a second point Q further along the curve. The straight line through them is called a secant, and its gradient is 4.",
+                "Now slide Q closer to P. The secant gradient drops to 3, then 2.5, then 2.1.",
+                "As Q reaches P, the secant becomes the tangent at P. Its gradient is 2, and that is the gradient of the curve at P."
+              ],
+              "glossary_terms": ["gradient", "tangent"],
+              "concept_ids": [30]
+            },
+            {
+              "primitive_id": "TangentSlide",
+              "params": {
+                "expression": "x**2",
+                "x_min": -3,
+                "x_max": 3,
+                "x_start": -2,
+                "x_end": 2
+              },
+              "narration": [
+                "Here is y equals x squared again, this time from minus 3 to 3.",
+                "At x equals minus 2, the tangent slopes downwards. Its gradient is minus 4.",
+                "Slide the tangent to the right. The gradient rises through 0 at the bottom of the curve, and at x equals 2 it is 4. A curve has a different gradient at every point."
+              ],
+              "glossary_terms": ["tangent"],
+              "concept_ids": [30]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "The gradient function of x squared",
+      "plan": {
+        "module_id": 2,
+        "concept_id": 31,
+        "segments": [
+          {
+            "primitive_id": "EquationTransform",
+            "content": {
+              "step_1": "((x + h)**2 - x**2)/h",
+              "step_2": "(2*x*h + h**2)/h",
+              "step_3": "2*x + h"
+            },
+            "narration_intent": "The gradient of the secant from x to x + h on y = x^2 simplifies to 2x + h, which becomes 2x as h shrinks to 0.",
+            "glossary_terms": ["derivative"]
+          }
+        ],
+        "check_items": [13]
+      },
+      "renders": [
+        {
+          "module_id": 2,
+          "level": 2,
+          "voice": "default",
+          "library_version": "0.1.0",
+          "beats": [
+            {
+              "primitive_id": "EquationTransform",
+              "params": {
+                "expressions": ["((x + h)**2 - x**2)/h", "(2*x*h + h**2)/h", "2*x + h"]
+              },
+              "narration": [
+                "Take any point x on the curve y equals x squared, and a second point h further along. The gradient of the secant is the change in y, x plus h all squared minus x squared, over the change in x, which is h.",
+                "Expanding the bracket, the x squared terms cancel, leaving 2 x h plus h squared, all over h.",
+                "Dividing by h gives 2 x plus h. As h shrinks to 0, this becomes 2 x. So the derivative of x squared is 2 x, and at x equals 1 the gradient is 2, just as the secants showed."
+              ],
+              "glossary_terms": ["derivative"],
+              "concept_ids": [31]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Where the gradient is zero",
+      "plan": {
+        "module_id": 3,
+        "concept_id": 32,
+        "segments": [
+          {
+            "primitive_id": "TangentSlide",
+            "content": { "curve": "x**3 - 3*x", "start": "(-2, -2)", "end": "(1, -2)" },
+            "narration_intent": "On y = x^3 - 3x the tangent flattens out at x = 1, where the gradient is 0: a stationary point.",
+            "glossary_terms": ["stationary point", "tangent"]
+          },
+          {
+            "primitive_id": "EquationTransform",
+            "content": {
+              "step_1": "3*x**2 - 3 = 0",
+              "step_2": "3*x**2 = 3",
+              "step_3": "x**2 = 1"
+            },
+            "narration_intent": "Setting the derivative 3x^2 - 3 equal to 0 finds the stationary points at x = 1 and x = -1.",
+            "glossary_terms": ["derivative", "stationary point"]
+          }
+        ],
+        "check_items": [14]
+      },
+      "renders": [
+        {
+          "module_id": 3,
+          "level": 2,
+          "voice": "default",
+          "library_version": "0.1.0",
+          "beats": [
+            {
+              "primitive_id": "TangentSlide",
+              "params": {
+                "expression": "x**3 - 3*x",
+                "x_min": -2.5,
+                "x_max": 2.5,
+                "x_start": -2,
+                "x_end": 1
+              },
+              "narration": [
+                "Here is the curve y equals x cubed minus 3 x. It rises, turns, falls, and then rises again.",
+                "At x equals minus 2, the tangent is steep, with a gradient of 9.",
+                "Slide it to the right. The gradient falls, and at x equals 1 the tangent is flat: the gradient is 0. A point where the gradient is 0 is called a stationary point."
+              ],
+              "glossary_terms": ["stationary point", "tangent"],
+              "concept_ids": [32]
+            },
+            {
+              "primitive_id": "EquationTransform",
+              "params": {
+                "expressions": ["3*x**2 - 3 = 0", "3*x**2 = 3", "x**2 = 1"]
+              },
+              "narration": [
+                "To find every stationary point, set the derivative, 3 x squared minus 3, equal to 0.",
+                "Add 3 to both sides: 3 x squared equals 3.",
+                "Divide by 3: x squared equals 1. So x is 1 or minus 1. The curve has two stationary points, one at each turn."
+              ],
+              "glossary_terms": ["derivative", "stationary point"],
+              "concept_ids": [32]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

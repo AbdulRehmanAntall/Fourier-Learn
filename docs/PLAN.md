@@ -294,6 +294,41 @@ without it.
 workers. It becomes a narrated module that plays in the Phase 2 player and starts at the first
 beat. This is a good demo for the FYP-I evaluation.
 
+> **Status: the backend is done.** M2 now needs only the Phase 2 player to play these lessons.
+>
+> **Lane B:**
+>
+> - **The primitive library:** all seven primitives of Table 5.2. The four new ones each have six
+>   harness cases at three levels; all 126 renders pass, and their frames were reviewed.
+> - **Plan checks:** the scene-plan reference check (`app/prompt_interpreter/plan_checks.py`).
+> - **Content files:** the concept taxonomy with prerequisite edges, the glossary and the item bank,
+>   as content files in `backend/content/`. The syllabus codes there are still placeholders.
+>
+> **Lane A:**
+>
+> - **The queue:** the render queue in Postgres, with priorities, three attempts, a lease so a
+>   dead worker's job is taken over, and the variant cache consulted first.
+> - **The worker:** `npm run worker`, also a Docker service.
+> - **The dev endpoint:** `POST /api/dev/render`, which stores a hand-written lesson and queues its
+>   renders. Its lessons play through the same endpoints as the stub's, including a live event
+>   stream. The first beat is playable before the module finishes; a manifest is published after
+>   every beat.
+>
+> **Lane C:**
+>
+> - **The database:** `POST /api/events` writes INTERACTION_EVENT rows, and topics and glossary come
+>   from the database once `npm run db:seed` has loaded `backend/content/`.
+>
+> **Checks:**
+>
+> - Measured on 4 cores at 480p with Kokoro: the example lesson's first module was playable after
+>   27 s, and the whole lesson was ready after 40 s.
+> - The Docker CI job runs that same check.
+> - The database tests run in CI against Postgres.
+>
+> Not in this phase: "I'm Lost" and branch insertion for these lessons (Phase 6), and the learner
+> model updating scores from check answers (Phase 5). The answers are stored now.
+
 | Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A** | **Job queue in Postgres.** The report names no queue, and a Postgres table avoids running Redis (KISS, §6.2.3): a `render_job` table, `SELECT … FOR UPDATE SKIP LOCKED`, and priority, status and attempts columns. A `workers/` process run with `npm run worker`, stateless and scaled by running more copies. 3 retries, with failures logged (§6.4.6). Cache lookup before enqueueing. Media served with FastAPI `StaticFiles`. API: `POST /api/dev/render` (plan JSON → a lesson), and the real `GET /api/lessons/{id}/current-module` and `GET /api/lessons/{id}/events` (SSE: beat ready, module ready, failed) in place of their stubs |
@@ -419,7 +454,11 @@ not blocked. Fix the report text when you next revise it.
 2. **The README says the Code Generator "compiles a lesson plan into Manim scene code".** The
    report says the model writes **parameters only**. → Fixed in the README and the package
    docstring.
-3. **The data model (Table 4.8) is missing things the design needs.** Add:
+3. **The data model (Table 4.8) is missing things the design needs.** Add the following. Phase 3
+   added the prerequisite edges, the item options, the lesson's title, mode and position, the
+   module's plan, render requests, cache key and completion, the variant index, the render
+   queue, the event columns, and a stream_event table for the workers' progress
+   (`backend/app/db/models.py`; `tests/test_db_models.py` lists them).
    - `concept_prerequisite (concept_id, prerequisite_id)`: needed for planning and readiness.
    - `bkt_params` per concept (P(L₀), P(T), P(G), P(S)), plus a likelihood table for each signal.
    - `check_question.options` (JSON) and `item_type` (MCQ or true/false). The wireframes show 4

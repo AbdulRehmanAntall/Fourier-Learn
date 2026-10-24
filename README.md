@@ -3,14 +3,19 @@
 Turn plain-text maths prompts into narrated, animated O-Level maths lessons (Manim), with difficulty
 adapted by a learner model (Bayesian Knowledge Tracing).
 
-> **Status: Phase 1 of [the plan](docs/PLAN.md) is done, and Phase 2 is under way.** The render
-> engine turns a module request (validated primitives, parameters and narration) into a narrated,
-> cached module video at any of the three difficulty levels. The database tables of the data
-> dictionary exist. **Every API endpoint the frontend needs now exists**, served by a stub with
-> sample data and real example videos ([the stub API](#the-stub-api-phase-2)). The screens are
-> being built in Phase 2; the frontend team's guide is [docs/frontend.md](docs/frontend.md).
-> Lesson planning with an LLM, the render queue and the learner model (BKT) are **not**
-> implemented yet; the stub stands in for them.
+> **Status: Phases 1 and 3 of [the plan](docs/PLAN.md) are done in the backend; Phase 2 (the
+> screens) is under way.**
+>
+> - **The render engine** turns a module request (validated primitives, parameters and narration)
+>   into a narrated, cached module video at any of the three difficulty levels. The library has
+>   all seven primitives of the report's Table 5.2.
+> - **The render queue and workers** render hand-written lessons in the background; the first beat
+>   plays before the rest is done ([Lessons through the queue](#lessons-through-the-queue-phase-3)).
+> - **Every API endpoint the frontend needs exists.** Lessons from the queue are served from the
+>   database; the rest is a stub with sample data and real example videos
+>   ([the stub API](#the-stub-api-phase-2)). The frontend team's guide is
+>   [docs/frontend.md](docs/frontend.md).
+> - **Not yet:** lesson planning with an LLM (Phase 4) and the learner model, BKT (Phase 5).
 
 | Part     | Stack                                                                                                |
 | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -120,6 +125,8 @@ docker compose logs -f backend                                # follow logs
 docker compose exec backend python scripts/manim_smoke.py     # Manim smoke test inside Docker
 docker compose exec backend python -m pytest                  # backend tests inside Docker
 docker compose exec backend alembic upgrade head              # migrations inside Docker
+docker compose exec backend python -m app.db.seed             # load backend/content/ into the db
+docker compose logs -f worker                                 # follow the render worker
 docker compose down                                           # stop (database data is kept)
 docker compose down -v                                        # stop and DELETE all volumes (db data, deps)
 ```
@@ -196,6 +203,8 @@ All commands run from the repo root and work on Windows, macOS and Linux.
 | `npm run render -- <file>`  | Render a module request (e.g. `backend/examples/gradient_of_line.L2.render.json`)     |
 | `npm run primitives:check`  | Validate every primitive across its parameter grid at all levels (docs/primitives.md) |
 | `npm run api:types`         | Regenerate the frontend's API types after changing an API schema (CI checks this)     |
+| `npm run db:seed`           | Load the taxonomy, glossary and item bank of `backend/content/` into the database     |
+| `npm run worker`            | Start a render worker: renders queued lessons (`-- --once` for a single job)          |
 
 The npm scripts call `backend/.venv`'s Python directly, so you don't need to activate the venv for
 them.
@@ -248,6 +257,49 @@ How the engine works is described in `backend/app/renderer/engine.py`; measured 
 in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
 [docs/primitives.md](docs/primitives.md).
 
+## Lessons through the queue (Phase 3)
+
+A hand-written lesson can now be rendered the way generated lessons will be: stored in Postgres,
+queued, rendered by a worker in the background, and played through the normal lesson endpoints,
+starting as soon as its first beat is ready. Until the planner exists (Phase 4), the lesson is
+written by hand: a scene plan per module with the primitive parameters and narration at one or
+more levels. `backend/examples/gradient_of_line.lesson.json` is a two-module example.
+
+```bash
+npm run db:migrate          # create the tables (once, and after pulling new migrations)
+npm run db:seed             # load backend/content/ (safe to run again)
+npm run dev                 # Postgres, backend and frontend
+npm run worker              # in a second terminal: renders queued lessons
+```
+
+Then, in <http://localhost:8000/docs>:
+
+1. **Log in.** Use `POST /api/auth/login` with `student@fourierlearn.test` / `password123`.
+2. **Submit the lesson.** `POST /api/dev/render` with the contents of
+   `backend/examples/gradient_of_line.lesson.json` returns a `lesson_id`. A 422 lists every
+   problem found: an unknown primitive, glossary term or check item, or beats that don't match
+   the plan.
+3. **Follow it.** `GET /api/lessons/{lesson_id}/current-module` turns from `preparing` to `ready`
+   once the first beat is rendered. `GET /api/lessons/{lesson_id}/events` streams each beat as it
+   is ready.
+
+Or check the whole path at once: `cd backend && .venv/bin/python scripts/check_dev_lesson.py`
+(Windows: `.venv\Scripts\python`). Add `--lesson examples/gradient_of_curve.lesson.json` to
+run the second example, a three-module calculus lesson (secant to tangent, the gradient function
+of $x^2$, stationary points) built with SecantToTangent, TangentSlide and EquationTransform.
+
+How it works:
+
+- **The render queue** is a Postgres table (`app/scheduler/queue.py`). Workers take jobs by
+  priority with `SELECT … FOR UPDATE SKIP LOCKED`, so you can run several. Each job gets three
+  attempts, logged on the job.
+- **The variant cache** is checked first: a variant already rendered, or being rendered for
+  another lesson, is reused. The cache key includes the voice engine, so a Kokoro video is never
+  served where espeak-ng was asked for.
+- **Ids decide who answers.** Lessons made this way have ids from 1 and are served from the
+  database. The stub's lessons have ids from 1,000,000, so the two live side by side and the
+  frontend uses both through the same endpoints.
+
 ## The stub API (Phase 2)
 
 During Phase 2 every endpoint of the API catalogue ([docs/frontend.md §7](docs/frontend.md#7-api-catalogue))
@@ -289,20 +341,24 @@ restarts.
 │   │   ├── api/routes/            # every /api endpoint (docs/frontend.md §7)
 │   │   ├── api/schemas/           # request and response bodies: the API's contract with the frontend
 │   │   ├── stub/                  # Phase 2: in-memory stub behind the API, with seed data
-│   │   ├── prompt_interpreter/    # placeholder: prompt → structured lesson plan
+│   │   ├── lessons/               # lessons stored in the database, played through the same API
+│   │   ├── content.py             # loads and checks backend/content/ (taxonomy, glossary, items)
+│   │   ├── prompt_interpreter/    # scene-plan reference check now; the LLM planner in Phase 4
 │   │   ├── contracts/             # data shapes shared by all components (docs/contracts.md)
 │   │   ├── code_generator/        # placeholder: scene plan → primitive parameters (no free code)
 │   │   ├── primitives/            # validated Manim primitives, SymPy checks, harness
 │   │   ├── renderer/              # render engine: beats → narrated, cached module video
 │   │   ├── audio_pipeline/        # TTS (Kokoro, espeak-ng, fake); narration scripts come in Phase 4
-│   │   ├── scheduler/             # placeholder: render queue / prefetching
+│   │   ├── scheduler/             # the render queue (queue.py); prefetching comes in Phase 5
 │   │   ├── learner_state/         # placeholder: Bayesian Knowledge Tracing
-│   │   └── workers/               # placeholder: render workers
+│   │   └── workers/               # render workers: npm run worker
 │   ├── alembic/ + alembic.ini     # migrations; URL comes from DATABASE_URL
 │   ├── examples/                  # example scene plan and render requests at L1, L2, L3
+│   ├── content/                   # teaching content as data: concepts, glossary, item bank
 │   ├── fixtures/variants/         # the example module rendered at L1, L2, L3 (the stub's videos)
 │   ├── scripts/manim_smoke.py     # Manim + LaTeX + FFmpeg smoke test
 │   ├── scripts/export_openapi.py  # writes the OpenAPI document for npm run api:types
+│   ├── scripts/check_dev_lesson.py # end-to-end check of the queue path (milestone M2)
 │   ├── tests/                     # pytest (no database needed)
 │   ├── requirements.in            # direct runtime deps (edit this)
 │   ├── requirements.txt           # generated lockfile: every package pinned, all OSes

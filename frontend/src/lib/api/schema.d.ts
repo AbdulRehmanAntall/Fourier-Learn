@@ -133,6 +133,9 @@ export interface paths {
         /**
          * Topics
          * @description The supported syllabus topics. Public: the landing page lists them.
+         *
+         *     From the database once it is seeded (npm run db:seed); until then from the same content
+         *     files, through the stub.
          */
         get: operations["topics_api_topics_get"];
         put?: never;
@@ -235,6 +238,28 @@ export interface paths {
          * @description Submit a topic query. Out-of-scope queries get the list of topics (UC 4.3).
          */
         post: operations["create_lesson_api_lessons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dev/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Dev Lesson
+         * @description Development only: store a hand-written lesson (scene plans with render requests), check
+         *     it (§5.2.3), and queue its renders. A running worker (npm run worker) renders it. The
+         *     lesson then plays like any other; 422 lists every problem found.
+         */
+        post: operations["create_dev_lesson_api_dev_render_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -412,7 +437,8 @@ export interface paths {
         /**
          * Log Events
          * @description A batch of up to 100 events. `im_lost` and `branch_choice` are refused here: their own
-         *     endpoints record them.
+         *     endpoints record them. Events for lessons in the database are stored as INTERACTION_EVENT
+         *     rows; the stub keeps its own.
          */
         post: operations["log_events_api_events_post"];
         delete?: never;
@@ -676,6 +702,30 @@ export interface components {
             concept_ids: number[];
         };
         /**
+         * BeatRenderSpec
+         * @description One beat to render: a primitive, its validated parameters and its narration.
+         */
+        BeatRenderSpec: {
+            /** Primitive Id */
+            primitive_id: string;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Narration */
+            narration: string[];
+            /**
+             * Glossary Terms
+             * @default []
+             */
+            glossary_terms: string[];
+            /**
+             * Concept Ids
+             * @default []
+             */
+            concept_ids: number[];
+        };
+        /**
          * BranchChoiceEvent
          * @description The option selected at a branch point after the module (§5.6.4).
          */
@@ -697,6 +747,18 @@ export interface components {
              * @enum {string}
              */
             option: "theory" | "worked_example" | "next_step";
+        };
+        /**
+         * BranchOption
+         * @description A branch offered after the module, described by its own scene plan (§5.6.4).
+         */
+        BranchOption: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "theory" | "worked_example";
+            plan: components["schemas"]["ScenePlan"];
         };
         /** BranchOptionOut */
         BranchOptionOut: {
@@ -929,6 +991,28 @@ export interface components {
             /** Stage */
             stage?: ("planning" | "parameters" | "narration" | "rendering") | null;
             failure?: components["schemas"]["ModuleFailure"] | null;
+        };
+        /** DevLessonRequest */
+        DevLessonRequest: {
+            /** Title */
+            title: string;
+            /**
+             * Query Text
+             * @default development lesson
+             */
+            query_text: string;
+            /** @default 2 */
+            level: components["schemas"]["Level"];
+            /** Modules */
+            modules: components["schemas"]["DevModule"][];
+        };
+        /** DevModule */
+        DevModule: {
+            /** Title */
+            title: string;
+            plan: components["schemas"]["ScenePlan"];
+            /** Renders */
+            renders: components["schemas"]["ModuleRenderRequest"][];
         };
         /** DiagnosticAnswer */
         DiagnosticAnswer: {
@@ -1232,6 +1316,26 @@ export interface components {
             module_video?: string | null;
         };
         /**
+         * ModuleRenderRequest
+         * @description Render one module at one level (§5.3.4).
+         */
+        ModuleRenderRequest: {
+            /** Module Id */
+            module_id: number;
+            level: components["schemas"]["Level"];
+            /** Voice */
+            voice: string;
+            /** Library Version */
+            library_version: string;
+            /** Beats */
+            beats: components["schemas"]["BeatRenderSpec"][];
+            /**
+             * Render From Beat
+             * @default 0
+             */
+            render_from_beat: number;
+        };
+        /**
          * ModuleStyle
          * @description MODULE.style: theory, worked example, or default.
          *
@@ -1462,6 +1566,48 @@ export interface components {
             to_beat_index: number;
             /** To Position S */
             to_position_s: number;
+        };
+        /**
+         * ScenePlan
+         * @description The plan of one micro-module (Table 5.1).
+         *
+         *     A scene plan carries no difficulty level: the same plan is rendered at every level, and the
+         *     segment list fixes the number and order of segments for every variant (§5.2.3). Unknown
+         *     fields such as "level" are rejected.
+         */
+        ScenePlan: {
+            /** Module Id */
+            module_id: number;
+            /** Concept Id */
+            concept_id: number;
+            /** Segments */
+            segments: components["schemas"]["Segment"][];
+            /** Check Items */
+            check_items: number[];
+            /**
+             * Branch Options
+             * @default []
+             */
+            branch_options: components["schemas"]["BranchOption"][];
+        };
+        /**
+         * Segment
+         * @description One segment (a "beat" in Chapter 6) of a micro-module.
+         */
+        Segment: {
+            /** Primitive Id */
+            primitive_id: string;
+            /** Content */
+            content: {
+                [key: string]: string;
+            };
+            /** Narration Intent */
+            narration_intent: string;
+            /**
+             * Glossary Terms
+             * @default []
+             */
+            glossary_terms: string[];
         };
         /**
          * SpeedChangeEvent
@@ -2030,6 +2176,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LessonCreated"] | components["schemas"]["OutOfScope"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_dev_lesson_api_dev_render_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DevLessonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonCreated"];
                 };
             };
             /** @description Validation Error */

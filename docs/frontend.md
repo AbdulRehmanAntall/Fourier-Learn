@@ -14,6 +14,18 @@ numbers such as "Fig. 4.3" refer to the project report.
 >
 > Start the backend with `npm run dev` (or `npm run dev:backend`), log in with a test account from
 > §8, and browse every endpoint at <http://localhost:8000/docs>.
+>
+> **Phase 3 added real lessons** (README, "Lessons through the queue").
+>
+> - **What they are:** lessons made with `POST /api/dev/render` are rendered by the real queue and
+>   served from the database, through the same endpoints and shapes. Use them to test the player
+>   against real rendering times.
+> - **Telling them apart:** the stub's lessons and modules now have ids from 1,000,000; real ones
+>   from 1. Nothing in the frontend may depend on id values.
+> - **What they can't do yet:** "I'm Lost" and branch choices return 409 until Phase 6, and their
+>   `finish` returns no branch.
+> - **Partial manifests:** for real lessons the manifest really is partial while beats render, so
+>   §6.2's partial-manifest handling can now be tested.
 
 ---
 

@@ -37,6 +37,34 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # Renders the queued lessons (npm run worker). Starts once the backend is up, so the two never
+  # install packages into the shared venv volume at the same time.
+  worker:
+    build: ./backend
+    command: ["python", "-m", "app.workers"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-fourierlearn}:${POSTGRES_PASSWORD:-fourierlearn}@db:5432/${POSTGRES_DB:-fourierlearn}
+      MEDIA_DIR: media
+    volumes:
+      - ./backend:/app
+      - backend_venv:/app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
