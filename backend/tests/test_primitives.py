@@ -159,6 +159,13 @@ def test_catalogue_matches_the_library():
     assert {(p.primitive_id, p.topic, p.version) for p in CATALOGUE} == library
 
 
+def test_every_primitive_has_syllabus_codes():
+    from app.primitives.catalog import SYLLABUS
+
+    assert set(SYLLABUS) == set(PRIMITIVES)
+    assert all(codes.strip() for codes in SYLLABUS.values())
+
+
 def test_tangent_slide_predicates_and_values():
     slide = TangentSlide()
     base = {"expression": "x**3 - 3*x", "x_min": -2.5, "x_max": 2.5, "x_start": -2, "x_end": 0.5}

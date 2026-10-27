@@ -4,9 +4,9 @@ A visual primitive is a parameterised Manim CE component that draws one type of 
 visual (report §5.3.1). Manim code is written only in primitives, before deployment. At runtime
 a language model chooses a primitive and fills in its parameters, and nothing else (§5.3).
 
-The library started with the seven primitives of Table 5.2 and is growing to cover the
-Cambridge O Level Mathematics (4024) syllabus and the calculus of Additional Mathematics (4037
-Unit 14). [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
+The library started with the seven primitives of Table 5.2 and now covers the Cambridge O Level
+Mathematics (4024) syllabus and the calculus of Additional Mathematics (4037 Unit 14), with the
+4037 topics that build on it: 68 primitives. [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
 needs to the primitive that draws it. Lessons combine primitives: a graph primitive on the left
 of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on the right.
 
@@ -87,6 +87,31 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 | `ParallelPerpendicular` | 3.6, 3.7; AM 7 | The parallel or perpendicular line through a point; the perpendicular bisector  |
 | `CoordinateCircle`      | AM 8.1–8.4     | The circle (x − a)² + (y − b)² = r² and where a line cuts, touches or misses it |
 
+### Transformations and vectors (4024 Unit 7)
+
+| Primitive             | Syllabus       | What it shows                                                                  |
+| --------------------- | -------------- | ------------------------------------------------------------------------------ |
+| `TransformationStage` | 7.1            | Reflection, rotation, translation and enlargement on a grid, described in full |
+| `VectorArena`         | 7.2–7.4; AM 13 | Column vectors, magnitude, the triangle law, multiples and vector geometry     |
+
+### Probability (4024 Unit 8)
+
+| Primitive            | Syllabus | What it shows                                                                 |
+| -------------------- | -------- | ----------------------------------------------------------------------------- |
+| `ProbabilitySpinner` | 8.1, 8.2 | Probability from a spinner, the 0 to 1 scale, P(not A) and expected frequency |
+| `TreeDiagram`        | 8.3      | Tree diagrams with or without replacement: multiply along, add the paths      |
+| `SampleSpaceGrid`    | 8.1, 8.3 | The possibility diagram for two events, wanted outcomes marked                |
+
+### Statistics (4024 Unit 9)
+
+| Primitive             | Syllabus | What it shows                                                                       |
+| --------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `ChartBuilder`        | 9.1, 9.4 | Bar charts, pie charts with the angles worked out, stem-and-leaf diagrams           |
+| `AveragesVisualizer`  | 9.2, 9.3 | Mean, median, mode and range from a list, a frequency table or grouped data         |
+| `ScatterBestFit`      | 9.5      | Scatter graphs: correlation, the line of best fit through the mean point, estimates |
+| `CumulativeFrequency` | 9.6      | The cumulative frequency curve: median, quartiles and interquartile range           |
+| `Histogram`           | 9.7      | Histograms with unequal widths: frequency density and estimates from areas          |
+
 ### Calculus and kinematics (4037 Unit 14)
 
 | Primitive                | Syllabus        | What it shows                                                          |
@@ -101,11 +126,12 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 
 ### Trigonometry (4024 Unit 6; 4037 Unit 10)
 
-| Primitive           | Syllabus      | What it shows                                                          |
-| ------------------- | ------------- | ---------------------------------------------------------------------- |
-| `RightTriangleTrig` | 6.1, 6.2      | Pythagoras or SOH CAH TOA, the method chosen from what is known        |
-| `SineCosineRule`    | 6.3           | The sine rule, the cosine rule or ½ab sin C, chosen from what is known |
-| `UnitCircleWaves`   | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c        |
+| Primitive           | Syllabus      | What it shows                                                               |
+| ------------------- | ------------- | --------------------------------------------------------------------------- |
+| `RightTriangleTrig` | 6.1, 6.2      | Pythagoras or SOH CAH TOA, the method chosen from what is known             |
+| `SineCosineRule`    | 6.3           | The sine rule, the cosine rule or ½ab sin C, chosen from what is known      |
+| `Trig3D`            | 6.4           | Lengths and angles in 3D from right-angled triangles in a cuboid or pyramid |
+| `UnitCircleWaves`   | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c             |
 
 The files are named after the primitive in snake case, in `backend/app/primitives/`.
 
@@ -135,11 +161,11 @@ staged primitive's plan at every level for every harness case.
 
 Shared helpers:
 
-| Module        | What it gives                                                                                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `plotting.py` | Axes from data (`make_plot`, optionally with equal units), curves cut where they leave the axes, tables, diagrams, angle marks, labels placed clear of everything else                     |
-| `analysis.py` | Sampling y = f(x), its zeros (exact for rational functions) and its vertical asymptotes                                                                                                    |
-| `symbolic.py` | Safe parsing; numbers exact when simple and to 3 significant figures otherwise (`format_value`, `latex_value`, `format_sf`); expressions in the order a teacher writes them (`tidy_latex`) |
+| Module        | What it gives                                                                                                                                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plotting.py` | Axes from data (`make_plot`, optionally with equal units, or fitted to the data alone without the origin), curves cut where they leave the axes, tables, diagrams, angle marks, labels placed clear of everything else |
+| `analysis.py` | Sampling y = f(x), its zeros (exact for rational functions) and its vertical asymptotes                                                                                                                                |
+| `symbolic.py` | Safe parsing; numbers exact when simple and to 3 significant figures otherwise (`format_value`, `latex_value`, `format_sf`); expressions in the order a teacher writes them (`tidy_latex`)                             |
 
 ## The four elements (§5.3.1)
 
@@ -218,7 +244,8 @@ class TangentSlide(Primitive[TangentSlideParams]):
 
 1. Register the class in `PRIMITIVES` in `backend/app/primitives/library.py`, and describe it
    in `backend/app/primitives/catalog.py`, which the API and the admin pages read without
-   importing Manim (a test keeps the two in step). Bump `LIBRARY_VERSION` in `catalog.py`
+   importing Manim (a test keeps the two in step). Give it its syllabus codes in `SYLLABUS`
+   there too, the same codes as its row in the tables above. Bump `LIBRARY_VERSION` in `catalog.py`
    whenever an existing primitive changes how it draws, so cached videos rendered by older code
    are not reused. Adding a new primitive changes no existing video, so it needs no bump.
 2. Add a grid of parameter sets to `GRIDS` in `backend/app/primitives/harness.py`, spanning the

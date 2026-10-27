@@ -90,37 +90,37 @@ level; **planned** means it is not built yet.
 
 ## F. Trigonometry (4024 Unit 6) `EXT`
 
-| #   | Visual                         | Syllabus            | Primitive           | Status  |
-| --- | ------------------------------ | ------------------- | ------------------- | ------- |
-| 38  | Right-triangle trigonometry    | 6.1, 6.2            | `RightTriangleTrig` | done    |
-| 39  | Sine and cosine rule solver    | 6.3                 | `SineCosineRule`    | done    |
-| 40  | Trigonometry in 3D             | 6.4                 | —                   | planned |
-| 41  | Unit circle and waves `AM-EXT` | AM 10.2, 10.3; 2.11 | `UnitCircleWaves`   | done    |
+| #   | Visual                         | Syllabus            | Primitive           | Status |
+| --- | ------------------------------ | ------------------- | ------------------- | ------ |
+| 38  | Right-triangle trigonometry    | 6.1, 6.2            | `RightTriangleTrig` | done   |
+| 39  | Sine and cosine rule solver    | 6.3                 | `SineCosineRule`    | done   |
+| 40  | Trigonometry in 3D             | 6.4                 | `Trig3D`            | done   |
+| 41  | Unit circle and waves `AM-EXT` | AM 10.2, 10.3; 2.11 | `UnitCircleWaves`   | done   |
 
 ## G. Transformations and vectors (4024 Unit 7) `EXT`
 
-| #   | Visual               | Syllabus       | Primitive | Status  |
-| --- | -------------------- | -------------- | --------- | ------- |
-| 42  | Transformation stage | 7.1            | —         | planned |
-| 43  | Vector arena         | 7.2–7.4; AM 13 | —         | planned |
+| #   | Visual               | Syllabus       | Primitive             | Status |
+| --- | -------------------- | -------------- | --------------------- | ------ |
+| 42  | Transformation stage | 7.1            | `TransformationStage` | done   |
+| 43  | Vector arena         | 7.2–7.4; AM 13 | `VectorArena`         | done   |
 
 ## H. Probability (4024 Unit 8) `EXT`
 
-| #   | Visual                        | Syllabus | Primitive | Status  |
-| --- | ----------------------------- | -------- | --------- | ------- |
-| 44  | Probability scale and spinner | 8.1, 8.2 | —         | planned |
-| 45  | Tree diagram                  | 8.3      | —         | planned |
-| 46  | Sample space grid             | 8.3      | —         | planned |
+| #   | Visual                        | Syllabus | Primitive            | Status |
+| --- | ----------------------------- | -------- | -------------------- | ------ |
+| 44  | Probability scale and spinner | 8.1, 8.2 | `ProbabilitySpinner` | done   |
+| 45  | Tree diagram                  | 8.3      | `TreeDiagram`        | done   |
+| 46  | Sample space grid             | 8.3      | `SampleSpaceGrid`    | done   |
 
 ## I. Statistics (4024 Unit 9) `EXT`
 
-| #   | Visual                           | Syllabus | Primitive | Status  |
-| --- | -------------------------------- | -------- | --------- | ------- |
-| 47  | Chart builder                    | 9.1, 9.4 | —         | planned |
-| 48  | Averages visualiser              | 9.2, 9.3 | —         | planned |
-| 49  | Scatter and best fit             | 9.5      | —         | planned |
-| 50  | Cumulative frequency ogive       | 9.6      | —         | planned |
-| 51  | Histogram with frequency density | 9.7      | —         | planned |
+| #   | Visual                           | Syllabus | Primitive             | Status |
+| --- | -------------------------------- | -------- | --------------------- | ------ |
+| 47  | Chart builder                    | 9.1, 9.4 | `ChartBuilder`        | done   |
+| 48  | Averages visualiser              | 9.2, 9.3 | `AveragesVisualizer`  | done   |
+| 49  | Scatter and best fit             | 9.5      | `ScatterBestFit`      | done   |
+| 50  | Cumulative frequency ogive       | 9.6      | `CumulativeFrequency` | done   |
+| 51  | Histogram with frequency density | 9.7      | `Histogram`           | done   |
 
 ## J. Calculus and kinematics (4037 Unit 14) `CORE`
 

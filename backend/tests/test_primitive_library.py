@@ -762,3 +762,136 @@ def test_compass_construction():
     )
     no_triangle = {"construction": "triangle", "sides": [1, 2, 5]}
     assert predicates("CompassConstruction", no_triangle) == ["triangle_exists"]
+
+
+# Probability, statistics, transformations, vectors and 3D trigonometry
+
+
+def test_tree_diagram():
+    bag = {"outcomes": ["R", "B"], "counts": [3, 2], "replace": False, "find": ["R,B", "B,R"]}
+    assert values("TreeDiagram", bag)["probability"] == "3/5"
+    coins = {
+        "outcomes": ["H", "T"],
+        "probabilities": ["1/2", "1/2"],
+        "events": 3,
+        "find": ["H,H,H"],
+    }
+    assert values("TreeDiagram", coins)["probability"] == "1/8"
+    bad = {"outcomes": ["R", "B"], "probabilities": ["1/2", "1/3"], "find": ["R,R"]}
+    assert predicates("TreeDiagram", bad) == ["sum_one"]
+
+
+def test_sample_space_grid():
+    dice = [str(i) for i in range(1, 7)]
+    seven = values("SampleSpaceGrid", {"first": dice, "second": dice, "value": 7})
+    assert (seven["favourable"], seven["probability"]) == ("6", "1/6")
+    six = {"first": dice, "second": dice, "condition": "contains", "contains": "6"}
+    assert values("SampleSpaceGrid", six)["probability"] == "11/36"
+
+
+def test_probability_spinner():
+    spinner = {
+        "sectors": ["red", "blue", "red", "green", "red", "blue"],
+        "event": "red",
+        "trials": 120,
+    }
+    result = values("ProbabilitySpinner", spinner)
+    assert (result["probability"], result["not"], result["expected"]) == ("1/2", "1/2", "60")
+
+
+def test_chart_builder():
+    pie = {
+        "chart": "pie",
+        "categories": ["Bus", "Car", "Walk", "Cycle"],
+        "frequencies": [12, 8, 15, 5],
+    }
+    angles = values("ChartBuilder", pie)
+    assert (angles["Bus"], angles["Walk"], angles["total"]) == ("108", "135", "40")
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (
+            {"kind": "list", "data": [4, 7, 2, 9, 7, 3, 5, 7, 6]},
+            {"mean": "5.56", "median": "6", "mode": "7", "range": "7"},
+        ),
+        (
+            {"kind": "table", "values": [0, 1, 2, 3, 4], "frequencies": [3, 7, 6, 3, 1]},
+            {"mean": "1.6", "median": "1.5", "mode": "1"},
+        ),
+        (
+            {"kind": "grouped", "bounds": [0, 10, 20, 30, 40], "frequencies": [4, 9, 12, 5]},
+            {"mean": "21", "modal_class": "20 - 30", "median_class": "20 - 30"},
+        ),
+    ],
+)
+def test_averages_visualizer(raw, expected):
+    result = values("AveragesVisualizer", raw)
+    assert {k: result[k] for k in expected} == expected
+
+
+def test_scatter_best_fit():
+    raw = {
+        "points": [[2, 52], [3, 55], [5, 61], [6, 60], [8, 70], [9, 71], [11, 78]],
+        "estimate_x": 7,
+    }
+    result = values("ScatterBestFit", raw)
+    assert (result["correlation"], result["estimate"]) == ("Strong positive", "65.9")
+    none = {"points": [[1, 5], [2, 1], [3, 6], [4, 2], [5, 5], [6, 3]]}
+    assert values("ScatterBestFit", none)["correlation"] == "No"
+
+
+def test_cumulative_frequency_and_histogram():
+    ogive = values(
+        "CumulativeFrequency",
+        {"bounds": [0, 10, 20, 30, 40, 50], "frequencies": [4, 11, 19, 12, 4]},
+    )
+    assert (ogive["median"], ogive["iqr"]) == ("25.3", "14.2")
+    histogram = {
+        "bounds": [0, 10, 15, 20, 30, 50],
+        "frequencies": [8, 12, 15, 14, 6],
+        "between": [12, 25],
+    }
+    result = values("Histogram", histogram)
+    assert (result["density_2"], result["estimate"]) == ("2.4", "29.2")
+
+
+@pytest.mark.parametrize(
+    ("raw", "image"),
+    [
+        (
+            {"kind": "enlargement", "shape": [[1, 1], [3, 1], [1, 2]], "scale": 2},
+            "(2, 2); (6, 2); (2, 4)",
+        ),
+        (
+            {"kind": "rotation", "shape": [[1, 1], [3, 1], [1, 2]], "angle": 90, "clockwise": True},
+            "(1, -1); (1, -3); (2, -1)",
+        ),
+        (
+            {
+                "kind": "reflection",
+                "shape": [[1, 1], [3, 1], [1, 2]],
+                "mirror": "x=a",
+                "line_value": 4,
+            },
+            "(7, 1); (5, 1); (7, 2)",
+        ),
+    ],
+)
+def test_transformation_stage(raw, image):
+    assert values("TransformationStage", raw)["image"] == image
+
+
+def test_vector_arena():
+    assert values("VectorArena", {"kind": "magnitude", "a": [3, 4]})["magnitude"] == "5"
+    assert values("VectorArena", {"kind": "add", "a": [3, 1], "b": [1, 3]})["result"] == "(4, 4)"
+    midpoint = {"kind": "geometry", "a": [4, 0], "b": [2, 4], "ratio": [1, 1]}
+    assert values("VectorArena", midpoint)["result"] == "(3, 2)"
+
+
+def test_trig_3d():
+    cuboid = values("Trig3D", {"solid": "cuboid", "length": 8, "width": 6, "height": 5})
+    assert (cuboid["shadow"], cuboid["line"], cuboid["angle"]) == ("10", "11.2", "26.6")
+    pyramid = values("Trig3D", {"solid": "pyramid", "length": 6, "width": 6, "height": 8})
+    assert (pyramid["line"], pyramid["angle"]) == ("9.06", "62.1")

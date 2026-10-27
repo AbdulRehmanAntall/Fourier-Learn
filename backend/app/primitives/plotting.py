@@ -65,25 +65,27 @@ def make_plot(
     x_from_zero: bool = False,
     left_margin: float | None = None,
     x_axis: tuple[float, float, float] | None = None,
+    origin: bool = True,
 ) -> Plot:
     """Axes whose ranges contain the values and the origin, filling the region below the title
     band. With `equal`, one unit is the same length on both axes, so right angles and circles
     look right. `y_ticks` is about how many numbered ticks the y-axis gets; fewer suit a
     short panel. `x_from_zero` starts the x-axis at 0, as a time axis does. `left_margin` puts
     the left end of the x-axis that far from the box's left edge, so stacked plots share one
-    x-scale whatever their tick numbers."""
+    x-scale whatever their tick numbers. Without `origin` the axes fit the values alone and
+    meet at the bottom-left corner."""
     if title:
         title_box, plot_box = style.graph_boxes(region)
     else:
         plot_box = style.region_box(region).shrink(style.PADDING)
         title_box = Box(plot_box.left, plot_box.right, plot_box.top, plot_box.top)
     upper, lower = style.title_lines(title_box)
-    x_range = axis_range(list(x_values))
+    x_range = axis_range(list(x_values), origin=origin)
     if x_from_zero and min(x_values) >= 0:
         x_range = (0, *x_range[1:])
     if x_axis is not None:  # a fixed axis, such as 0 to 360 degrees in steps of 90
         x_range = x_axis
-    y_range = axis_range(list(y_values), y_ticks)
+    y_range = axis_range(list(y_values), y_ticks, origin=origin)
     if equal:
         step = max(x_range[2], y_range[2])
         x_range = _aligned(x_range, step)
@@ -136,9 +138,25 @@ def make_plot(
     )
 
 
-def axis_range(values: Sequence[float], ticks: int = 6) -> tuple[float, float, float]:
+def axis_range(
+    values: Sequence[float], ticks: int = 6, origin: bool = True
+) -> tuple[float, float, float]:
     """`style.axis_range` with a chosen number of ticks: a range with nice ticks that contains
-    the values and the origin (with a tick of margin when there are 6 or more ticks)."""
+    the values and the origin (with a tick of margin when there are 6 or more ticks). Without
+    `origin` the range fits the values alone, as a scatter graph of heights does."""
+    if not origin:
+        lo, hi = min(values), max(values)
+        if hi - lo < 1e-9:
+            lo, hi = lo - 1, hi + 1
+        step = style.nice_step(hi - lo, ticks)
+        start, end = math.floor(lo / step) * step, math.ceil(hi / step) * step
+        # a value exactly on the end of the axis gets a tick of room, so it is not on the axis;
+        # 0 is a natural start and keeps it (a cumulative frequency starts at 0)
+        start -= step if math.isclose(start, lo) and lo != 0 else 0
+        end += step if math.isclose(end, hi) else 0
+        if float(step).is_integer():
+            return int(start), int(end), int(step)
+        return start, end, step
     lo, hi = min(0.0, *values), max(0.0, *values)
     if hi - lo < 1e-9:
         lo, hi = lo - 1, hi + 1
