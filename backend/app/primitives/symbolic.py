@@ -341,3 +341,25 @@ def _negative(term: sp.Expr) -> bool:
 def _is_fraction(expr: sp.Expr) -> bool:
     _, denominator = sp.fraction(sp.together(expr))
     return denominator != 1 and not denominator.is_number
+
+
+def latex_with_pi(value: sp.Expr, approx: bool = True) -> str:
+    """A number that may be a multiple of pi, exactly: 20\\pi, \\frac{25}{9\\pi}, with its
+    3 s.f. value beside it when `approx`; otherwise as `latex_approx`."""
+    value = sp.nsimplify(value, [sp.pi])
+    for power in (1, -1):
+        ratio = sp.nsimplify(value / sp.pi**power)
+        if value.has(sp.pi) and isinstance(ratio, sp.Rational) and abs(ratio.q) <= 1000:
+            numerator, denominator = ratio.p, ratio.q
+            if power == 1:
+                top = (
+                    r"\pi"
+                    if numerator == 1
+                    else (r"-\pi" if numerator == -1 else rf"{numerator}\pi")
+                )
+                exact_tex = top if denominator == 1 else rf"\frac{{{top}}}{{{denominator}}}"
+            else:
+                bottom = r"\pi" if denominator == 1 else rf"{denominator}\pi"
+                exact_tex = rf"\frac{{{numerator}}}{{{bottom}}}"
+            return rf"{exact_tex} \approx {format_sf(value)}" if approx else exact_tex
+    return latex_approx(value) if approx else latex_value(value)

@@ -37,6 +37,26 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 | `FunctionMachine`   | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse            |
 | `GraphicalSolution` | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                          |
 
+### Coordinate geometry (4024 Unit 3)
+
+| Primitive               | Syllabus       | What it shows                                                                   |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------- |
+| `CoordinatePlotter`     | 3.1, 3.4       | Two points, the midpoint, and the length from the right-angled triangle         |
+| `LineBuilder`           | 3.2, 3.3, 3.5  | y = mx + c from the y-intercept and a gradient step; the form ax + by = c       |
+| `ParallelPerpendicular` | 3.6, 3.7; AM 7 | The parallel or perpendicular line through a point; the perpendicular bisector  |
+| `CoordinateCircle`      | AM 8.1–8.4     | The circle (x − a)² + (y − b)² = r² and where a line cuts, touches or misses it |
+
+### Calculus and kinematics (4037 Unit 14)
+
+| Primitive                | Syllabus        | What it shows                                                          |
+| ------------------------ | --------------- | ---------------------------------------------------------------------- |
+| `DerivativePanels`       | AM 14.6, 14.9   | f above f′ with a linked cursor; rising, falling and stationary points |
+| `DifferentiationStepper` | AM 14.3, 14.4   | The power, chain, product and quotient rules, line by line             |
+| `TangentNormal`          | AM 14.5         | The tangent and the normal at a point, with their equations            |
+| `AreaBetweenCurves`      | AM 14.10–14.13  | The area between two graphs as the integral of upper minus lower       |
+| `KinematicsGraphs`       | AM 14.14, 14.15 | s, v and a against t beside a moving particle; when it is at rest      |
+| `OptimisationScene`      | AM 14.8         | A practical maximum or minimum with the model beside its graph         |
+
 The files are named after the primitive in snake case, in `backend/app/primitives/`.
 
 The three calculus primitives that draw y = f(x) share `backend/app/primitives/curves.py`: the

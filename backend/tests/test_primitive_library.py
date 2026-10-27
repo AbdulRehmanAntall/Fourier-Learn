@@ -209,3 +209,132 @@ def test_graphical_solution():
     assert predicates("GraphicalSolution", raw | {"line": "x**2"}) == ["different_graphs"]
     exponential = {"curve": "2**x", "line": "3 - x", "x_min": -2, "x_max": 4}
     assert values("GraphicalSolution", exponential)["solution_1"] == "1"
+
+
+# Coordinate geometry
+
+
+def test_coordinate_plotter():
+    result = values("CoordinatePlotter", {"point_a": [1, 2], "point_b": [4, 8]})
+    assert (result["midpoint"], result["length"]) == ("(5/2, 5)", "3 root 5")
+    assert values("CoordinatePlotter", {"point_a": [0, 0], "point_b": [3, 4]})["length"] == "5"
+    same = {"point_a": [1, 1], "point_b": [1, 1]}
+    assert predicates("CoordinatePlotter", same) == ["distinct_points"]
+
+
+def test_line_builder():
+    result = values("LineBuilder", {"gradient": -0.5, "intercept": 3})
+    assert (result["run"], result["rise"], result["x_intercept"]) == ("2", "-1", "6")
+    assert result["general_form"] == "x + 2*y = 6"
+    assert values("LineBuilder", {"gradient": 2, "intercept": -1})["general_form"] == "2*x - y = 1"
+
+
+def test_parallel_perpendicular():
+    perpendicular = {"mode": "perpendicular", "gradient": 2, "intercept": 1, "point": [4, 1]}
+    result = values("ParallelPerpendicular", perpendicular)
+    assert (result["new_gradient"], result["new_line"]) == ("-1/2", "y = 3 - x/2")
+    parallel = perpendicular | {"mode": "parallel"}
+    assert values("ParallelPerpendicular", parallel)["new_line"] == "y = 2*x - 7"
+    flat = perpendicular | {"gradient": 0}
+    assert values("ParallelPerpendicular", flat)["new_line"] == "x = 4"
+    bisector = {"mode": "bisector", "point_a": [-2, 1], "point_b": [4, 5]}
+    result = values("ParallelPerpendicular", bisector)
+    assert (result["midpoint"], result["new_gradient"]) == ("(1, 3)", "-3/2")
+    assert predicates("ParallelPerpendicular", {"mode": "parallel", "gradient": 1}) == [
+        "needs_line_and_point"
+    ]
+    assert predicates("ParallelPerpendicular", {"mode": "bisector"}) == ["needs_two_points"]
+
+
+def test_coordinate_circle():
+    raw = {"centre": [2, 1], "radius": 5, "line_gradient": 1, "line_intercept": 4}
+    result = values("CoordinateCircle", raw)
+    assert (result["meets"], result["meet_1"], result["meet_2"]) == ("2", "(-3, 1)", "(2, 6)")
+    assert result["expanded"] == "x**2 - 4*x + y**2 - 2*y - 20 = 0"
+    tangent = {"centre": [0, 0], "radius": 5, "line_gradient": 0.75, "line_intercept": 6.25}
+    assert values("CoordinateCircle", tangent)["meets"] == "1"
+    miss = {"centre": [0, 0], "radius": 1, "line_gradient": 1, "line_intercept": 5}
+    assert values("CoordinateCircle", miss)["meets"] == "0"
+    half_line = {"centre": [0, 0], "radius": 1, "line_gradient": 1}
+    assert predicates("CoordinateCircle", half_line) == ["whole_line"]
+
+
+# Calculus
+
+
+def test_derivative_panels():
+    result = values("DerivativePanels", {"expression": "x**3 - 3*x", "x_min": -2.5, "x_max": 2.5})
+    assert result["derivative"] == "3*x**2 - 3"
+    assert (result["stationary_1"], result["stationary_1_kind"]) == ("(-1, 2)", "maximum")
+    assert (result["stationary_2"], result["stationary_2_kind"]) == ("(1, -2)", "minimum")
+    corner = {"expression": "abs(x)", "x_min": -2, "x_max": 2}
+    assert predicates("DerivativePanels", corner) == ["differentiable"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "derivative"),
+    [
+        ({"rule": "power", "expression": "3*x**4 - 2/x"}, "12*x**3 + 2/x**2"),
+        ({"rule": "chain", "inner": "3*x + 1", "outer": "u**5"}, "15*(3*x + 1)**4"),
+        ({"rule": "product", "u": "x**2", "v": "x - 1"}, "x*(3*x - 2)"),
+        ({"rule": "quotient", "u": "2*x + 1", "v": "x - 3"}, "-7/(x - 3)**2"),
+    ],
+)
+def test_differentiation_stepper(raw, derivative):
+    assert values("DifferentiationStepper", raw)["derivative"] == derivative
+
+
+def test_differentiation_stepper_predicates():
+    assert predicates("DifferentiationStepper", {"rule": "chain", "inner": "x"}) == ["rule_inputs"]
+    not_powers = {"rule": "power", "expression": "sin(x)"}
+    assert predicates("DifferentiationStepper", not_powers) == ["power_terms"]
+    trivial = {"rule": "chain", "inner": "3*x", "outer": "u"}
+    assert predicates("DifferentiationStepper", trivial) == ["outer_not_u"]
+    at_pole = {"rule": "power", "expression": "1/x", "at_x": 0}
+    assert predicates("DifferentiationStepper", at_pole) == ["gradient_defined"]
+    at_one = {"rule": "power", "expression": "x**3", "at_x": 2}
+    assert values("DifferentiationStepper", at_one)["gradient_at_x"] == "12"
+
+
+def test_tangent_normal():
+    raw = {"expression": "x**2 - 2*x", "x_min": -1, "x_max": 4, "x0": 2.5}
+    result = values("TangentNormal", raw)
+    assert (result["tangent"], result["normal"]) == ("y = 3*x - 25/4", "y = 25/12 - x/3")
+    flat = {"expression": "x**3 - 3*x", "x_min": -2, "x_max": 2, "x0": 1}
+    assert values("TangentNormal", flat)["normal"] == "x = 1"
+    outside = raw | {"x0": 7}
+    assert predicates("TangentNormal", outside) == ["point_in_interval"]
+
+
+def test_area_between_curves():
+    assert values("AreaBetweenCurves", {"upper": "4 - x**2", "lower": "x + 2"})["area"] == "9/2"
+    assert values("AreaBetweenCurves", {"upper": "sqrt(x)", "lower": "x**2"})["area"] == "1/3"
+    swapped = {"upper": "x + 2", "lower": "4 - x**2"}
+    assert predicates("AreaBetweenCurves", swapped) == ["upper_above_lower"]
+    apart = {"upper": "x**2 + 5", "lower": "x"}
+    assert predicates("AreaBetweenCurves", apart) == ["limits_found"]
+
+
+def test_kinematics_graphs():
+    raw = {"expression": "t**3 - 6*t**2 + 9*t", "t_max": 4}
+    result = values("KinematicsGraphs", raw)
+    assert (result["velocity"], result["acceleration"]) == ("3*t**2 - 12*t + 9", "6*t - 12")
+    assert (result["rest_1_time"], result["rest_2_time"]) == ("1", "3")
+    assert result["rest_1_displacement"] == "4"
+    velocity = {"given": "velocity", "expression": "12 - 3*t**2", "s0": 2, "t_max": 3}
+    result = values("KinematicsGraphs", velocity)
+    assert (result["displacement"], result["rest_1_time"]) == ("-t**3 + 12*t + 2", "2")
+
+
+@pytest.mark.parametrize(
+    ("scenario", "size", "best", "value"),
+    [
+        ("open_box", 12, "2", "128"),
+        ("fence_wall", 40, "10", "200"),
+        ("rectangle", 20, "5", "25"),
+        ("cylinder", 500, "4.3", "349"),
+    ],
+)
+def test_optimisation_scene(scenario, size, best, value):
+    result = values("OptimisationScene", {"scenario": scenario, "size": size})
+    assert (result["best_x"], result["best_value"]) == (best, value)

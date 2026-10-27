@@ -61,18 +61,29 @@ def make_plot(
     y_label: str = "y",
     equal: bool = False,
     title: bool = True,
+    y_ticks: int = 6,
+    x_from_zero: bool = False,
+    left_margin: float | None = None,
+    x_axis: tuple[float, float, float] | None = None,
 ) -> Plot:
     """Axes whose ranges contain the values and the origin, filling the region below the title
     band. With `equal`, one unit is the same length on both axes, so right angles and circles
-    look right."""
+    look right. `y_ticks` is about how many numbered ticks the y-axis gets; fewer suit a
+    short panel. `x_from_zero` starts the x-axis at 0, as a time axis does. `left_margin` puts
+    the left end of the x-axis that far from the box's left edge, so stacked plots share one
+    x-scale whatever their tick numbers."""
     if title:
         title_box, plot_box = style.graph_boxes(region)
     else:
         plot_box = style.region_box(region).shrink(style.PADDING)
         title_box = Box(plot_box.left, plot_box.right, plot_box.top, plot_box.top)
     upper, lower = style.title_lines(title_box)
-    x_range = style.axis_range(list(x_values))
-    y_range = style.axis_range(list(y_values))
+    x_range = axis_range(list(x_values))
+    if x_from_zero and min(x_values) >= 0:
+        x_range = (0, *x_range[1:])
+    if x_axis is not None:  # a fixed axis, such as 0 to 360 degrees in steps of 90
+        x_range = x_axis
+    y_range = axis_range(list(y_values), y_ticks)
     if equal:
         step = max(x_range[2], y_range[2])
         x_range = _aligned(x_range, step)
@@ -104,6 +115,15 @@ def make_plot(
     )
     centre = plot_box.center + np.array([-room_x / 2, -room_y / 2, 0])
     axes.move_to(centre)
+    # Wide tick numbers (such as 15000) would push the axes out of their box: shrink to fit.
+    if axes.width > plot_box.width - room_x or axes.height > plot_box.height - room_y:
+        axes.scale(
+            min((plot_box.width - room_x) / axes.width, (plot_box.height - room_y) / axes.height)
+        )
+        axes.move_to(centre)
+    if left_margin is not None:
+        start = axes.c2p(x_range[0], y_range[0])[0]
+        axes.shift([plot_box.left + left_margin - start, 0, 0])
     return Plot(
         axes,
         axes.get_x_axis_label(x_tex),
@@ -114,6 +134,23 @@ def make_plot(
         upper,
         lower,
     )
+
+
+def axis_range(values: Sequence[float], ticks: int = 6) -> tuple[float, float, float]:
+    """`style.axis_range` with a chosen number of ticks: a range with nice ticks that contains
+    the values and the origin (with a tick of margin when there are 6 or more ticks)."""
+    lo, hi = min(0.0, *values), max(0.0, *values)
+    if hi - lo < 1e-9:
+        lo, hi = lo - 1, hi + 1
+    step = style.nice_step(hi - lo, ticks)
+    # With few ticks a whole tick of margin would squash the graph; the range still ends on a
+    # tick beyond the values.
+    margin = step if ticks >= 6 else 0
+    start = math.floor(lo / step) * step - margin
+    end = math.ceil(hi / step) * step + margin
+    if float(step).is_integer():
+        return int(start), int(end), int(step)
+    return start, end, step
 
 
 def _aligned(axis: tuple[float, float, float], step: float) -> tuple[float, float, float]:
@@ -289,9 +326,13 @@ def angle_mark(
         mark.set_points_as_corners(corner)
         return mark
     return Arc(
-        radius=radius, start_angle=start, angle=sweep, arc_center=vertex, color=colour,
+        radius=radius,
+        start_angle=start,
+        angle=sweep,
+        arc_center=vertex,
+        color=colour,
         stroke_width=3,
-    )  # fmt: skip
+    )
 
 
 def angle_label_position(

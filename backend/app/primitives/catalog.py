@@ -129,6 +129,73 @@ CATALOGUE = [
         "Solves f(x) = g(x) by drawing both graphs and reading off the x-coordinates "
         "where they meet.",
     ),
+    PrimitiveInfo(
+        "CoordinatePlotter",
+        "Coordinate geometry",
+        "1",
+        "Plots two points and finds the midpoint and the length of the segment joining them.",
+    ),
+    PrimitiveInfo(
+        "LineBuilder",
+        "Coordinate geometry",
+        "1",
+        "Builds y = mx + c from the y-intercept and a gradient step, and rearranges it "
+        "to ax + by = c.",
+    ),
+    PrimitiveInfo(
+        "ParallelPerpendicular",
+        "Coordinate geometry",
+        "1",
+        "Finds the line through a point parallel or perpendicular to a line, or the "
+        "perpendicular bisector of AB.",
+    ),
+    PrimitiveInfo(
+        "DerivativePanels",
+        "Introductory calculus",
+        "1",
+        "Shows y = f(x) above its gradient function, with a linked cursor, rising and "
+        "falling parts and stationary points.",
+    ),
+    PrimitiveInfo(
+        "DifferentiationStepper",
+        "Introductory calculus",
+        "1",
+        "Works a derivative line by line with the power, chain, product or quotient rule.",
+    ),
+    PrimitiveInfo(
+        "TangentNormal",
+        "Introductory calculus",
+        "1",
+        "Draws the tangent and the normal to a curve at a point and finds their equations.",
+    ),
+    PrimitiveInfo(
+        "AreaBetweenCurves",
+        "Introductory calculus",
+        "1",
+        "Finds the area between two graphs as the integral of upper minus lower, shown "
+        "as thin strips.",
+    ),
+    PrimitiveInfo(
+        "KinematicsGraphs",
+        "Travel graphs and kinematics",
+        "1",
+        "Stacks displacement, velocity and acceleration against time beside a moving "
+        "particle; marks when it is at rest.",
+    ),
+    PrimitiveInfo(
+        "OptimisationScene",
+        "Introductory calculus",
+        "1",
+        "Solves a practical maximum or minimum (open box, fencing, rectangle, cylinder) "
+        "with the model beside its graph.",
+    ),
+    PrimitiveInfo(
+        "CoordinateCircle",
+        "Coordinate geometry",
+        "1",
+        "Draws the circle (x - a)^2 + (y - b)^2 = r^2 and finds where a line cuts it, "
+        "touches it or misses it.",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)

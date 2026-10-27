@@ -106,20 +106,27 @@ def combine(name: str, description: str, min_run_time: float, *stages: Stage) ->
     show: list[str] = []
     hide: list[str] = []
     morph: list[tuple[str, str]] = []
+    gone: set[str] = set()  # parts that leave the screen during the step
     for current in stages:
         for old, new in current.morph:
+            gone.add(old)
             if old in show:
                 show[show.index(old)] = new
             else:
                 morph.append((old, new))
         for item in current.show:
             show.append(item)
+            gone.discard(item)
         for item in current.hide:
+            gone.add(item)
             if item in show:
                 show.remove(item)
             else:
                 hide.append(item)
-    emphasise = tuple(n for s in stages for n in s.emphasise if n in show or n not in hide)
+    # Emphasise only what is still on screen at the end of the step.
+    emphasise = tuple(
+        dict.fromkeys(n for s in stages for n in s.emphasise if n in show or n not in gone)
+    )
     return Stage(name, description, min_run_time, tuple(show), tuple(hide), tuple(morph), emphasise)
 
 

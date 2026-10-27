@@ -60,12 +60,12 @@ level; **planned** means it is not built yet.
 
 ## C. Coordinate geometry (4024 Unit 3) `CORE`
 
-| #   | Visual                           | Syllabus              | Primitive          | Status  |
-| --- | -------------------------------- | --------------------- | ------------------ | ------- |
-| 23  | Coordinate plotter               | 3.1, 3.4, links 6.1   | `GradientTriangle` | planned |
-| 24  | Line builder                     | 3.2, 3.3, 3.5         | `GradientTriangle` | planned |
-| 25  | Parallel and perpendicular lines | 3.6, 3.7; AM 7.2, 7.3 | —                  | planned |
-| 26  | Coordinate circle `AM-EXT`       | AM 8.1–8.4            | —                  | planned |
+| #   | Visual                           | Syllabus              | Primitive                               | Status |
+| --- | -------------------------------- | --------------------- | --------------------------------------- | ------ |
+| 23  | Coordinate plotter               | 3.1, 3.4, links 6.1   | `CoordinatePlotter`, `GradientTriangle` | done   |
+| 24  | Line builder                     | 3.2, 3.3, 3.5         | `LineBuilder`, `GradientTriangle`       | done   |
+| 25  | Parallel and perpendicular lines | 3.6, 3.7; AM 7.2, 7.3 | `ParallelPerpendicular`                 | done   |
+| 26  | Coordinate circle `AM-EXT`       | AM 8.1–8.4            | `CoordinateCircle`                      | done   |
 
 ## D. Geometry (4024 Unit 4) `EXT`
 
@@ -124,12 +124,12 @@ level; **planned** means it is not built yet.
 
 ## J. Calculus and kinematics (4037 Unit 14) `CORE`
 
-| #   | Visual                          | Syllabus             | Primitive                         | Status  |
-| --- | ------------------------------- | -------------------- | --------------------------------- | ------- |
-| 52  | Secant to tangent               | AM 14.1–14.5; 2.10.4 | `SecantToTangent`, `TangentSlide` | done    |
-| 53  | Function-derivative twin panels | AM 14.6, 14.9        | —                                 | planned |
-| 54  | Differentiation stepper         | AM 14.3, 14.4        | `EquationTransform` (partly)      | planned |
-| 55  | Optimisation scene              | AM 14.8              | —                                 | planned |
-| 56  | Connected rates                 | AM 14.7              | —                                 | planned |
-| 57  | Area under a curve              | AM 14.10–14.13       | `AreaUnderCurve`                  | done    |
-| 58  | Kinematics triple graph         | AM 14.14, 14.15      | —                                 | planned |
+| #   | Visual                          | Syllabus             | Primitive                                          | Status  |
+| --- | ------------------------------- | -------------------- | -------------------------------------------------- | ------- |
+| 52  | Secant to tangent               | AM 14.1–14.5; 2.10.4 | `SecantToTangent`, `TangentSlide`, `TangentNormal` | done    |
+| 53  | Function-derivative twin panels | AM 14.6, 14.9        | `DerivativePanels`                                 | done    |
+| 54  | Differentiation stepper         | AM 14.3, 14.4        | `DifferentiationStepper`                           | done    |
+| 55  | Optimisation scene              | AM 14.8              | `OptimisationScene`                                | done    |
+| 56  | Connected rates                 | AM 14.7              | —                                                  | planned |
+| 57  | Area under a curve              | AM 14.10–14.13       | `AreaUnderCurve`, `AreaBetweenCurves`              | done    |
+| 58  | Kinematics triple graph         | AM 14.14, 14.15      | `KinematicsGraphs`, `TravelGraph`                  | done    |
