@@ -266,6 +266,69 @@ CATALOGUE = [
         "Shows fractions as bars and grids: equivalent fractions, adding, subtracting, "
         "multiplying and dividing.",
     ),
+    PrimitiveInfo(
+        "PercentageBar",
+        "Number",
+        "1",
+        "Shows percentages as bars: a percentage of an amount, increase and decrease, "
+        "reverse percentage and percentage change.",
+    ),
+    PrimitiveInfo(
+        "StandardForm",
+        "Number",
+        "1",
+        "Writes a number in standard form by moving the decimal point place by place, "
+        "and multiplies or divides in standard form.",
+    ),
+    PrimitiveInfo(
+        "IndexLaws",
+        "Number",
+        "1",
+        "Simplify with the laws of indices, each step labelled with the law it uses",
+    ),
+    PrimitiveInfo(
+        "SurdSimplifier",
+        "Number",
+        "1",
+        "Surds simplified with the largest square factor, collected, and denominators rationalised",
+    ),
+    PrimitiveInfo(
+        "RatioSplitter",
+        "Number",
+        "1",
+        "Sharing in a ratio with a bar model: one unit from what is known, then each share",
+    ),
+    PrimitiveInfo(
+        "BoundsInterval",
+        "Number",
+        "1",
+        "Upper and lower bounds on a zoomed number line, and the bounds of a calculation",
+    ),
+    PrimitiveInfo(
+        "ClockTimetable",
+        "Number",
+        "1",
+        "12- and 24-hour clock times, time intervals by counting on, timetables and "
+        "currency exchange",
+    ),
+    PrimitiveInfo(
+        "AngleChaser",
+        "Geometry",
+        "1",
+        "Unknown angles from the angle facts: lines, points, parallel lines and triangles",
+    ),
+    PrimitiveInfo(
+        "PolygonAngles",
+        "Geometry",
+        "1",
+        "Interior angle sums by triangles, exterior angles as one turn, and sides from an angle",
+    ),
+    PrimitiveInfo(
+        "CircleTheorems",
+        "Geometry",
+        "1",
+        "The circle theorems drawn true to size, the unknown angle found and the theorem named",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)

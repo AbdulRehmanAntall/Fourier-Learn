@@ -28,20 +28,20 @@ level; **planned** means it is not built yet.
 
 ## A. Number (4024 Unit 1) `EXT`
 
-| #   | Visual                 | Syllabus                 | Primitive         | Status  |
-| --- | ---------------------- | ------------------------ | ----------------- | ------- |
-| 1   | Number line            | 1.1, 1.4, 1.5, 1.9, 1.10 | `NumberLine`      | done    |
-| 2   | Prime factor tree      | 1.1                      | `PrimeFactorTree` | done    |
-| 3   | Venn diagram           | 1.2, 8.3                 | `VennDiagram`     | done    |
-| 4   | Fraction area model    | 1.4, 1.6                 | `FractionModel`   | done    |
-| 5   | Percentage bar         | 1.13                     | —                 | planned |
-| 6   | Growth and decay curve | 1.13.4, 1.17, 2.10.3     | `GrowthDecay`     | done    |
-| 7   | Powers-of-ten zoom     | 1.7, 1.8                 | —                 | planned |
-| 8   | Index laws stepper     | 1.7, 2.4                 | —                 | planned |
-| 9   | Surd simplifier        | 1.18                     | —                 | planned |
-| 10  | Ratio bar splitter     | 1.11, 1.12               | —                 | planned |
-| 11  | Bounds interval        | 1.10                     | —                 | planned |
-| 12  | Clock and timetable    | 1.15, 1.16               | —                 | planned |
+| #   | Visual                 | Syllabus                 | Primitive         | Status |
+| --- | ---------------------- | ------------------------ | ----------------- | ------ |
+| 1   | Number line            | 1.1, 1.4, 1.5, 1.9, 1.10 | `NumberLine`      | done   |
+| 2   | Prime factor tree      | 1.1                      | `PrimeFactorTree` | done   |
+| 3   | Venn diagram           | 1.2, 8.3                 | `VennDiagram`     | done   |
+| 4   | Fraction area model    | 1.4, 1.6                 | `FractionModel`   | done   |
+| 5   | Percentage bar         | 1.13                     | `PercentageBar`   | done   |
+| 6   | Growth and decay curve | 1.13.4, 1.17, 2.10.3     | `GrowthDecay`     | done   |
+| 7   | Powers-of-ten zoom     | 1.7, 1.8                 | `StandardForm`    | done   |
+| 8   | Index laws stepper     | 1.7, 2.4                 | `IndexLaws`       | done   |
+| 9   | Surd simplifier        | 1.18                     | `SurdSimplifier`  | done   |
+| 10  | Ratio bar splitter     | 1.11, 1.12               | `RatioSplitter`   | done   |
+| 11  | Bounds interval        | 1.10                     | `BoundsInterval`  | done   |
+| 12  | Clock and timetable    | 1.15, 1.16               | `ClockTimetable`  | done   |
 
 ## B. Algebra and graphs (4024 Unit 2) `CORE`
 
@@ -69,16 +69,16 @@ level; **planned** means it is not built yet.
 
 ## D. Geometry (4024 Unit 4) `EXT`
 
-| #   | Visual               | Syllabus       | Primitive | Status  |
-| --- | -------------------- | -------------- | --------- | ------- |
-| 27  | Angle chaser         | 4.6.1, 4.6.2   | —         | planned |
-| 28  | Polygon angle walker | 4.6.3          | —         | planned |
-| 29  | Circle theorem stage | 4.7, 4.8       | —         | planned |
-| 30  | Similarity scaler    | 4.4, links 7.1 | —         | planned |
-| 31  | Bearings navigator   | 4.3            | —         | planned |
-| 32  | Symmetry reveal      | 4.5            | —         | planned |
-| 33  | Net folder           | 4.1, 4.2.3     | —         | planned |
-| 34  | Compass construction | 4.2            | —         | planned |
+| #   | Visual               | Syllabus       | Primitive        | Status  |
+| --- | -------------------- | -------------- | ---------------- | ------- |
+| 27  | Angle chaser         | 4.6.1, 4.6.2   | `AngleChaser`    | done    |
+| 28  | Polygon angle walker | 4.6.3          | `PolygonAngles`  | done    |
+| 29  | Circle theorem stage | 4.7, 4.8       | `CircleTheorems` | done    |
+| 30  | Similarity scaler    | 4.4, links 7.1 | —                | planned |
+| 31  | Bearings navigator   | 4.3            | —                | planned |
+| 32  | Symmetry reveal      | 4.5            | —                | planned |
+| 33  | Net folder           | 4.1, 4.2.3     | —                | planned |
+| 34  | Compass construction | 4.2            | —                | planned |
 
 ## E. Mensuration (4024 Unit 5) `EXT`
 

@@ -49,6 +49,21 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 | `VennDiagram`     | 1.2; 8.3                 | Sets as elements or counts, with a set expression shaded               |
 | `FractionModel`   | 1.4, 1.6                 | Fractions as bars and area models: equivalence and the four operations |
 | `GrowthDecay`     | 1.13.4, 1.17             | Compound interest, growth and decay as a table of years and a curve    |
+| `PercentageBar`   | 1.13                     | Percentages as bars: of an amount, increase, decrease, reverse, change |
+| `StandardForm`    | 1.7, 1.8                 | A number written as A × 10ⁿ by hopping the decimal point; × and ÷      |
+| `IndexLaws`       | 1.7, 2.4                 | An expression simplified one index law at a time, each law shown       |
+| `SurdSimplifier`  | 1.18                     | Surds simplified, collected, and denominators rationalised             |
+| `RatioSplitter`   | 1.11, 1.12               | Sharing in a ratio with a bar model; simplifying a ratio               |
+| `BoundsInterval`  | 1.10                     | Upper and lower bounds on a number line, and bounds of a calculation   |
+| `ClockTimetable`  | 1.15, 1.16               | Clock times, intervals by counting on, timetables, currency exchange   |
+
+### Geometry (4024 Unit 4)
+
+| Primitive        | Syllabus     | What it shows                                                                      |
+| ---------------- | ------------ | ---------------------------------------------------------------------------------- |
+| `AngleChaser`    | 4.6.1, 4.6.2 | Unknown angles from the angle facts: lines, points, parallel lines, triangles      |
+| `PolygonAngles`  | 4.6.3        | Interior angle sums by triangles, exterior angles as one turn, sides from an angle |
+| `CircleTheorems` | 4.7, 4.8     | The circle theorems drawn true to size, the unknown angle found and named          |
 
 ### Coordinate geometry (4024 Unit 3)
 

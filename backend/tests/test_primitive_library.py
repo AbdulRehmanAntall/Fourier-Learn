@@ -332,7 +332,7 @@ def test_kinematics_graphs():
         ("open_box", 12, "2", "128"),
         ("fence_wall", 40, "10", "200"),
         ("rectangle", 20, "5", "25"),
-        ("cylinder", 500, "4.3", "349"),
+        ("cylinder", 500, "4.30", "349"),
     ],
 )
 def test_optimisation_scene(scenario, size, best, value):
@@ -489,3 +489,147 @@ def test_fraction_model_predicates():
         values("FractionModel", {"operation": "add", "first": "3/4", "second": "2/3"})["mixed"]
         == "1 5/12"
     )
+
+
+# Number and geometry
+
+
+@pytest.mark.parametrize(
+    ("raw", "answer"),
+    [
+        ({"kind": "increase", "amount": 80, "percent": 15}, "92.00"),
+        ({"kind": "of", "amount": 240, "percent": 35}, "84.00"),
+        ({"kind": "reverse_increase", "amount": 69, "percent": 15}, "60.00"),
+        ({"kind": "reverse_decrease", "amount": 340, "percent": 15}, "400.00"),
+        ({"kind": "change", "amount": 40, "new_amount": 52}, "30"),
+    ],
+)
+def test_percentage_bar(raw, answer):
+    assert values("PercentageBar", raw)["answer"] == answer
+
+
+def test_percentage_bar_predicates():
+    assert predicates("PercentageBar", {"kind": "decrease", "amount": 10, "percent": 120}) == [
+        "decrease_below_100"
+    ]
+    assert predicates("PercentageBar", {"kind": "change", "amount": 10}) == ["needs_new_amount"]
+
+
+def test_standard_form():
+    assert values("StandardForm", {"number": "34500000"})["standard_form"] == "3.45 x 10^7"
+    assert values("StandardForm", {"number": "0.000345"})["standard_form"] == "3.45 x 10^-4"
+    calc = {"number": "0.0072", "operation": "divide", "other": "900000"}
+    assert values("StandardForm", calc)["result"] == "8 x 10^-9"
+    assert predicates("StandardForm", {"number": "0"}) == ["nonzero"]
+
+
+def test_index_laws():
+    raw = {
+        "lines": ["27**(2/3)", "(27**(1/3))**2", "3**2", "9"],
+        "laws": ["power", "fractional", "evaluate"],
+    }
+    assert predicates("IndexLaws", raw) == []
+    assert values("IndexLaws", raw)["result"] == "9"
+    wrong = {"lines": ["x**3 * x**4", "x**12"], "laws": ["multiply"]}
+    assert predicates("IndexLaws", wrong) == ["step_equivalent"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "answer"),
+    [
+        ({"kind": "simplify", "number": 72}, "6*sqrt(2)"),
+        ({"kind": "combine", "expression": "2*sqrt(12) + sqrt(27) - sqrt(3)"}, "6*sqrt(3)"),
+        (
+            {"kind": "rationalise", "numerator": "6", "denominator": "3 - sqrt(5)"},
+            "(3*sqrt(5) + 9)/2",
+        ),
+    ],
+)
+def test_surd_simplifier(raw, answer):
+    assert values("SurdSimplifier", raw)["answer"] == answer
+
+
+def test_surd_simplifier_predicates():
+    assert predicates("SurdSimplifier", {"kind": "simplify", "number": 49}) == ["not_square"]
+    assert predicates("SurdSimplifier", {"kind": "simplify", "number": 30}) == ["has_square_factor"]
+    two_sums = {"kind": "rationalise", "numerator": "1", "denominator": "1 + 2 + sqrt(3)"}
+    assert predicates("SurdSimplifier", two_sums) == ["two_terms"]
+
+
+def test_ratio_splitter():
+    share = values(
+        "RatioSplitter", {"ratio": [2, 3], "names": ["Ali", "Sara"], "kind": "share", "amount": 40}
+    )
+    assert (share["Ali"], share["Sara"]) == ("16", "24")
+    difference = {"ratio": [2, 5], "kind": "difference", "amount": 45}
+    assert values("RatioSplitter", difference)["total"] == "105"
+    assert values("RatioSplitter", {"ratio": [12, 18], "kind": "simplify"})["simplest"] == "2:3"
+    assert predicates("RatioSplitter", {"ratio": [2, 3], "kind": "simplify"}) == ["can_simplify"]
+
+
+def test_bounds_interval():
+    single = values("BoundsInterval", {"value": "340", "sf": 2})
+    assert (single["lower_bound"], single["upper_bound"]) == ("335", "345")
+    calc = {
+        "value": "250",
+        "nearest": "10",
+        "operation": "subtract",
+        "other": "80",
+        "other_nearest": "5",
+    }
+    result = values("BoundsInterval", calc)
+    assert (result["largest"], result["smallest"]) == ("177.5", "162.5")
+    assert predicates("BoundsInterval", {"value": "7.45", "nearest": "0.1"}) == ["value_rounded"]
+
+
+def test_clock_timetable():
+    assert values("ClockTimetable", {"kind": "convert", "start": "00:25"})["twelve_hour"] == (
+        "12:25 am"
+    )
+    overnight = {"kind": "interval", "start": "22:45", "end": "01:10"}
+    assert values("ClockTimetable", overnight)["duration"] == "2 h 25 min"
+    exchange = {"kind": "exchange", "amount": 250, "rate": 278.5}
+    assert values("ClockTimetable", exchange)["result"] == "69625.00"
+    backwards = {
+        "kind": "timetable",
+        "stops": ["A", "B"],
+        "times": [["09:00"], ["08:00"]],
+        "board": 0,
+        "leave": 1,
+    }
+    assert predicates("ClockTimetable", backwards) == ["times_increase"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "x"),
+    [
+        ({"layout": "line", "angles": ["2*x", "x + 30", "60"]}, "30"),
+        ({"layout": "point", "angles": ["110", "3*x", "2*x + 50"]}, "40"),
+        ({"layout": "triangle", "angles": ["65", "x", "130"], "exterior": True}, "65"),
+        ({"layout": "parallel", "given": 70, "given_at": "upper_bl", "find_at": "lower_tl"}, "110"),
+        ({"layout": "parallel", "given": 70, "given_at": "upper_tr", "find_at": "lower_bl"}, "70"),
+    ],
+)
+def test_angle_chaser(raw, x):
+    assert values("AngleChaser", raw)["x"] == x
+
+
+def test_polygon_angles():
+    assert values("PolygonAngles", {"kind": "interior_sum", "sides": 8})["interior_angle"] == "135"
+    found = values("PolygonAngles", {"kind": "find_sides", "angle": 140, "given": "interior"})
+    assert found["sides"] == "9"
+    assert predicates("PolygonAngles", {"kind": "find_sides", "angle": 25}) == ["whole_sides"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "x"),
+    [
+        ({"theorem": "semicircle", "given": 35}, "55"),
+        ({"theorem": "centre", "given": 40}, "80"),
+        ({"theorem": "centre", "given": 130, "given_at": "centre"}, "65"),
+        ({"theorem": "cyclic_quadrilateral", "given": 75}, "105"),
+        ({"theorem": "two_tangents", "given": 70}, "55"),
+    ],
+)
+def test_circle_theorems(raw, x):
+    assert values("CircleTheorems", raw)["x"] == x

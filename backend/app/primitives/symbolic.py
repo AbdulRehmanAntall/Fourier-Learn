@@ -243,7 +243,8 @@ def _number(value) -> str:
 def format_sf(value: sp.Expr | float, figures: int = 3) -> str:
     """A number to `figures` significant figures, as O Level states non-exact answers: 3.61,
     1250, 0.0123. Halves round up (2.625 to 2.63), from the exact value, not from a float.
-    Whole numbers are shown in full."""
+    Whole numbers are shown in full. Trailing zeros are kept when the value was rounded (18.03
+    is 18.0) and dropped when it is exact (2.5, not 2.50)."""
     exact_value = sp.N(value, 30)
     number = float(exact_value)
     if number == 0:
@@ -255,7 +256,10 @@ def format_sf(value: sp.Expr | float, figures: int = 3) -> str:
     rounded = Decimal(str(exact_value)).quantize(quantum, rounding=ROUND_HALF_UP)
     if places <= 0:
         return str(int(rounded))
-    text = format(rounded, "f").rstrip("0").rstrip(".")
+    text = format(rounded, "f")
+    exact = abs(rounded - Decimal(str(exact_value))) <= Decimal("1e-12") * abs(rounded)
+    if exact:
+        text = text.rstrip("0").rstrip(".")
     return "0" if float(text) == 0 else text
 
 
