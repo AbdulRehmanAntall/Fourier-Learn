@@ -4,7 +4,13 @@ A visual primitive is a parameterised Manim CE component that draws one type of 
 visual (report §5.3.1). Manim code is written only in primitives, before deployment. At runtime
 a language model chooses a primitive and fills in its parameters, and nothing else (§5.3).
 
-The library holds the seven primitives of Table 5.2:
+The library started with the seven primitives of Table 5.2 and now covers the Cambridge O Level
+Mathematics (4024) syllabus and the calculus of Additional Mathematics (4037 Unit 14), with the
+4037 topics that build on it: 68 primitives. [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
+needs to the primitive that draws it. Lessons combine primitives: a graph primitive on the left
+of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on the right.
+
+### Table 5.2
 
 | Primitive           | Topic                        | What it shows                                                   | File                                           |
 | ------------------- | ---------------------------- | --------------------------------------------------------------- | ---------------------------------------------- |
@@ -16,6 +22,119 @@ The library holds the seven primitives of Table 5.2:
 | `AreaUnderCurve`    | Introductory calculus        | The area under a curve between two limits, by integration       | `backend/app/primitives/area_under_curve.py`   |
 | `EquationTransform` | All topics                   | A derivation step by step, changed terms highlighted            | `backend/app/primitives/equation_transform.py` |
 
+### Algebra and graphs (4024 Unit 2)
+
+| Primitive               | Syllabus     | What it shows                                                                 |
+| ----------------------- | ------------ | ----------------------------------------------------------------------------- |
+| `AlgebraBalance`        | 2.1–2.3, 2.5 | Solving an equation or changing the subject by doing the same to both sides   |
+| `ExpansionGrid`         | 2.2, 2.5.5   | Expanding brackets or factorising with a grid (area) model                    |
+| `CompletingSquare`      | 2.5.5; AM 2  | Completing the square as an area, with the missing corner                     |
+| `QuadraticExplorer`     | 2.5.5, 2.11  | A parabola's roots, discriminant, vertex, axis of symmetry and completed form |
+| `InequalityRegion`      | 2.6          | Regions of linear inequalities, unwanted side shaded, region R labelled       |
+| `SequencePattern`       | 2.7          | The nth term from differences or a ratio, with optional dot patterns          |
+| `ProportionGraph`       | 2.8          | Direct and inverse proportion: y = kxⁿ, k from a known pair                   |
+| `CurveSketch`           | 2.11; AM 4.4 | A sketched curve with intercepts, turning points and asymptotes               |
+| `FunctionMachine`       | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse            |
+| `GraphicalSolution`     | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                          |
+| `SimultaneousEquations` | 2.5          | Two equations solved by elimination or substitution, line by line             |
+| `TableOfValues`         | 2.10         | A table of values filled in, then the points plotted and joined               |
+| `InverseGraph`          | 2.12; AM 1   | f and f⁻¹ as reflections in y = x, with a point and its image                 |
+
+### Number (4024 Unit 1)
+
+| Primitive         | Syllabus                 | What it shows                                                          |
+| ----------------- | ------------------------ | ---------------------------------------------------------------------- |
+| `NumberLine`      | 1.1, 1.4, 1.5, 1.9, 1.10 | Numbers, intervals and inequalities on a line, open and closed circles |
+| `PrimeFactorTree` | 1.1                      | A factor tree, index form, and HCF and LCM from a Venn diagram         |
+| `VennDiagram`     | 1.2; 8.3                 | Sets as elements or counts, with a set expression shaded               |
+| `FractionModel`   | 1.4, 1.6                 | Fractions as bars and area models: equivalence and the four operations |
+| `GrowthDecay`     | 1.13.4, 1.17             | Compound interest, growth and decay as a table of years and a curve    |
+| `PercentageBar`   | 1.13                     | Percentages as bars: of an amount, increase, decrease, reverse, change |
+| `StandardForm`    | 1.7, 1.8                 | A number written as A × 10ⁿ by hopping the decimal point; × and ÷      |
+| `IndexLaws`       | 1.7, 2.4                 | An expression simplified one index law at a time, each law shown       |
+| `SurdSimplifier`  | 1.18                     | Surds simplified, collected, and denominators rationalised             |
+| `RatioSplitter`   | 1.11, 1.12               | Sharing in a ratio with a bar model; simplifying a ratio               |
+| `BoundsInterval`  | 1.10                     | Upper and lower bounds on a number line, and bounds of a calculation   |
+| `ClockTimetable`  | 1.15, 1.16               | Clock times, intervals by counting on, timetables, currency exchange   |
+
+### Geometry (4024 Unit 4)
+
+| Primitive             | Syllabus     | What it shows                                                                           |
+| --------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| `AngleChaser`         | 4.6.1, 4.6.2 | Unknown angles from the angle facts: lines, points, parallel lines, triangles           |
+| `PolygonAngles`       | 4.6.3        | Interior angle sums by triangles, exterior angles as one turn, sides from an angle      |
+| `CircleTheorems`      | 4.7, 4.8     | The circle theorems drawn true to size, the unknown angle found and named               |
+| `SimilarityScaler`    | 4.4          | Similar shapes: the scale factor, a missing length, areas by k² and volumes by k³       |
+| `Bearings`            | 4.3          | Three-figure bearings from north, back bearings, east and north parts of a journey      |
+| `SymmetryReveal`      | 4.5          | Lines of symmetry and the order of rotational symmetry, found from the vertices         |
+| `NetFolder`           | 4.1, 4.2.3   | The net of a solid face by face, its faces, edges and vertices, its surface area        |
+| `CompassConstruction` | 4.2          | Ruler-and-compasses constructions arc by arc: bisectors and a triangle from three sides |
+
+### Mensuration (4024 Unit 5)
+
+| Primitive          | Syllabus      | What it shows                                                                         |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------- |
+| `AreaDissector`    | 5.2           | Area formulas by cutting and moving pieces: parallelogram, triangle, trapezium        |
+| `CircleSector`     | 5.3; AM 9     | Arc length, sector area and perimeter, segment area and the angle, degrees or radians |
+| `SolidMensuration` | 5.1, 5.4, 5.5 | Volume and surface area of prisms, cylinders, cones, pyramids and spheres             |
+
+### Coordinate geometry (4024 Unit 3)
+
+| Primitive               | Syllabus       | What it shows                                                                   |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------- |
+| `CoordinatePlotter`     | 3.1, 3.4       | Two points, the midpoint, and the length from the right-angled triangle         |
+| `LineBuilder`           | 3.2, 3.3, 3.5  | y = mx + c from the y-intercept and a gradient step; the form ax + by = c       |
+| `ParallelPerpendicular` | 3.6, 3.7; AM 7 | The parallel or perpendicular line through a point; the perpendicular bisector  |
+| `CoordinateCircle`      | AM 8.1–8.4     | The circle (x − a)² + (y − b)² = r² and where a line cuts, touches or misses it |
+
+### Transformations and vectors (4024 Unit 7)
+
+| Primitive             | Syllabus       | What it shows                                                                  |
+| --------------------- | -------------- | ------------------------------------------------------------------------------ |
+| `TransformationStage` | 7.1            | Reflection, rotation, translation and enlargement on a grid, described in full |
+| `VectorArena`         | 7.2–7.4; AM 13 | Column vectors, magnitude, the triangle law, multiples and vector geometry     |
+
+### Probability (4024 Unit 8)
+
+| Primitive            | Syllabus | What it shows                                                                 |
+| -------------------- | -------- | ----------------------------------------------------------------------------- |
+| `ProbabilitySpinner` | 8.1, 8.2 | Probability from a spinner, the 0 to 1 scale, P(not A) and expected frequency |
+| `TreeDiagram`        | 8.3      | Tree diagrams with or without replacement: multiply along, add the paths      |
+| `SampleSpaceGrid`    | 8.1, 8.3 | The possibility diagram for two events, wanted outcomes marked                |
+
+### Statistics (4024 Unit 9)
+
+| Primitive             | Syllabus | What it shows                                                                       |
+| --------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `ChartBuilder`        | 9.1, 9.4 | Bar charts, pie charts with the angles worked out, stem-and-leaf diagrams           |
+| `AveragesVisualizer`  | 9.2, 9.3 | Mean, median, mode and range from a list, a frequency table or grouped data         |
+| `ScatterBestFit`      | 9.5      | Scatter graphs: correlation, the line of best fit through the mean point, estimates |
+| `CumulativeFrequency` | 9.6      | The cumulative frequency curve: median, quartiles and interquartile range           |
+| `Histogram`           | 9.7      | Histograms with unequal widths: frequency density and estimates from areas          |
+
+### Calculus and kinematics (4037 Unit 14)
+
+| Primitive                | Syllabus        | What it shows                                                          |
+| ------------------------ | --------------- | ---------------------------------------------------------------------- |
+| `DerivativePanels`       | AM 14.6, 14.9   | f above f′ with a linked cursor; rising, falling and stationary points |
+| `DifferentiationStepper` | AM 14.3, 14.4   | The power, chain, product and quotient rules, line by line             |
+| `TangentNormal`          | AM 14.5         | The tangent and the normal at a point, with their equations            |
+| `AreaBetweenCurves`      | AM 14.10–14.13  | The area between two graphs as the integral of upper minus lower       |
+| `KinematicsGraphs`       | AM 14.14, 14.15 | s, v and a against t beside a moving particle; when it is at rest      |
+| `OptimisationScene`      | AM 14.8         | A practical maximum or minimum with the model beside its graph         |
+| `ConnectedRates`         | AM 14.7         | dA/dt = dA/dr × dr/dt for a growing circle, square, sphere or cube     |
+
+### Trigonometry (4024 Unit 6; 4037 Unit 10)
+
+| Primitive           | Syllabus      | What it shows                                                               |
+| ------------------- | ------------- | --------------------------------------------------------------------------- |
+| `RightTriangleTrig` | 6.1, 6.2      | Pythagoras or SOH CAH TOA, the method chosen from what is known             |
+| `SineCosineRule`    | 6.3           | The sine rule, the cosine rule or ½ab sin C, chosen from what is known      |
+| `Trig3D`            | 6.4           | Lengths and angles in 3D from right-angled triangles in a cuboid or pyramid |
+| `UnitCircleWaves`   | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c             |
+
+The files are named after the primitive in snake case, in `backend/app/primitives/`.
+
 The three calculus primitives that draw y = f(x) share `backend/app/primitives/curves.py`: the
 parameter schema of f and its interval, the parsing, domain and continuity predicates, the
 check that f has a gradient (no corners), and drawing the axes, curve and equation. Decimals in
@@ -23,6 +142,30 @@ f are made exact first, so 0.5x² differentiates to x, not 1.0x.
 
 New primitives arrive when scene plans show a visual the library cannot draw (§5.3.1). Copy the
 closest existing primitive and follow the rules below.
+
+## Building a primitive from stages
+
+Most primitives after Table 5.2 are `StagedPrimitive`s (`backend/app/primitives/staged.py`).
+Instead of writing `steps` and `animate` separately, a staged primitive:
+
+1. builds every object of its picture once, by name (`build`), already laid out in its region;
+2. lists the steps that reveal them at each level (`stages`): each `stage(...)` shows parts,
+   hides them, morphs one into another, or emphasises them. `combine` merges stages into one
+   step, and `by_level` writes the Level 2 and 3 steps from the Level 1 ones;
+3. names a `motion` method for a step whose picture moves continuously, such as a sliding point.
+
+The step list, the animation and the layout check's object names then come from one plan, so
+they cannot disagree. Every step ends on its finished picture for a moment (`FINAL_HOLD_S`), so
+a step's last frame is never caught mid-stroke. `tests/test_primitive_library.py` checks every
+staged primitive's plan at every level for every harness case.
+
+Shared helpers:
+
+| Module        | What it gives                                                                                                                                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plotting.py` | Axes from data (`make_plot`, optionally with equal units, or fitted to the data alone without the origin), curves cut where they leave the axes, tables, diagrams, angle marks, labels placed clear of everything else |
+| `analysis.py` | Sampling y = f(x), its zeros (exact for rational functions) and its vertical asymptotes                                                                                                                                |
+| `symbolic.py` | Safe parsing; numbers exact when simple and to 3 significant figures otherwise (`format_value`, `latex_value`, `format_sf`); expressions in the order a teacher writes them (`tidy_latex`)                             |
 
 ## The four elements (§5.3.1)
 
@@ -101,7 +244,8 @@ class TangentSlide(Primitive[TangentSlideParams]):
 
 1. Register the class in `PRIMITIVES` in `backend/app/primitives/library.py`, and describe it
    in `backend/app/primitives/catalog.py`, which the API and the admin pages read without
-   importing Manim (a test keeps the two in step). Bump `LIBRARY_VERSION` in `catalog.py`
+   importing Manim (a test keeps the two in step). Give it its syllabus codes in `SYLLABUS`
+   there too, the same codes as its row in the tables above. Bump `LIBRARY_VERSION` in `catalog.py`
    whenever an existing primitive changes how it draws, so cached videos rendered by older code
    are not reused. Adding a new primitive changes no existing video, so it needs no bump.
 2. Add a grid of parameter sets to `GRIDS` in `backend/app/primitives/harness.py`, spanning the

@@ -25,7 +25,10 @@ def predicates(primitive, raw):
 
 
 def test_library_holds_every_primitive_of_table_5_2():
-    assert set(PRIMITIVES) == {
+    # Table 5.2 is the core; the library grows beyond it (docs/primitives.md).
+    from app.primitives.catalog import PRIMITIVE_IDS
+
+    assert {
         "FunctionGraph",
         "GradientTriangle",
         "TangentSlide",
@@ -33,7 +36,8 @@ def test_library_holds_every_primitive_of_table_5_2():
         "TravelGraph",
         "AreaUnderCurve",
         "EquationTransform",
-    }
+    } <= set(PRIMITIVES)
+    assert set(PRIMITIVES) == PRIMITIVE_IDS
     with pytest.raises(UnknownPrimitiveError):
         get_primitive("PieChart")
 
@@ -153,6 +157,13 @@ def test_catalogue_matches_the_library():
 
     library = {(cls.primitive_id, cls.topic, cls.version) for cls in PRIMITIVES.values()}
     assert {(p.primitive_id, p.topic, p.version) for p in CATALOGUE} == library
+
+
+def test_every_primitive_has_syllabus_codes():
+    from app.primitives.catalog import SYLLABUS
+
+    assert set(SYLLABUS) == set(PRIMITIVES)
+    assert all(codes.strip() for codes in SYLLABUS.values())
 
 
 def test_tangent_slide_predicates_and_values():
