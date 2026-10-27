@@ -256,7 +256,8 @@ variable `OPENBLAS_NUM_THREADS=1`.
 
 How the engine works is described in `backend/app/renderer/engine.py`; measured render times are
 in [docs/benchmarks.md](docs/benchmarks.md), and how to write a primitive in
-[docs/primitives.md](docs/primitives.md).
+[docs/primitives.md](docs/primitives.md). What building the library taught, and what the tests
+and the harness found, is in [docs/discussion.md](docs/discussion.md).
 
 ## Lessons through the queue (Phase 3)
 
