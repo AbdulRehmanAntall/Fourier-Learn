@@ -62,6 +62,73 @@ CATALOGUE = [
         "1",
         "Shows an expression being simplified step by step, highlighting what changes.",
     ),
+    PrimitiveInfo(
+        "AlgebraBalance",
+        "Algebra and graphs",
+        "1",
+        "Solves an equation or changes the subject by doing the same to both sides.",
+    ),
+    PrimitiveInfo(
+        "ExpansionGrid",
+        "Algebra and graphs",
+        "1",
+        "Expands brackets or factorises with a grid (area) model, like terms coloured alike.",
+    ),
+    PrimitiveInfo(
+        "CompletingSquare",
+        "Algebra and graphs",
+        "1",
+        "Completes the square as an area: x squared plus two strips, with the missing corner.",
+    ),
+    PrimitiveInfo(
+        "QuadraticExplorer",
+        "Algebra and graphs",
+        "1",
+        "Draws a parabola with its roots, discriminant, vertex, axis of symmetry and "
+        "completed square form.",
+    ),
+    PrimitiveInfo(
+        "InequalityRegion",
+        "Algebra and graphs",
+        "1",
+        "Shades the regions of linear inequalities in x and y and labels the region R that "
+        "satisfies them all.",
+    ),
+    PrimitiveInfo(
+        "SequencePattern",
+        "Algebra and graphs",
+        "1",
+        "Finds the nth term of a linear, quadratic, cubic or geometric sequence from its "
+        "differences or ratio.",
+    ),
+    PrimitiveInfo(
+        "ProportionGraph",
+        "Algebra and graphs",
+        "1",
+        "Turns direct or inverse proportion into y = kx^n, finds k from a known pair and "
+        "uses the rule.",
+    ),
+    PrimitiveInfo(
+        "CurveSketch",
+        "Algebra and graphs",
+        "1",
+        "Sketches a curve and labels its intercepts, turning points (maximum or minimum) "
+        "and asymptotes.",
+    ),
+    PrimitiveInfo(
+        "FunctionMachine",
+        "Functions and graphs",
+        "1",
+        "Shows a function as a machine of operations, traces values through it and runs "
+        "it backwards for the inverse.",
+    ),
+    PrimitiveInfo(
+        "GraphicalSolution",
+        "Functions and graphs",
+        "1",
+        "Solves f(x) = g(x) by drawing both graphs and reading off the x-coordinates "
+        "where they meet.",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)

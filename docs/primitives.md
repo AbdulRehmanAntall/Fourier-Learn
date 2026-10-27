@@ -4,7 +4,13 @@ A visual primitive is a parameterised Manim CE component that draws one type of 
 visual (report §5.3.1). Manim code is written only in primitives, before deployment. At runtime
 a language model chooses a primitive and fills in its parameters, and nothing else (§5.3).
 
-The library holds the seven primitives of Table 5.2:
+The library started with the seven primitives of Table 5.2 and is growing to cover the
+Cambridge O Level Mathematics (4024) syllabus and the calculus of Additional Mathematics (4037
+Unit 14). [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
+needs to the primitive that draws it. Lessons combine primitives: a graph primitive on the left
+of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on the right.
+
+### Table 5.2
 
 | Primitive           | Topic                        | What it shows                                                   | File                                           |
 | ------------------- | ---------------------------- | --------------------------------------------------------------- | ---------------------------------------------- |
@@ -16,6 +22,23 @@ The library holds the seven primitives of Table 5.2:
 | `AreaUnderCurve`    | Introductory calculus        | The area under a curve between two limits, by integration       | `backend/app/primitives/area_under_curve.py`   |
 | `EquationTransform` | All topics                   | A derivation step by step, changed terms highlighted            | `backend/app/primitives/equation_transform.py` |
 
+### Algebra and graphs (4024 Unit 2)
+
+| Primitive           | Syllabus     | What it shows                                                                 |
+| ------------------- | ------------ | ----------------------------------------------------------------------------- |
+| `AlgebraBalance`    | 2.1–2.3, 2.5 | Solving an equation or changing the subject by doing the same to both sides   |
+| `ExpansionGrid`     | 2.2, 2.5.5   | Expanding brackets or factorising with a grid (area) model                    |
+| `CompletingSquare`  | 2.5.5; AM 2  | Completing the square as an area, with the missing corner                     |
+| `QuadraticExplorer` | 2.5.5, 2.11  | A parabola's roots, discriminant, vertex, axis of symmetry and completed form |
+| `InequalityRegion`  | 2.6          | Regions of linear inequalities, unwanted side shaded, region R labelled       |
+| `SequencePattern`   | 2.7          | The nth term from differences or a ratio, with optional dot patterns          |
+| `ProportionGraph`   | 2.8          | Direct and inverse proportion: y = kxⁿ, k from a known pair                   |
+| `CurveSketch`       | 2.11; AM 4.4 | A sketched curve with intercepts, turning points and asymptotes               |
+| `FunctionMachine`   | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse            |
+| `GraphicalSolution` | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                          |
+
+The files are named after the primitive in snake case, in `backend/app/primitives/`.
+
 The three calculus primitives that draw y = f(x) share `backend/app/primitives/curves.py`: the
 parameter schema of f and its interval, the parsing, domain and continuity predicates, the
 check that f has a gradient (no corners), and drawing the axes, curve and equation. Decimals in
@@ -23,6 +46,30 @@ f are made exact first, so 0.5x² differentiates to x, not 1.0x.
 
 New primitives arrive when scene plans show a visual the library cannot draw (§5.3.1). Copy the
 closest existing primitive and follow the rules below.
+
+## Building a primitive from stages
+
+Most primitives after Table 5.2 are `StagedPrimitive`s (`backend/app/primitives/staged.py`).
+Instead of writing `steps` and `animate` separately, a staged primitive:
+
+1. builds every object of its picture once, by name (`build`), already laid out in its region;
+2. lists the steps that reveal them at each level (`stages`): each `stage(...)` shows parts,
+   hides them, morphs one into another, or emphasises them. `combine` merges stages into one
+   step, and `by_level` writes the Level 2 and 3 steps from the Level 1 ones;
+3. names a `motion` method for a step whose picture moves continuously, such as a sliding point.
+
+The step list, the animation and the layout check's object names then come from one plan, so
+they cannot disagree. Every step ends on its finished picture for a moment (`FINAL_HOLD_S`), so
+a step's last frame is never caught mid-stroke. `tests/test_primitive_library.py` checks every
+staged primitive's plan at every level for every harness case.
+
+Shared helpers:
+
+| Module        | What it gives                                                                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `plotting.py` | Axes from data (`make_plot`, optionally with equal units), curves cut where they leave the axes, tables, diagrams, angle marks, labels placed clear of everything else                     |
+| `analysis.py` | Sampling y = f(x), its zeros (exact for rational functions) and its vertical asymptotes                                                                                                    |
+| `symbolic.py` | Safe parsing; numbers exact when simple and to 3 significant figures otherwise (`format_value`, `latex_value`, `format_sf`); expressions in the order a teacher writes them (`tidy_latex`) |
 
 ## The four elements (§5.3.1)
 

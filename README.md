@@ -8,7 +8,8 @@ adapted by a learner model (Bayesian Knowledge Tracing).
 >
 > - **The render engine** turns a module request (validated primitives, parameters and narration)
 >   into a narrated, cached module video at any of the three difficulty levels. The library has
->   all seven primitives of the report's Table 5.2.
+>   the seven primitives of the report's Table 5.2 and is growing to cover the O Level syllabus
+>   ([coverage](docs/primitive-coverage.md)): 17 primitives so far.
 > - **The render queue and workers** render hand-written lessons in the background; the first beat
 >   plays before the rest is done ([Lessons through the queue](#lessons-through-the-queue-phase-3)).
 > - **Every API endpoint the frontend needs exists.** Lessons from the queue are served from the

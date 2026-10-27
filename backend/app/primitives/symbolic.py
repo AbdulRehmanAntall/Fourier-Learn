@@ -6,6 +6,7 @@ known function or an allowed variable.
 """
 
 import ast
+import math
 import re
 from collections.abc import Collection, Iterable
 from tokenize import TokenError
@@ -236,3 +237,107 @@ def _number(value) -> str:
     return (
         str(int(value)) if float(value).is_integer() and not isinstance(value, bool) else str(value)
     )
+
+
+def format_sf(value: sp.Expr | float, figures: int = 3) -> str:
+    """A number to `figures` significant figures, as O Level states non-exact answers: 3.61,
+    1250, 0.0123. Whole numbers are shown in full."""
+    number = float(sp.N(value))
+    if number == 0:
+        return "0"
+    if number.is_integer():
+        return str(int(number))
+    places = figures - 1 - math.floor(math.log10(abs(number)))
+    rounded = round(number, places)
+    if places <= 0:
+        return str(int(rounded))
+    text = f"{rounded:.{places}f}".rstrip("0").rstrip(".")
+    return "0" if float(text) == 0 else text
+
+
+def is_simple_exact(value: sp.Expr) -> bool:
+    """Whether a value is worth showing exactly: a fraction with a small denominator, or a surd
+    such as 2*sqrt(3) or sqrt(13)/2 with small numbers."""
+    value = sp.nsimplify(value)
+    if isinstance(value, sp.Rational):
+        return abs(value.q) <= 100
+    if value.free_symbols or not value.is_real or value.has(sp.pi, sp.exp, sp.log, sp.sin):
+        return False
+    return value.is_algebraic and sp.count_ops(value) <= 6 and len(str(value)) <= 16
+
+
+def format_value(value: sp.Expr | float) -> str:
+    """A number as narration text: exact when simple ("3/4", "2*sqrt(3)" read as "2 root 3"),
+    otherwise to 3 significant figures. A Python float is a measurement, never made exact."""
+    if isinstance(value, float):
+        return format_sf(value)
+    value = sp.nsimplify(value)
+    if isinstance(value, sp.Rational) and abs(value.q) <= 100:
+        return format_number(value)
+    if is_simple_exact(value):
+        return _speak_surd(str(value))
+    return format_sf(value)
+
+
+def latex_value(value: sp.Expr | float) -> str:
+    """A number as LaTeX: exact when simple (\\frac{3}{4}, 2\\sqrt{3}), otherwise to 3
+    significant figures."""
+    if isinstance(value, float):
+        return format_sf(value)
+    value = sp.nsimplify(value)
+    if isinstance(value, sp.Rational) and abs(value.q) <= 100:
+        return latex_number(value)
+    if is_simple_exact(value):
+        return sp.latex(value)
+    return format_sf(value)
+
+
+def latex_approx(value: sp.Expr) -> str:
+    """Exact and decimal together for a surd, e.g. \\sqrt{13} \\approx 3.61; a fraction or an
+    integer alone."""
+    value = sp.nsimplify(value)
+    if isinstance(value, sp.Rational) and abs(value.q) <= 100:
+        return latex_number(value)
+    if is_simple_exact(value):
+        return rf"{sp.latex(value)} \approx {format_sf(value)}"
+    return format_sf(value)
+
+
+def _speak_surd(text: str) -> str:
+    return re.sub(r"sqrt\((\d+)\)", r"root \1", text).replace("*", " ")
+
+
+def tidy_latex(expr: sp.Expr) -> str:
+    """LaTeX of a computed expression in the order a teacher writes it: highest power first
+    (-2x^2 + 4x + 1), and otherwise a positive term before a negative one (v - u rather than
+    -u + v, 3 - x rather than -x + 3)."""
+    expr = sp.sympify(expr)
+    numerator, denominator = sp.fraction(sp.together(expr)) if _is_fraction(expr) else (expr, 1)
+    if denominator != 1:
+        top, bottom = tidy_latex(numerator), tidy_latex(denominator)
+        return rf"\frac{{{top}}}{{{bottom}}}"
+    if not isinstance(expr, sp.Add):
+        return sp.latex(expr)
+    terms = list(expr.as_ordered_terms())
+    symbols = expr.free_symbols
+    one_variable_polynomial = len(symbols) == 1 and expr.is_polynomial(*symbols)
+    leads_by_degree = one_variable_polynomial and sp.degree(terms[0], *symbols) > 0
+    if _negative(terms[0]) and not leads_by_degree:
+        first_positive = next((t for t in terms if not _negative(t)), None)
+        if first_positive is not None:
+            terms.remove(first_positive)
+            terms.insert(0, first_positive)
+    text = sp.latex(terms[0])
+    for term in terms[1:]:
+        text += f" - {sp.latex(-term)}" if _negative(term) else f" + {sp.latex(term)}"
+    return text
+
+
+def _negative(term: sp.Expr) -> bool:
+    coefficient, _ = term.as_coeff_Mul()
+    return bool(coefficient.is_negative)
+
+
+def _is_fraction(expr: sp.Expr) -> bool:
+    _, denominator = sp.fraction(sp.together(expr))
+    return denominator != 1 and not denominator.is_number

@@ -392,16 +392,12 @@ def test_admin_pages(client):
     summary = client.get("/api/admin/summary").json()
     assert summary["students"] == 12 and summary["renders_failed_24h"] >= 0
 
+    # The admin page lists the whole library, from the catalogue (no Manim needed).
+    from app.primitives.catalog import PRIMITIVE_IDS
+
     primitives = client.get("/api/admin/primitives").json()
-    assert {p["id"] for p in primitives} == {
-        "FunctionGraph",
-        "GradientTriangle",
-        "TangentSlide",
-        "SecantToTangent",
-        "TravelGraph",
-        "AreaUnderCurve",
-        "EquationTransform",
-    }
+    assert {p["id"] for p in primitives} == PRIMITIVE_IDS
+    assert "FunctionGraph" in PRIMITIVE_IDS
     retired = client.patch("/api/admin/primitives/FunctionGraph", json={"status": "retired"})
     assert retired.json()["status"] == "retired"
 
