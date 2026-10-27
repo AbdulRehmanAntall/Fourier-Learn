@@ -9,6 +9,7 @@ import ast
 import math
 import re
 from collections.abc import Collection, Iterable
+from decimal import ROUND_HALF_UP, Decimal
 from tokenize import TokenError
 
 import sympy as sp
@@ -241,17 +242,20 @@ def _number(value) -> str:
 
 def format_sf(value: sp.Expr | float, figures: int = 3) -> str:
     """A number to `figures` significant figures, as O Level states non-exact answers: 3.61,
-    1250, 0.0123. Whole numbers are shown in full."""
-    number = float(sp.N(value))
+    1250, 0.0123. Halves round up (2.625 to 2.63), from the exact value, not from a float.
+    Whole numbers are shown in full."""
+    exact_value = sp.N(value, 30)
+    number = float(exact_value)
     if number == 0:
         return "0"
     if number.is_integer():
         return str(int(number))
     places = figures - 1 - math.floor(math.log10(abs(number)))
-    rounded = round(number, places)
+    quantum = Decimal(1).scaleb(-places)
+    rounded = Decimal(str(exact_value)).quantize(quantum, rounding=ROUND_HALF_UP)
     if places <= 0:
         return str(int(rounded))
-    text = f"{rounded:.{places}f}".rstrip("0").rstrip(".")
+    text = format(rounded, "f").rstrip("0").rstrip(".")
     return "0" if float(text) == 0 else text
 
 

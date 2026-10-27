@@ -28,35 +28,35 @@ level; **planned** means it is not built yet.
 
 ## A. Number (4024 Unit 1) `EXT`
 
-| #   | Visual                 | Syllabus                 | Primitive | Status  |
-| --- | ---------------------- | ------------------------ | --------- | ------- |
-| 1   | Number line            | 1.1, 1.4, 1.5, 1.9, 1.10 | —         | planned |
-| 2   | Prime factor tree      | 1.1                      | —         | planned |
-| 3   | Venn diagram           | 1.2, 8.3                 | —         | planned |
-| 4   | Fraction area model    | 1.4, 1.6                 | —         | planned |
-| 5   | Percentage bar         | 1.13                     | —         | planned |
-| 6   | Growth and decay curve | 1.13.4, 1.17, 2.10.3     | —         | planned |
-| 7   | Powers-of-ten zoom     | 1.7, 1.8                 | —         | planned |
-| 8   | Index laws stepper     | 1.7, 2.4                 | —         | planned |
-| 9   | Surd simplifier        | 1.18                     | —         | planned |
-| 10  | Ratio bar splitter     | 1.11, 1.12               | —         | planned |
-| 11  | Bounds interval        | 1.10                     | —         | planned |
-| 12  | Clock and timetable    | 1.15, 1.16               | —         | planned |
+| #   | Visual                 | Syllabus                 | Primitive         | Status  |
+| --- | ---------------------- | ------------------------ | ----------------- | ------- |
+| 1   | Number line            | 1.1, 1.4, 1.5, 1.9, 1.10 | `NumberLine`      | done    |
+| 2   | Prime factor tree      | 1.1                      | `PrimeFactorTree` | done    |
+| 3   | Venn diagram           | 1.2, 8.3                 | `VennDiagram`     | done    |
+| 4   | Fraction area model    | 1.4, 1.6                 | `FractionModel`   | done    |
+| 5   | Percentage bar         | 1.13                     | —                 | planned |
+| 6   | Growth and decay curve | 1.13.4, 1.17, 2.10.3     | `GrowthDecay`     | done    |
+| 7   | Powers-of-ten zoom     | 1.7, 1.8                 | —                 | planned |
+| 8   | Index laws stepper     | 1.7, 2.4                 | —                 | planned |
+| 9   | Surd simplifier        | 1.18                     | —                 | planned |
+| 10  | Ratio bar splitter     | 1.11, 1.12               | —                 | planned |
+| 11  | Bounds interval        | 1.10                     | —                 | planned |
+| 12  | Clock and timetable    | 1.15, 1.16               | —                 | planned |
 
 ## B. Algebra and graphs (4024 Unit 2) `CORE`
 
-| #   | Visual                  | Syllabus                | Primitive                             | Status |
-| --- | ----------------------- | ----------------------- | ------------------------------------- | ------ |
-| 13  | Algebra balance stepper | 2.1, 2.2, 2.3, 2.5      | `AlgebraBalance`, `EquationTransform` | done   |
-| 14  | Expansion grid          | 2.2, 2.5.5              | `ExpansionGrid`, `CompletingSquare`   | done   |
-| 15  | Quadratic explorer      | 2.5.5, 2.11; AM 2.1–2.5 | `QuadraticExplorer`                   | done   |
-| 16  | Inequality region       | 2.6                     | `InequalityRegion`                    | done   |
-| 17  | Sequence pattern        | 2.7                     | `SequencePattern`                     | done   |
-| 18  | Proportion grapher      | 2.8                     | `ProportionGraph`                     | done   |
-| 19  | Function grapher        | 2.10, 2.9.1             | `FunctionGraph`, `GraphicalSolution`  | done   |
-| 20  | Curve sketcher          | 2.11; AM 4.4, AM 6.1    | `CurveSketch`                         | done   |
-| 21  | Function machine        | 2.12; AM 1.1–1.8        | `FunctionMachine`                     | done   |
-| 22  | Travel graph            | 2.9.3, 2.9.4            | `TravelGraph`                         | done   |
+| #   | Visual                  | Syllabus                | Primitive                                                      | Status |
+| --- | ----------------------- | ----------------------- | -------------------------------------------------------------- | ------ |
+| 13  | Algebra balance stepper | 2.1, 2.2, 2.3, 2.5      | `AlgebraBalance`, `EquationTransform`, `SimultaneousEquations` | done   |
+| 14  | Expansion grid          | 2.2, 2.5.5              | `ExpansionGrid`, `CompletingSquare`                            | done   |
+| 15  | Quadratic explorer      | 2.5.5, 2.11; AM 2.1–2.5 | `QuadraticExplorer`                                            | done   |
+| 16  | Inequality region       | 2.6                     | `InequalityRegion`                                             | done   |
+| 17  | Sequence pattern        | 2.7                     | `SequencePattern`                                              | done   |
+| 18  | Proportion grapher      | 2.8                     | `ProportionGraph`                                              | done   |
+| 19  | Function grapher        | 2.10, 2.9.1             | `FunctionGraph`, `GraphicalSolution`, `TableOfValues`          | done   |
+| 20  | Curve sketcher          | 2.11; AM 4.4, AM 6.1    | `CurveSketch`                                                  | done   |
+| 21  | Function machine        | 2.12; AM 1.1–1.8        | `FunctionMachine`, `InverseGraph`                              | done   |
+| 22  | Travel graph            | 2.9.3, 2.9.4            | `TravelGraph`                                                  | done   |
 
 ## C. Coordinate geometry (4024 Unit 3) `CORE`
 
@@ -90,12 +90,12 @@ level; **planned** means it is not built yet.
 
 ## F. Trigonometry (4024 Unit 6) `EXT`
 
-| #   | Visual                         | Syllabus            | Primitive | Status  |
-| --- | ------------------------------ | ------------------- | --------- | ------- |
-| 38  | Right-triangle trigonometry    | 6.1, 6.2            | —         | planned |
-| 39  | Sine and cosine rule solver    | 6.3                 | —         | planned |
-| 40  | Trigonometry in 3D             | 6.4                 | —         | planned |
-| 41  | Unit circle and waves `AM-EXT` | AM 10.2, 10.3; 2.11 | —         | planned |
+| #   | Visual                         | Syllabus            | Primitive         | Status  |
+| --- | ------------------------------ | ------------------- | ----------------- | ------- |
+| 38  | Right-triangle trigonometry    | 6.1, 6.2            | —                 | planned |
+| 39  | Sine and cosine rule solver    | 6.3                 | —                 | planned |
+| 40  | Trigonometry in 3D             | 6.4                 | —                 | planned |
+| 41  | Unit circle and waves `AM-EXT` | AM 10.2, 10.3; 2.11 | `UnitCircleWaves` | done    |
 
 ## G. Transformations and vectors (4024 Unit 7) `EXT`
 
@@ -124,12 +124,12 @@ level; **planned** means it is not built yet.
 
 ## J. Calculus and kinematics (4037 Unit 14) `CORE`
 
-| #   | Visual                          | Syllabus             | Primitive                                          | Status  |
-| --- | ------------------------------- | -------------------- | -------------------------------------------------- | ------- |
-| 52  | Secant to tangent               | AM 14.1–14.5; 2.10.4 | `SecantToTangent`, `TangentSlide`, `TangentNormal` | done    |
-| 53  | Function-derivative twin panels | AM 14.6, 14.9        | `DerivativePanels`                                 | done    |
-| 54  | Differentiation stepper         | AM 14.3, 14.4        | `DifferentiationStepper`                           | done    |
-| 55  | Optimisation scene              | AM 14.8              | `OptimisationScene`                                | done    |
-| 56  | Connected rates                 | AM 14.7              | —                                                  | planned |
-| 57  | Area under a curve              | AM 14.10–14.13       | `AreaUnderCurve`, `AreaBetweenCurves`              | done    |
-| 58  | Kinematics triple graph         | AM 14.14, 14.15      | `KinematicsGraphs`, `TravelGraph`                  | done    |
+| #   | Visual                          | Syllabus             | Primitive                                          | Status |
+| --- | ------------------------------- | -------------------- | -------------------------------------------------- | ------ |
+| 52  | Secant to tangent               | AM 14.1–14.5; 2.10.4 | `SecantToTangent`, `TangentSlide`, `TangentNormal` | done   |
+| 53  | Function-derivative twin panels | AM 14.6, 14.9        | `DerivativePanels`                                 | done   |
+| 54  | Differentiation stepper         | AM 14.3, 14.4        | `DifferentiationStepper`                           | done   |
+| 55  | Optimisation scene              | AM 14.8              | `OptimisationScene`                                | done   |
+| 56  | Connected rates                 | AM 14.7              | `ConnectedRates`                                   | done   |
+| 57  | Area under a curve              | AM 14.10–14.13       | `AreaUnderCurve`, `AreaBetweenCurves`              | done   |
+| 58  | Kinematics triple graph         | AM 14.14, 14.15      | `KinematicsGraphs`, `TravelGraph`                  | done   |

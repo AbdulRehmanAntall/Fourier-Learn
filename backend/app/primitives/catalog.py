@@ -196,6 +196,76 @@ CATALOGUE = [
         "Draws the circle (x - a)^2 + (y - b)^2 = r^2 and finds where a line cuts it, "
         "touches it or misses it.",
     ),
+    PrimitiveInfo(
+        "GrowthDecay",
+        "Number",
+        "1",
+        "Shows compound growth or decay year by year on an exponential curve, against "
+        "simple interest.",
+    ),
+    PrimitiveInfo(
+        "UnitCircleWaves",
+        "Trigonometry",
+        "1",
+        "Generates sine or cosine from a radius turning round the unit circle, then "
+        "shows y = a sin(bx) + c.",
+    ),
+    PrimitiveInfo(
+        "ConnectedRates",
+        "Introductory calculus",
+        "1",
+        "Links the rate a shape's size changes to the rate its area or volume changes, "
+        "with the chain rule.",
+    ),
+    PrimitiveInfo(
+        "InverseGraph",
+        "Functions and graphs",
+        "1",
+        "Reflects a one-to-one function in y = x to give its inverse, and finds the "
+        "inverse's formula.",
+    ),
+    PrimitiveInfo(
+        "SimultaneousEquations",
+        "Algebra and graphs",
+        "1",
+        "Solves two simultaneous equations by elimination or by substitution, including "
+        "a linear and a quadratic.",
+    ),
+    PrimitiveInfo(
+        "TableOfValues",
+        "Functions and graphs",
+        "1",
+        "Completes a table of values for y = f(x), plots the points and joins them with "
+        "a smooth curve.",
+    ),
+    PrimitiveInfo(
+        "NumberLine",
+        "Number",
+        "1",
+        "Places numbers in order on a number line and shows an inequality as an interval "
+        "with open or closed circles.",
+    ),
+    PrimitiveInfo(
+        "PrimeFactorTree",
+        "Number",
+        "1",
+        "Splits numbers into primes with factor trees, writes them in index form, and "
+        "finds the HCF and LCM from a Venn diagram.",
+    ),
+    PrimitiveInfo(
+        "VennDiagram",
+        "Number",
+        "1",
+        "Draws two or three sets in a Venn diagram, places elements or counts, and "
+        "shades and counts a region in set notation.",
+    ),
+    PrimitiveInfo(
+        "FractionModel",
+        "Number",
+        "1",
+        "Shows fractions as bars and grids: equivalent fractions, adding, subtracting, "
+        "multiplying and dividing.",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)

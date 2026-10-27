@@ -24,18 +24,31 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 
 ### Algebra and graphs (4024 Unit 2)
 
-| Primitive           | Syllabus     | What it shows                                                                 |
-| ------------------- | ------------ | ----------------------------------------------------------------------------- |
-| `AlgebraBalance`    | 2.1–2.3, 2.5 | Solving an equation or changing the subject by doing the same to both sides   |
-| `ExpansionGrid`     | 2.2, 2.5.5   | Expanding brackets or factorising with a grid (area) model                    |
-| `CompletingSquare`  | 2.5.5; AM 2  | Completing the square as an area, with the missing corner                     |
-| `QuadraticExplorer` | 2.5.5, 2.11  | A parabola's roots, discriminant, vertex, axis of symmetry and completed form |
-| `InequalityRegion`  | 2.6          | Regions of linear inequalities, unwanted side shaded, region R labelled       |
-| `SequencePattern`   | 2.7          | The nth term from differences or a ratio, with optional dot patterns          |
-| `ProportionGraph`   | 2.8          | Direct and inverse proportion: y = kxⁿ, k from a known pair                   |
-| `CurveSketch`       | 2.11; AM 4.4 | A sketched curve with intercepts, turning points and asymptotes               |
-| `FunctionMachine`   | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse            |
-| `GraphicalSolution` | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                          |
+| Primitive               | Syllabus     | What it shows                                                                 |
+| ----------------------- | ------------ | ----------------------------------------------------------------------------- |
+| `AlgebraBalance`        | 2.1–2.3, 2.5 | Solving an equation or changing the subject by doing the same to both sides   |
+| `ExpansionGrid`         | 2.2, 2.5.5   | Expanding brackets or factorising with a grid (area) model                    |
+| `CompletingSquare`      | 2.5.5; AM 2  | Completing the square as an area, with the missing corner                     |
+| `QuadraticExplorer`     | 2.5.5, 2.11  | A parabola's roots, discriminant, vertex, axis of symmetry and completed form |
+| `InequalityRegion`      | 2.6          | Regions of linear inequalities, unwanted side shaded, region R labelled       |
+| `SequencePattern`       | 2.7          | The nth term from differences or a ratio, with optional dot patterns          |
+| `ProportionGraph`       | 2.8          | Direct and inverse proportion: y = kxⁿ, k from a known pair                   |
+| `CurveSketch`           | 2.11; AM 4.4 | A sketched curve with intercepts, turning points and asymptotes               |
+| `FunctionMachine`       | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse            |
+| `GraphicalSolution`     | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                          |
+| `SimultaneousEquations` | 2.5          | Two equations solved by elimination or substitution, line by line             |
+| `TableOfValues`         | 2.10         | A table of values filled in, then the points plotted and joined               |
+| `InverseGraph`          | 2.12; AM 1   | f and f⁻¹ as reflections in y = x, with a point and its image                 |
+
+### Number (4024 Unit 1)
+
+| Primitive         | Syllabus                 | What it shows                                                          |
+| ----------------- | ------------------------ | ---------------------------------------------------------------------- |
+| `NumberLine`      | 1.1, 1.4, 1.5, 1.9, 1.10 | Numbers, intervals and inequalities on a line, open and closed circles |
+| `PrimeFactorTree` | 1.1                      | A factor tree, index form, and HCF and LCM from a Venn diagram         |
+| `VennDiagram`     | 1.2; 8.3                 | Sets as elements or counts, with a set expression shaded               |
+| `FractionModel`   | 1.4, 1.6                 | Fractions as bars and area models: equivalence and the four operations |
+| `GrowthDecay`     | 1.13.4, 1.17             | Compound interest, growth and decay as a table of years and a curve    |
 
 ### Coordinate geometry (4024 Unit 3)
 
@@ -56,6 +69,13 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 | `AreaBetweenCurves`      | AM 14.10–14.13  | The area between two graphs as the integral of upper minus lower       |
 | `KinematicsGraphs`       | AM 14.14, 14.15 | s, v and a against t beside a moving particle; when it is at rest      |
 | `OptimisationScene`      | AM 14.8         | A practical maximum or minimum with the model beside its graph         |
+| `ConnectedRates`         | AM 14.7         | dA/dt = dA/dr × dr/dt for a growing circle, square, sphere or cube     |
+
+### Trigonometry (4037 Unit 10)
+
+| Primitive         | Syllabus      | What it shows                                                   |
+| ----------------- | ------------- | --------------------------------------------------------------- |
+| `UnitCircleWaves` | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c |
 
 The files are named after the primitive in snake case, in `backend/app/primitives/`.
 

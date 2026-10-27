@@ -301,8 +301,8 @@ beat. This is a good demo for the FYP-I evaluation.
 > - **The primitive library:** all seven primitives of Table 5.2. The four new ones each have six
 >   harness cases at three levels; all 126 renders pass, and their frames were reviewed.
 > - **Beyond Table 5.2:** the library is growing to cover the whole O Level syllabus (4024) and
->   the calculus of 4037, as mapped in [primitive-coverage.md](primitive-coverage.md): 27
->   primitives so far (algebra and graphs, coordinate geometry and calculus done). Each passes the harness at all three levels.
+>   the calculus of 4037, as mapped in [primitive-coverage.md](primitive-coverage.md): 37
+>   primitives so far (algebra and graphs, coordinate geometry, calculus and most of number done). Each passes the harness at all three levels.
 > - **Plan checks:** the scene-plan reference check (`app/prompt_interpreter/plan_checks.py`).
 > - **Content files:** the concept taxonomy with prerequisite edges, the glossary and the item bank,
 >   as content files in `backend/content/`. The syllabus codes there are still placeholders.

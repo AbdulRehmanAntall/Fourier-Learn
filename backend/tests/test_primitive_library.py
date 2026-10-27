@@ -338,3 +338,154 @@ def test_kinematics_graphs():
 def test_optimisation_scene(scenario, size, best, value):
     result = values("OptimisationScene", {"scenario": scenario, "size": size})
     assert (result["best_x"], result["best_value"]) == (best, value)
+
+
+# Number, and the rest of the core
+
+
+def test_growth_decay():
+    result = values(
+        "GrowthDecay", {"initial": 1000, "rate": 5, "periods": 10, "compare_simple": True}
+    )
+    assert (result["multiplier"], result["final"], result["simple_final"]) == (
+        "1.05",
+        "1628.89",
+        "1500.00",
+    )
+    decay = values("GrowthDecay", {"initial": 15000, "rate": -20, "periods": 6})
+    assert decay["final"] == "3932.16"
+    people = values("GrowthDecay", {"initial": 2400, "rate": 3, "periods": 20, "unit": "people"})
+    assert people["final"] == "4335"
+    assert predicates("GrowthDecay", {"initial": 100, "rate": 0, "periods": 2}) == ["rate_nonzero"]
+
+
+def test_unit_circle_waves():
+    result = values("UnitCircleWaves", {"function": "sin", "a": 2, "b": 2, "c": 1})
+    assert (result["amplitude"], result["period"]) == ("2", "180")
+    assert (result["maximum"], result["minimum"]) == ("3", "-1")
+    assert predicates("UnitCircleWaves", {"function": "cos", "a": 0}) == ["a_nonzero"]
+
+
+def test_connected_rates():
+    circle = values("ConnectedRates", {"shape": "circle", "rate": 2, "at": 5})
+    assert circle["answer"] == "62.8"  # 20π
+    sphere = {"shape": "sphere", "known": "quantity", "rate": 100, "at": 3}
+    assert values("ConnectedRates", sphere)["answer"] == "0.884"  # 25/(9π)
+    cube = values("ConnectedRates", {"shape": "cube", "rate": 0.5, "at": 4})
+    assert cube["answer"] == "24"
+
+
+def test_inverse_graph():
+    assert (
+        values("InverseGraph", {"expression": "2*x + 1", "x_min": -3, "x_max": 2})["inverse"]
+        == "x/2 - 1/2"
+    )
+    square = {"expression": "x**2", "x_min": 0, "x_max": 2.5, "point_x": 2}
+    result = values("InverseGraph", square)
+    assert (result["inverse"], result["reflected"]) == ("sqrt(x)", "(4, 2)")
+    both_sides = {"expression": "x**2", "x_min": -2, "x_max": 2}
+    assert predicates("InverseGraph", both_sides) == ["one_to_one"]
+    on_mirror = {"expression": "x**3", "x_min": -1.5, "x_max": 1.5, "point_x": 1}
+    assert predicates("InverseGraph", on_mirror) == ["point_off_mirror"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solutions"),
+    [
+        ({"equation_1": "3*x + 2*y = 16", "equation_2": "x - 2*y = 0"}, [("4", "2")]),
+        ({"equation_1": "2*x + 3*y = 13", "equation_2": "5*x - 2*y = 4"}, [("2", "3")]),
+        (
+            {"equation_1": "y = x**2 - 3", "equation_2": "y = 2*x", "method": "substitution"},
+            [("-1", "-2"), ("3", "6")],
+        ),
+    ],
+)
+def test_simultaneous_equations(raw, solutions):
+    result = values("SimultaneousEquations", raw)
+    found = [(result[f"x_{i}"], result[f"y_{i}"]) for i in range(1, len(solutions) + 1)]
+    assert found == solutions
+
+
+def test_simultaneous_equations_predicates():
+    parallel = {"equation_1": "x + y = 2", "equation_2": "2*x + 2*y = 7"}
+    assert predicates("SimultaneousEquations", parallel) == ["one_solution"]
+    curve = {"equation_1": "y = x**2", "equation_2": "x + y = 2"}
+    assert predicates("SimultaneousEquations", curve) == ["linear_equations"]
+    apart = {"equation_1": "y = x**2 + 5", "equation_2": "y = x", "method": "substitution"}
+    assert predicates("SimultaneousEquations", apart) == ["real_solution"]
+
+
+def test_table_of_values():
+    result = values(
+        "TableOfValues", {"expression": "x**3 - 4*x", "x_min": -2.5, "x_max": 2.5, "step": 0.5}
+    )
+    assert result["y_at_-2.5"] == "-5.63"  # -5.625, half rounded up
+    assert result["y_at_2.5"] == "5.63"
+    reciprocal = {"expression": "1/x", "x_min": -2, "x_max": 2}
+    assert predicates("TableOfValues", reciprocal) == ["defined_at_each_x"]
+    many = {"expression": "x", "x_min": -10, "x_max": 10, "step": 1}
+    assert predicates("TableOfValues", many) == ["few_columns"]
+
+
+def test_number_line():
+    result = values("NumberLine", {"numbers": ["0.3", "1/3", "0.33", "pi/10"]})
+    assert result["in_order"] == "0.3, pi/10, 0.33, 1/3"
+    integers = {"inequality": "-3 <= x < 2", "integers_only": True}
+    assert values("NumberLine", integers)["integers"] == "-3, -2, -1, 0, 1"
+    assert predicates("NumberLine", {"inequality": "x = 3"}) == ["inequality_parses"]
+    assert predicates("NumberLine", {"numbers": ["sqrt(-1)"]}) == ["real_number"]
+
+
+def test_prime_factor_tree():
+    result = values("PrimeFactorTree", {"number": 360, "other": 84})
+    assert (result["index_form"], result["hcf"], result["lcm"]) == ("2^3 x 3^2 x 5", "12", "2520")
+    assert predicates("PrimeFactorTree", {"number": 97}) == ["composite"]
+
+
+def test_venn_diagram():
+    raw = {
+        "sets": [["1", "2", "3", "4", "6", "12"], ["2", "4", "6", "8", "10"]],
+        "universal": ["5", "7", "9", "11"],
+        "shade": "A ∩ B",
+    }
+    result = values("VennDiagram", raw)
+    assert (result["n_shaded"], result["shaded_elements"], result["n_universal"]) == (
+        "3",
+        "2, 4, 6",
+        "12",
+    )
+    counts = {
+        "counts": {"A": 4, "B": 3, "C": 6, "AB": 2, "AC": 1, "BC": 5, "ABC": 7, "": 2},
+        "set_count": 3,
+        "shade": "(A ∩ B) ∪ C'",
+    }
+    assert values("VennDiagram", counts)["n_shaded"] == "18"
+    assert values("VennDiagram", counts | {"shade": "A' ∩ B'"})["n_shaded"] == "8"
+    assert predicates("VennDiagram", counts | {"shade": "A ∩ D"}) == ["shade_parses"]
+    assert predicates("VennDiagram", {"counts": {"AD": 1}}) == ["region_keys"]
+
+
+@pytest.mark.parametrize(
+    ("operation", "first", "second", "result"),
+    [
+        ("add", "3/4", "2/3", "17/12"),
+        ("subtract", "5/6", "1/4", "7/12"),
+        ("multiply", "2/3", "3/4", "1/2"),
+        ("divide", "3/4", "1/8", "6"),
+    ],
+)
+def test_fraction_model(operation, first, second, result):
+    raw = {"operation": operation, "first": first, "second": second}
+    assert values("FractionModel", raw)["result"] == result
+
+
+def test_fraction_model_predicates():
+    assert predicates("FractionModel", {"operation": "add", "first": "1/2"}) == ["needs_second"]
+    bigger = {"operation": "subtract", "first": "1/4", "second": "1/2"}
+    assert predicates("FractionModel", bigger) == ["difference_positive"]
+    improper = {"operation": "multiply", "first": "3/2", "second": "1/2"}
+    assert predicates("FractionModel", improper) == ["proper_for_area"]
+    assert (
+        values("FractionModel", {"operation": "add", "first": "3/4", "second": "2/3"})["mixed"]
+        == "1 5/12"
+    )
