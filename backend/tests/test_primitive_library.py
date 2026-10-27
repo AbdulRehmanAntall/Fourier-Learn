@@ -633,3 +633,132 @@ def test_polygon_angles():
 )
 def test_circle_theorems(raw, x):
     assert values("CircleTheorems", raw)["x"] == x
+
+
+# Geometry, mensuration and trigonometry
+
+
+@pytest.mark.parametrize(
+    ("raw", "key", "value"),
+    [
+        ({"angle": 35, "hypotenuse": 12, "find": "opposite"}, "opposite", "6.88"),
+        ({"angle": 50, "opposite": 8, "find": "hypotenuse"}, "hypotenuse", "10.4"),
+        ({"opposite": 5, "adjacent": 12, "find": "angle"}, "angle", "22.6"),
+        ({"opposite": 3, "adjacent": 4, "find": "hypotenuse"}, "hypotenuse", "5"),
+        ({"hypotenuse": 13, "adjacent": 5, "find": "opposite"}, "opposite", "12"),
+    ],
+)
+def test_right_triangle_trig(raw, key, value):
+    assert values("RightTriangleTrig", raw)[key] == value
+
+
+def test_right_triangle_trig_predicates():
+    too_long = {"opposite": 12, "hypotenuse": 10, "find": "adjacent"}
+    assert predicates("RightTriangleTrig", too_long) == ["hypotenuse_longest"]
+    assert predicates("RightTriangleTrig", {"angle": 40, "find": "opposite"}) == ["one_side"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "key", "value"),
+    [
+        ({"b": 7, "c": 9, "A": 48, "find": "a"}, "a", "6.76"),
+        ({"a": 7, "b": 8, "c": 10, "find": "C"}, "C", "83.3"),
+        ({"a": 12, "A": 40, "B": 65, "find": "c"}, "c", "18.0"),
+        ({"a": 9, "b": 7, "A": 70, "find": "B"}, "B", "47.0"),
+        ({"a": 6, "b": 8, "C": 110, "find": "area"}, "area", "22.6"),
+    ],
+)
+def test_sine_cosine_rule(raw, key, value):
+    assert values("SineCosineRule", raw)[key] == value
+
+
+def test_sine_cosine_rule_predicates():
+    no_triangle = {"a": 3, "b": 4, "c": 9, "find": "A"}
+    assert predicates("SineCosineRule", no_triangle) == ["triangle_determined"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "key", "value"),
+    [
+        ({"radius": 6, "angle": 120, "find": "arc"}, "arc", "12.6"),
+        ({"radius": 6, "angle": 60, "find": "segment"}, "segment", "3.26"),
+        ({"radius": 4, "arc": 6, "find": "angle"}, "angle", "85.9"),
+        ({"radius": 5, "angle": 1.2, "radians": True, "find": "area"}, "area", "15"),
+    ],
+)
+def test_circle_sector(raw, key, value):
+    assert values("CircleSector", raw)[key] == value
+
+
+@pytest.mark.parametrize(
+    ("raw", "value"),
+    [
+        ({"solid": "cylinder", "radius": 3, "height": 10, "find": "volume"}, "283"),
+        ({"solid": "cone", "radius": 5, "height": 12, "find": "surface_area"}, "283"),
+        ({"solid": "pyramid", "width": 6, "height": 4, "find": "surface_area"}, "96"),
+        ({"solid": "hemisphere", "radius": 4, "find": "surface_area"}, "151"),
+    ],
+)
+def test_solid_mensuration(raw, value):
+    assert values("SolidMensuration", raw)[raw["find"]] == value
+
+
+def test_solid_mensuration_predicates():
+    cuboid = {"solid": "cuboid", "length": 1, "width": 1, "height": 1, "find": "curved_area"}
+    assert predicates("SolidMensuration", cuboid) == ["has_curved_surface"]
+
+
+def test_bearings():
+    assert values("Bearings", {"bearing": 65})["back_bearing"] == "245"
+    assert values("Bearings", {"bearing": 230})["back_bearing"] == "050"
+    journey = values("Bearings", {"bearing": 320, "distance": 12, "find": "components"})
+    assert (journey["east"], journey["north"]) == ("-7.71", "9.19")
+
+
+def test_similarity_scaler():
+    assert (
+        values("SimilarityScaler", {"sides": [4, 5, 6], "known_value": 12, "find": "side"})["side"]
+        == "15"
+    )
+    area = {"sides": [3, 4, 5], "known_value": 7.5, "find": "area", "small_value": 6}
+    assert values("SimilarityScaler", area)["area"] == "37.5"
+    volume = {"sides": [3, 4, 5], "known_value": 6, "find": "volume", "small_value": 40}
+    assert values("SimilarityScaler", volume)["volume"] == "320"
+
+
+@pytest.mark.parametrize(
+    ("raw", "lines", "order"),
+    [
+        ({"shape": "rectangle"}, "2", "2"),
+        ({"shape": "parallelogram"}, "0", "2"),
+        ({"shape": "kite"}, "1", "1"),
+        ({"shape": "regular_polygon", "sides": 6}, "6", "6"),
+    ],
+)
+def test_symmetry_reveal(raw, lines, order):
+    result = values("SymmetryReveal", raw)
+    assert (result["lines"], result["order"]) == (lines, order)
+
+
+def test_area_dissector_and_net_folder():
+    trapezium = {"shape": "trapezium", "base": 9, "height": 4, "top": 5}
+    assert values("AreaDissector", trapezium)["area"] == "28"
+    assert (
+        values("NetFolder", {"solid": "cylinder", "radius": 3, "height": 8})["surface_area"]
+        == "207"
+    )
+    assert (
+        values("NetFolder", {"solid": "cuboid", "length": 5, "width": 3, "height": 2})[
+            "surface_area"
+        ]
+        == "62"
+    )
+
+
+def test_compass_construction():
+    assert (
+        values("CompassConstruction", {"construction": "angle_bisector", "angle": 70})["half_angle"]
+        == "35"
+    )
+    no_triangle = {"construction": "triangle", "sides": [1, 2, 5]}
+    assert predicates("CompassConstruction", no_triangle) == ["triangle_exists"]

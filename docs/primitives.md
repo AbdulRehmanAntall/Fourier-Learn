@@ -59,11 +59,24 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 
 ### Geometry (4024 Unit 4)
 
-| Primitive        | Syllabus     | What it shows                                                                      |
-| ---------------- | ------------ | ---------------------------------------------------------------------------------- |
-| `AngleChaser`    | 4.6.1, 4.6.2 | Unknown angles from the angle facts: lines, points, parallel lines, triangles      |
-| `PolygonAngles`  | 4.6.3        | Interior angle sums by triangles, exterior angles as one turn, sides from an angle |
-| `CircleTheorems` | 4.7, 4.8     | The circle theorems drawn true to size, the unknown angle found and named          |
+| Primitive             | Syllabus     | What it shows                                                                           |
+| --------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| `AngleChaser`         | 4.6.1, 4.6.2 | Unknown angles from the angle facts: lines, points, parallel lines, triangles           |
+| `PolygonAngles`       | 4.6.3        | Interior angle sums by triangles, exterior angles as one turn, sides from an angle      |
+| `CircleTheorems`      | 4.7, 4.8     | The circle theorems drawn true to size, the unknown angle found and named               |
+| `SimilarityScaler`    | 4.4          | Similar shapes: the scale factor, a missing length, areas by k² and volumes by k³       |
+| `Bearings`            | 4.3          | Three-figure bearings from north, back bearings, east and north parts of a journey      |
+| `SymmetryReveal`      | 4.5          | Lines of symmetry and the order of rotational symmetry, found from the vertices         |
+| `NetFolder`           | 4.1, 4.2.3   | The net of a solid face by face, its faces, edges and vertices, its surface area        |
+| `CompassConstruction` | 4.2          | Ruler-and-compasses constructions arc by arc: bisectors and a triangle from three sides |
+
+### Mensuration (4024 Unit 5)
+
+| Primitive          | Syllabus      | What it shows                                                                         |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------- |
+| `AreaDissector`    | 5.2           | Area formulas by cutting and moving pieces: parallelogram, triangle, trapezium        |
+| `CircleSector`     | 5.3; AM 9     | Arc length, sector area and perimeter, segment area and the angle, degrees or radians |
+| `SolidMensuration` | 5.1, 5.4, 5.5 | Volume and surface area of prisms, cylinders, cones, pyramids and spheres             |
 
 ### Coordinate geometry (4024 Unit 3)
 
@@ -86,11 +99,13 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 | `OptimisationScene`      | AM 14.8         | A practical maximum or minimum with the model beside its graph         |
 | `ConnectedRates`         | AM 14.7         | dA/dt = dA/dr × dr/dt for a growing circle, square, sphere or cube     |
 
-### Trigonometry (4037 Unit 10)
+### Trigonometry (4024 Unit 6; 4037 Unit 10)
 
-| Primitive         | Syllabus      | What it shows                                                   |
-| ----------------- | ------------- | --------------------------------------------------------------- |
-| `UnitCircleWaves` | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c |
+| Primitive           | Syllabus      | What it shows                                                          |
+| ------------------- | ------------- | ---------------------------------------------------------------------- |
+| `RightTriangleTrig` | 6.1, 6.2      | Pythagoras or SOH CAH TOA, the method chosen from what is known        |
+| `SineCosineRule`    | 6.3           | The sine rule, the cosine rule or ½ab sin C, chosen from what is known |
+| `UnitCircleWaves`   | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c        |
 
 The files are named after the primitive in snake case, in `backend/app/primitives/`.
 

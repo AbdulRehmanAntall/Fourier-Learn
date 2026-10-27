@@ -329,6 +329,69 @@ CATALOGUE = [
         "1",
         "The circle theorems drawn true to size, the unknown angle found and the theorem named",
     ),
+    PrimitiveInfo(
+        "RightTriangleTrig",
+        "Trigonometry",
+        "1",
+        "Pythagoras or SOH CAH TOA in a right-angled triangle, the method chosen from "
+        "what is known",
+    ),
+    PrimitiveInfo(
+        "SineCosineRule",
+        "Trigonometry",
+        "1",
+        "The sine rule, the cosine rule or the area formula, chosen from what is known",
+    ),
+    PrimitiveInfo(
+        "CircleSector",
+        "Mensuration",
+        "1",
+        "Arc length, sector area and perimeter, segment area and the angle, in degrees or radians",
+    ),
+    PrimitiveInfo(
+        "SolidMensuration",
+        "Mensuration",
+        "1",
+        "Volume and surface area of prisms, cylinders, cones, pyramids and spheres",
+    ),
+    PrimitiveInfo(
+        "Bearings",
+        "Geometry",
+        "1",
+        "Three-figure bearings from north, back bearings, and the east and north parts "
+        "of a journey",
+    ),
+    PrimitiveInfo(
+        "SimilarityScaler",
+        "Geometry",
+        "1",
+        "Similar shapes: the scale factor, a missing length, and areas by k squared and "
+        "volumes by k cubed",
+    ),
+    PrimitiveInfo(
+        "SymmetryReveal",
+        "Geometry",
+        "1",
+        "Lines of symmetry and the order of rotational symmetry, found from the vertices",
+    ),
+    PrimitiveInfo(
+        "AreaDissector",
+        "Mensuration",
+        "1",
+        "Area formulas by cutting and moving pieces: parallelogram, triangle and trapezium",
+    ),
+    PrimitiveInfo(
+        "NetFolder",
+        "Geometry",
+        "1",
+        "The net of a solid face by face, its faces, edges and vertices, and its surface area",
+    ),
+    PrimitiveInfo(
+        "CompassConstruction",
+        "Geometry",
+        "1",
+        "Ruler-and-compasses constructions arc by arc: bisectors and a triangle from three sides",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)

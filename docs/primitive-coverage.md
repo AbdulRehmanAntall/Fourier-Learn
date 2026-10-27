@@ -69,33 +69,33 @@ level; **planned** means it is not built yet.
 
 ## D. Geometry (4024 Unit 4) `EXT`
 
-| #   | Visual               | Syllabus       | Primitive        | Status  |
-| --- | -------------------- | -------------- | ---------------- | ------- |
-| 27  | Angle chaser         | 4.6.1, 4.6.2   | `AngleChaser`    | done    |
-| 28  | Polygon angle walker | 4.6.3          | `PolygonAngles`  | done    |
-| 29  | Circle theorem stage | 4.7, 4.8       | `CircleTheorems` | done    |
-| 30  | Similarity scaler    | 4.4, links 7.1 | —                | planned |
-| 31  | Bearings navigator   | 4.3            | —                | planned |
-| 32  | Symmetry reveal      | 4.5            | —                | planned |
-| 33  | Net folder           | 4.1, 4.2.3     | —                | planned |
-| 34  | Compass construction | 4.2            | —                | planned |
+| #   | Visual               | Syllabus       | Primitive             | Status |
+| --- | -------------------- | -------------- | --------------------- | ------ |
+| 27  | Angle chaser         | 4.6.1, 4.6.2   | `AngleChaser`         | done   |
+| 28  | Polygon angle walker | 4.6.3          | `PolygonAngles`       | done   |
+| 29  | Circle theorem stage | 4.7, 4.8       | `CircleTheorems`      | done   |
+| 30  | Similarity scaler    | 4.4, links 7.1 | `SimilarityScaler`    | done   |
+| 31  | Bearings navigator   | 4.3            | `Bearings`            | done   |
+| 32  | Symmetry reveal      | 4.5            | `SymmetryReveal`      | done   |
+| 33  | Net folder           | 4.1, 4.2.3     | `NetFolder`           | done   |
+| 34  | Compass construction | 4.2            | `CompassConstruction` | done   |
 
 ## E. Mensuration (4024 Unit 5) `EXT`
 
-| #   | Visual                 | Syllabus      | Primitive | Status  |
-| --- | ---------------------- | ------------- | --------- | ------- |
-| 35  | Area dissector         | 5.2, 5.5      | —         | planned |
-| 36  | Circle, arc and sector | 5.3; AM 9.1   | —         | planned |
-| 37  | Solid mensurator       | 5.1, 5.4, 5.5 | —         | planned |
+| #   | Visual                 | Syllabus      | Primitive          | Status |
+| --- | ---------------------- | ------------- | ------------------ | ------ |
+| 35  | Area dissector         | 5.2, 5.5      | `AreaDissector`    | done   |
+| 36  | Circle, arc and sector | 5.3; AM 9.1   | `CircleSector`     | done   |
+| 37  | Solid mensurator       | 5.1, 5.4, 5.5 | `SolidMensuration` | done   |
 
 ## F. Trigonometry (4024 Unit 6) `EXT`
 
-| #   | Visual                         | Syllabus            | Primitive         | Status  |
-| --- | ------------------------------ | ------------------- | ----------------- | ------- |
-| 38  | Right-triangle trigonometry    | 6.1, 6.2            | —                 | planned |
-| 39  | Sine and cosine rule solver    | 6.3                 | —                 | planned |
-| 40  | Trigonometry in 3D             | 6.4                 | —                 | planned |
-| 41  | Unit circle and waves `AM-EXT` | AM 10.2, 10.3; 2.11 | `UnitCircleWaves` | done    |
+| #   | Visual                         | Syllabus            | Primitive           | Status  |
+| --- | ------------------------------ | ------------------- | ------------------- | ------- |
+| 38  | Right-triangle trigonometry    | 6.1, 6.2            | `RightTriangleTrig` | done    |
+| 39  | Sine and cosine rule solver    | 6.3                 | `SineCosineRule`    | done    |
+| 40  | Trigonometry in 3D             | 6.4                 | —                   | planned |
+| 41  | Unit circle and waves `AM-EXT` | AM 10.2, 10.3; 2.11 | `UnitCircleWaves`   | done    |
 
 ## G. Transformations and vectors (4024 Unit 7) `EXT`
 
