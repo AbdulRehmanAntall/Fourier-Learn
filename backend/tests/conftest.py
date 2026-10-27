@@ -16,7 +16,12 @@ os.environ["STUB_LATENCY_MS"] = "0"
 # `npm run setup` installs everything except Manim on machines without Cairo/Pango. The app
 # still runs there, so skip the tests that need Manim instead of failing them.
 if importlib.util.find_spec("manim") is None:
-    collect_ignore = ["test_layout.py", "test_primitives.py", "test_render_engine.py"]
+    collect_ignore = [
+        "test_layout.py",
+        "test_primitive_library.py",
+        "test_primitives.py",
+        "test_render_engine.py",
+    ]
 
 
 import pytest  # noqa: E402

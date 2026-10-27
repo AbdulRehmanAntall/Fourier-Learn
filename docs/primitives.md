@@ -6,7 +6,7 @@ a language model chooses a primitive and fills in its parameters, and nothing el
 
 The library started with the seven primitives of Table 5.2 and now covers the Cambridge O Level
 Mathematics (4024) syllabus and the calculus of Additional Mathematics (4037 Unit 14), with the
-4037 topics that build on it: 68 primitives. [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
+4037 topics that build on it: 69 primitives. [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
 needs to the primitive that draws it. Lessons combine primitives: a graph primitive on the left
 of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on the right.
 
@@ -39,6 +39,19 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 | `SimultaneousEquations` | 2.5          | Two equations solved by elimination or substitution, line by line             |
 | `TableOfValues`         | 2.10         | A table of values filled in, then the points plotted and joined               |
 | `InverseGraph`          | 2.12; AM 1   | f and f⁻¹ as reflections in y = x, with a point and its image                 |
+
+### Text on screen (all topics)
+
+| Primitive  | Syllabus   | What it shows                                                                       |
+| ---------- | ---------- | ----------------------------------------------------------------------------------- |
+| `TextCard` | all topics | A topic heading, a question in the learner's own words, or key points one at a time |
+
+Maths goes between dollar signs (`"Solve $2x + 3 = 7$"`); a dollar sign for money is written
+`\$`. The text comes from the language model, so it is checked before it reaches LaTeX: outside
+the maths only plain words and punctuation, inside it only a known list of commands with
+balanced braces (`\frac`, `\sqrt`, `\theta`, `\le`, ...); anything else, such as `\input`, is
+refused. `place: "side"` puts the card in the working region, so a question stays in view while
+a graph primitive solves it on the left.
 
 ### Number (4024 Unit 1)
 

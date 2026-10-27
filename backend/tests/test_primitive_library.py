@@ -895,3 +895,42 @@ def test_trig_3d():
     assert (cuboid["shadow"], cuboid["line"], cuboid["angle"]) == ("10", "11.2", "26.6")
     pyramid = values("Trig3D", {"solid": "pyramid", "length": 6, "width": 6, "height": 8})
     assert (pyramid["line"], pyramid["angle"]) == ("9.06", "62.1")
+
+
+# Text on screen
+
+
+@pytest.mark.parametrize(
+    ("raw", "predicate"),
+    [
+        ({"layout": "question", "text": "Solve $2x + 3 = 7$"}, None),
+        ({"layout": "question", "text": r"A shirt costs \$24 after a 20% discount."}, None),
+        ({"layout": "question", "text": r"Find $\input{secret}$"}, "safe_text"),
+        ({"layout": "question", "text": r"text with \textbf{markup}"}, "safe_text"),
+        ({"layout": "question", "text": "x^2 outside the maths"}, "safe_text"),
+        ({"layout": "question", "text": "An unclosed $x + 1"}, "safe_text"),
+        ({"layout": "question", "text": r"Braces $\frac{1}{2$"}, "safe_text"),
+        ({"layout": "title"}, "needs_title"),
+        ({"layout": "points", "title": "Key points"}, "needs_points"),
+    ],
+)
+def test_text_card_only_passes_safe_text(raw, predicate):
+    assert predicates("TextCard", raw) == ([predicate] if predicate else [])
+
+
+def test_text_card_wraps_without_breaking_maths():
+    from app.primitives.text_card import _tex, _wrap
+
+    text = "A ladder leans on a wall with its foot $\\sqrt{7} + 2$ m from the wall. How high?"
+    for line in _wrap(text, 30):
+        assert line.count("$") % 2 == 0
+    assert _tex(r"Cost \$5 & 10%") == r"Cost \$5 \& 10\%"
+
+
+def test_text_card_levels():
+    card = get_primitive("TextCard")
+    params = card.parse_params(
+        {"layout": "points", "title": "Remember", "points": ["SOH CAH TOA", "Angles to 1 d.p."]}
+    )
+    assert len(card.steps(params, Level.SUPPORTED)) == 3
+    assert len(card.steps(params, Level.CONCISE)) == 1

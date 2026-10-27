@@ -133,3 +133,10 @@ level; **planned** means it is not built yet.
 | 56  | Connected rates                 | AM 14.7              | `ConnectedRates`                                   | done   |
 | 57  | Area under a curve              | AM 14.10–14.13       | `AreaUnderCurve`, `AreaBetweenCurves`              | done   |
 | 58  | Kinematics triple graph         | AM 14.14, 14.15      | `KinematicsGraphs`, `TravelGraph`                  | done   |
+
+## Text on screen
+
+Every visual above is drawn by a primitive. Words that are not part of a visual (a topic heading
+at the start of a lesson, a question in the learner's own words, key points to remember) are
+drawn by `TextCard`, which checks the text before it reaches LaTeX. With `place: "side"` it sits
+in the working region, so a question stays in view while a graph primitive solves it.

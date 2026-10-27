@@ -67,6 +67,7 @@ from app.primitives.symmetry_reveal import SymmetryReveal
 from app.primitives.table_of_values import TableOfValues
 from app.primitives.tangent_normal import TangentNormal
 from app.primitives.tangent_slide import TangentSlide
+from app.primitives.text_card import TextCard
 from app.primitives.transformation_stage import TransformationStage
 from app.primitives.travel_graph import TravelGraph
 from app.primitives.tree_diagram import TreeDiagram
@@ -146,6 +147,7 @@ PRIMITIVES: dict[str, type[Primitive]] = {
         TransformationStage,
         VectorArena,
         Trig3D,
+        TextCard,
     )
 }
 
