@@ -460,6 +460,12 @@ CATALOGUE = [
         "1",
         "Lengths and angles in 3D from right-angled triangles in a cuboid or a pyramid",
     ),
+    PrimitiveInfo(
+        "TextCard",
+        "All topics",
+        "1",
+        "Words on screen: a topic heading, a question in the learner's words, or key points",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)
@@ -531,6 +537,7 @@ SYLLABUS: dict[str, str] = {
     "TransformationStage": "7.1",
     "TravelGraph": "2.9.3, 2.9.4",
     "TreeDiagram": "8.3",
+    "TextCard": "all topics",
     "Trig3D": "6.4",
     "UnitCircleWaves": "AM 10.2, 10.3",
     "VectorArena": "7.2–7.4; AM 13",

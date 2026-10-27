@@ -766,6 +766,45 @@ GRIDS: dict[str, list[dict]] = {  # fmt: skip
         {"solid": "cuboid", "length": 12, "width": 5, "height": 3},
         {"solid": "pyramid", "length": 4, "width": 4, "height": 6, "unit": "m"},
     ],
+    "TextCard": [
+        {"layout": "title", "title": "Circle theorems", "subtitle": "Angles in circles"},
+        {
+            "layout": "question",
+            "title": "Question",
+            "text": "A ladder 5 m long leans against a vertical wall with its foot $\\sqrt{7}$ m "
+            "from the wall. How far up the wall does it reach?",
+        },
+        {
+            "layout": "points",
+            "title": "Key points",
+            "points": [
+                "The angle in a semicircle is $90^\\circ$",
+                "Angles in the same segment are equal",
+                "Opposite angles of a cyclic quadrilateral add to $180^\\circ$",
+            ],
+        },
+        {
+            "layout": "question",
+            "title": "Question 3",
+            "place": "side",
+            "text": "Find the gradient of $y = x^2 - 3x$ at the point where $x = 4$.",
+        },
+        {
+            "layout": "points",
+            "title": "Remember",
+            "place": "side",
+            "points": [
+                "SOH CAH TOA",
+                "$\\tan\\theta = \\frac{\\text{opp}}{\\text{adj}}$",
+                "Angles to 1 d.p., lengths to 3 s.f.",
+            ],
+        },
+        {"layout": "title", "title": "Simultaneous equations", "place": "side"},
+        {
+            "layout": "question",
+            "text": "A shirt costs \\$24 after a 20% discount. What was the original price?",
+        },
+    ],
 }
 
 
