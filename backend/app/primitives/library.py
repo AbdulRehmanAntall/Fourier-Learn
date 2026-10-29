@@ -11,6 +11,7 @@ from app.primitives.antiderivative_family import AntiderivativeFamily
 from app.primitives.area_between_curves import AreaBetweenCurves
 from app.primitives.area_dissector import AreaDissector
 from app.primitives.area_under_curve import AreaUnderCurve
+from app.primitives.argand_diagram import ArgandDiagram
 from app.primitives.averages_visualizer import AveragesVisualizer
 from app.primitives.bearings import Bearings
 from app.primitives.binomial_expansion import BinomialExpansion
@@ -22,12 +23,14 @@ from app.primitives.circle_theorems import CircleTheorems
 from app.primitives.clock_timetable import ClockTimetable
 from app.primitives.compass_construction import CompassConstruction
 from app.primitives.completing_square import CompletingSquare
+from app.primitives.complex_loci import ComplexLoci
 from app.primitives.connected_rates import ConnectedRates
 from app.primitives.coordinate_circle import CoordinateCircle
 from app.primitives.coordinate_plotter import CoordinatePlotter
 from app.primitives.cumulative_frequency import CumulativeFrequency
 from app.primitives.curve_sketch import CurveSketch
 from app.primitives.derivative_panels import DerivativePanels
+from app.primitives.differential_equation import DifferentialEquation
 from app.primitives.differentiation_stepper import DifferentiationStepper
 from app.primitives.equation_transform import EquationTransform
 from app.primitives.expansion_grid import ExpansionGrid
@@ -39,18 +42,25 @@ from app.primitives.gradient_triangle import GradientTriangle
 from app.primitives.graph_transform import GraphTransform
 from app.primitives.graphical_solution import GraphicalSolution
 from app.primitives.growth_decay import GrowthDecay
+from app.primitives.harmonic_form import HarmonicForm
 from app.primitives.histogram import Histogram
+from app.primitives.implicit_curve import ImplicitCurve
 from app.primitives.index_laws import IndexLaws
 from app.primitives.inequality_region import InequalityRegion
+from app.primitives.integration_method import IntegrationMethod
 from app.primitives.inverse_graph import InverseGraph
+from app.primitives.iteration_diagram import IterationDiagram
 from app.primitives.kinematics_graphs import KinematicsGraphs
 from app.primitives.line_builder import LineBuilder
 from app.primitives.line_meets_curve import LineMeetsCurve
+from app.primitives.log_linearisation import LogLinearisation
 from app.primitives.modulus_equation import ModulusEquation
 from app.primitives.net_folder import NetFolder
 from app.primitives.number_line import NumberLine
 from app.primitives.optimisation_scene import OptimisationScene
 from app.primitives.parallel_perpendicular import ParallelPerpendicular
+from app.primitives.parametric_curve import ParametricCurve
+from app.primitives.partial_fractions import PartialFractions
 from app.primitives.percentage_bar import PercentageBar
 from app.primitives.polygon_angles import PolygonAngles
 from app.primitives.polynomial_division import PolynomialDivision
@@ -77,12 +87,14 @@ from app.primitives.tangent_normal import TangentNormal
 from app.primitives.tangent_slide import TangentSlide
 from app.primitives.text_card import TextCard
 from app.primitives.transformation_stage import TransformationStage
+from app.primitives.trapezium_rule import TrapeziumRule
 from app.primitives.travel_graph import TravelGraph
 from app.primitives.tree_diagram import TreeDiagram
 from app.primitives.trig_3d import Trig3D
 from app.primitives.trig_equation_solver import TrigEquationSolver
 from app.primitives.unit_circle_waves import UnitCircleWaves
 from app.primitives.vector_arena import VectorArena
+from app.primitives.vector_lines_3d import VectorLines3D
 from app.primitives.venn_diagram import VennDiagram
 from app.primitives.volume_of_revolution import VolumeOfRevolution
 
@@ -168,6 +180,18 @@ PRIMITIVES: dict[str, type[Primitive]] = {
         VolumeOfRevolution,
         ModulusEquation,
         PolynomialDivision,
+        PartialFractions,
+        LogLinearisation,
+        HarmonicForm,
+        TrapeziumRule,
+        IterationDiagram,
+        ParametricCurve,
+        ImplicitCurve,
+        IntegrationMethod,
+        DifferentialEquation,
+        VectorLines3D,
+        ArgandDiagram,
+        ComplexLoci,
     )
 }
 

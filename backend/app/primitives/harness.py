@@ -952,6 +952,193 @@ GRIDS: dict[str, list[dict]] = {  # fmt: skip
         {"dividend": "3*x**2 - 5*x + 7", "divisor": "x - 2"},
         {"dividend": "x**4 - 16", "divisor": "x - 2"},
     ],
+    "PartialFractions": [
+        {"numerator": "5*x + 1", "denominator": "(x + 1)*(x - 2)"},
+        {"numerator": "x**2 + 3", "denominator": "(x + 1)*(x - 1)*(x + 3)"},
+        {"numerator": "3*x + 4", "denominator": "(2*x + 1)*(x - 1)**2"},
+        {"numerator": "2*x**2 - x + 7", "denominator": "(x + 2)*(x**2 + 1)"},
+        {"numerator": "7", "denominator": "(3*x - 1)*(x + 2)"},
+        {"numerator": "x**2 + 5*x", "denominator": "(x - 2)*(x + 1)**2"},
+        {"numerator": "4*x", "denominator": "(2*x - 3)*(x**2 + 3)"},
+    ],
+    "LogLinearisation": [
+        {"model": "power", "points": [[1, 3], [2, 12.1], [3, 27], [4, 47.9], [5, 75.2]]},
+        {"model": "exponential", "points": [[0, 5], [1, 7.5], [2, 11.2], [3, 16.9], [4, 25.3]]},
+        {"model": "power", "points": [[2, 5.66], [8, 45.3]]},
+        {"model": "exponential", "points": [[1, 40], [3, 10]]},
+        {"model": "power", "points": [[0.5, 16], [1, 4], [2, 1], [4, 0.25]]},
+        {"model": "exponential", "points": [[-2, 0.8], [0, 2], [2, 5], [4, 12.5], [6, 31.2]]},
+    ],
+    "HarmonicForm": [
+        {"a": 3, "b": 4, "form": "R sin(t + a)"},
+        {"a": 5, "b": -12, "form": "R sin(t - a)", "solve_for": 6},
+        {"a": 1, "b": 1, "form": "R cos(t - a)"},
+        {"a": -2, "b": 3, "form": "R cos(t + a)", "solve_for": 1},
+        {"a": 3, "b": 2, "form": "R sin(t + a)", "solve_for": -2},
+        {"a": 1.5, "b": -2, "form": "R sin(t - a)"},
+    ],
+    "TrapeziumRule": [
+        {"expression": "sqrt(1 + x**2)", "lower": "0", "upper": "2", "strips": 4},
+        {"expression": "1/(1 + x)", "lower": "0", "upper": "1", "strips": 2},
+        {"expression": "sin(x)", "lower": "0", "upper": "pi", "strips": 4},
+        {"expression": "exp(-x**2)", "lower": "-1", "upper": "1", "strips": 4},
+        {"expression": "ln(x)", "lower": "1", "upper": "5", "strips": 4},
+        {"expression": "x**3", "lower": "1", "upper": "3", "strips": 8},
+        {"expression": "2*x + 1", "lower": "0", "upper": "4", "strips": 2},
+        {"expression": "sqrt(cos(x))", "lower": "0", "upper": "pi/3", "strips": 3},
+    ],
+    "IterationDiagram": [
+        {"iteration": "(x + 5)**(1/3)", "x0": 2, "sign_change": [1, 2], "places": 2},
+        {"iteration": "exp(-x)", "x0": 0.5, "places": 2},
+        {"iteration": "(x**2 + 3)/5", "x0": 1, "places": 3},
+        {"iteration": "(x**2 + 3)/5", "x0": 5, "places": 2},
+        {"iteration": "2 - ln(x)", "x0": 1.5, "sign_change": [1, 2], "places": 2},
+        {"iteration": "cos(x)", "x0": 1, "places": 1},
+    ],
+    "ParametricCurve": [
+        {"x": "t**2", "y": "2*t", "t_min": -2, "t_max": 2, "t0": 1},
+        {"x": "t - exp(2*t)", "y": "t + exp(2*t)", "t_min": -2, "t_max": 0.5, "t0": 0},
+        {
+            "x": "3*cos(t)",
+            "y": "2*sin(t)",
+            "t_min": 0,
+            "t_max": 6.283,
+            "t0": 0.785,
+            "line": "normal",
+        },
+        {"x": "t**3", "y": "t**2 - 1", "t_min": -1.5, "t_max": 1.5, "t0": 1},
+        {"x": "2*t + 1", "y": "4/t", "t_min": 0.5, "t_max": 4, "t0": 2, "line": "normal"},
+        {"x": "t - sin(t)", "y": "1 - cos(t)", "t_min": 0, "t_max": 6.28, "t0": 1.5},
+    ],
+    "ImplicitCurve": [
+        {
+            "equation": "x**2 + y**2 = x*y + 7",
+            "point": [3, 2],
+            "x_min": -4,
+            "x_max": 4,
+            "y_min": -4,
+            "y_max": 4,
+        },
+        {
+            "equation": "x**2 + y**2 = 25",
+            "point": [3, 4],
+            "x_min": -6,
+            "x_max": 6,
+            "y_min": -6,
+            "y_max": 6,
+        },
+        {
+            "equation": "x**3 + y**3 = 9*x*y",
+            "point": [2, 4],
+            "x_min": -3,
+            "x_max": 6,
+            "y_min": -3,
+            "y_max": 6,
+            "line": "normal",
+        },
+        {
+            "equation": "y**2 = x**3 - x + 1",
+            "point": [1, -1],
+            "x_min": -2,
+            "x_max": 3,
+            "y_min": -4,
+            "y_max": 4,
+        },
+        {
+            "equation": "x*y + y**2 = 6",
+            "point": [1, 2],
+            "x_min": -5,
+            "x_max": 5,
+            "y_min": -5,
+            "y_max": 5,
+        },
+        {
+            "equation": "x**2 - 4*y**2 = 5",
+            "point": [3, 1],
+            "x_min": -6,
+            "x_max": 6,
+            "y_min": -4,
+            "y_max": 4,
+            "line": "normal",
+        },
+    ],
+    "IntegrationMethod": [
+        {"method": "parts", "integrand": "x*sin(2*x)", "u": "x"},
+        {"method": "parts", "integrand": "x**2*exp(-x)", "u": "x**2", "lower": "0", "upper": "1"},
+        {"method": "parts", "integrand": "x*ln(x)", "u": "ln(x)", "lower": "1", "upper": "2"},
+        {"method": "substitution", "integrand": "sin(x)**2*cos(x)", "u": "sin(x)"},
+        {
+            "method": "substitution",
+            "integrand": "x*sqrt(x**2 + 1)",
+            "u": "x**2 + 1",
+            "lower": "0",
+            "upper": "2",
+        },
+        {"method": "log_form", "integrand": "x/(x**2 + 1)"},
+        {"method": "log_form", "integrand": "tan(x)", "lower": "0", "upper": "pi/4"},
+    ],
+    "DifferentialEquation": [
+        {"gradient": "x*y", "point": [0, 1], "x_min": -2, "x_max": 2},
+        {"gradient": "(y - 1)/x", "point": [1, 3], "x_min": 0.5, "x_max": 4},
+        {"gradient": "-0.5*y", "point": [0, 8], "x_min": 0, "x_max": 6},
+        {"gradient": "2*x*(1 + y**2)", "point": [0, 0], "x_min": -1, "x_max": 1},
+        {"gradient": "y**2*cos(x)", "point": [0, 0.5], "x_min": -3, "x_max": 3},
+        {"gradient": "x/y", "point": [0, 2], "x_min": -3, "x_max": 3},
+    ],
+    "VectorLines3D": [
+        {"kind": "intersection", "a": [1, 2, 0], "b": [1, 0, 1], "c": [3, 1, 1], "d": [0, 1, 1]},
+        {"kind": "intersection", "a": [1, 0, 2], "b": [2, 1, -1], "c": [0, 3, 1], "d": [1, -1, 2]},
+        {"kind": "intersection", "a": [0, 1, 1], "b": [1, 2, -1], "c": [3, 0, 0], "d": [-2, -4, 2]},
+        {"kind": "angle", "a": [1, 0, 0], "b": [2, -1, 2], "c": [0, 1, 3], "d": [1, 1, 0]},
+        {"kind": "angle", "a": [0, 0, 0], "b": [1, 2, 3], "c": [1, 1, 1], "d": [-3, 0, 1]},
+        {"kind": "foot", "a": [1, 2, 3], "b": [1, -1, 2], "p": [4, 5, 0]},
+        {"kind": "foot", "a": [0, 0, 1], "b": [2, 1, 2], "p": [3, -2, 4]},
+    ],
+    "ArgandDiagram": [
+        {"kind": "modulus_argument", "z": [-1, "sqrt(3)"]},
+        {"kind": "modulus_argument", "z": [3, -4]},
+        {"kind": "conjugate", "z": [2, 3]},
+        {"kind": "add", "z": [3, 1], "w": [1, 2]},
+        {"kind": "subtract", "z": [2, 3], "w": [3, -1]},
+        {"kind": "multiply", "z": [1, 1], "w": [1, 2]},
+        {"kind": "divide", "z": [5, 5], "w": [1, 2]},
+        {"kind": "square_roots", "z": [5, 12]},
+        {"kind": "square_roots", "z": [-3, 4]},
+    ],
+    "ComplexLoci": [
+        {
+            "loci": [
+                {"kind": "circle", "relation": "<=", "a": [1, 1], "r": 2},
+                {"kind": "sector", "a": [1, 1], "angle": "0", "angle_2": "pi/2"},
+            ]
+        },
+        {
+            "loci": [
+                {"kind": "circle", "a": [0, 0], "r": 5},
+                {"kind": "half_line", "a": [0, 0], "angle": "pi/4"},
+            ]
+        },
+        {"loci": [{"kind": "bisector", "a": [2, 0], "b": [0, -2]}]},
+        {
+            "loci": [
+                {"kind": "bisector", "relation": "<", "a": [1, 2], "b": [3, 0]},
+                {"kind": "circle", "relation": "<", "a": [2, 1], "r": 3},
+            ]
+        },
+        {
+            "loci": [
+                {"kind": "circle", "a": [-1, 2], "r": 2},
+                {"kind": "bisector", "a": [0, 0], "b": [2, 2]},
+            ]
+        },
+        {
+            "loci": [
+                {"kind": "half_line", "a": [1, 0], "angle": "3*pi/4"},
+                {"kind": "half_line", "a": [-2, 0], "angle": "pi/4"},
+            ]
+        },
+        {"loci": [{"kind": "circle", "relation": ">", "a": [0, 1], "r": 1.5}]},
+    ],
 }
 
 

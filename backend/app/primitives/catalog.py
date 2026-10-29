@@ -533,6 +533,90 @@ CATALOGUE = [
         "Long division of polynomials, with the quotient, remainder, and the remainder "
         "and factor theorems",
     ),
+    PrimitiveInfo(
+        "PartialFractions",
+        "Algebra",
+        "1",
+        "A proper fraction split into partial fractions: the form, then substituting "
+        "roots and comparing coefficients",
+    ),
+    PrimitiveInfo(
+        "LogLinearisation",
+        "Logarithms and exponentials",
+        "1",
+        "y = kx^n or y = ka^x made a straight line by taking logs; k, n and a from its "
+        "gradient and intercept",
+    ),
+    PrimitiveInfo(
+        "HarmonicForm",
+        "Trigonometry",
+        "1",
+        "a sin θ + b cos θ as R sin(θ ± α) or R cos(θ ± α): the triangle for R and α, "
+        "and the single wave",
+    ),
+    PrimitiveInfo(
+        "TrapeziumRule",
+        "Integration",
+        "1",
+        "A definite integral estimated with trapezia, and over or under from the way the "
+        "curve bends",
+    ),
+    PrimitiveInfo(
+        "IterationDiagram",
+        "Numerical solution of equations",
+        "1",
+        "A root from a change of sign, then x = F(x) iterated as a staircase or cobweb "
+        "to the required accuracy",
+    ),
+    PrimitiveInfo(
+        "ParametricCurve",
+        "Differentiation",
+        "1",
+        "A curve x = f(t), y = g(t) traced as t grows, dy/dx = (dy/dt)/(dx/dt), and the "
+        "tangent or normal at a point",
+    ),
+    PrimitiveInfo(
+        "ImplicitCurve",
+        "Differentiation",
+        "1",
+        "A curve given by an equation in x and y, differentiated implicitly, with the "
+        "tangent or normal at a point",
+    ),
+    PrimitiveInfo(
+        "IntegrationMethod",
+        "Integration",
+        "1",
+        "An integral by parts, by substitution or as k f'(x)/f(x), checked by "
+        "differentiating the answer",
+    ),
+    PrimitiveInfo(
+        "DifferentialEquation",
+        "Differential equations",
+        "1",
+        "A separable dy/dx = f(x)g(y): slope field, separating the variables, the family "
+        "and the particular solution",
+    ),
+    PrimitiveInfo(
+        "VectorLines3D",
+        "Vectors",
+        "1",
+        "Lines r = a + λb in 3D: parallel, meeting or skew, the angle between them, and "
+        "the foot of a perpendicular",
+    ),
+    PrimitiveInfo(
+        "ArgandDiagram",
+        "Complex numbers",
+        "1",
+        "Complex numbers in the Argand diagram: modulus and argument, conjugate, sums, "
+        "products, quotients and square roots",
+    ),
+    PrimitiveInfo(
+        "ComplexLoci",
+        "Complex numbers",
+        "1",
+        "Loci in the Argand diagram: circles, perpendicular bisectors, half-lines and "
+        "sectors, their regions and meeting points",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)
@@ -546,6 +630,7 @@ SYLLABUS: dict[str, str] = {
     "AreaBetweenCurves": "AM 14.10–14.13",
     "AreaDissector": "5.2",
     "AreaUnderCurve": "AM 14.10–14.13",
+    "ArgandDiagram": "9709 3.9",
     "AveragesVisualizer": "9.2, 9.3",
     "Bearings": "4.3",
     "BinomialExpansion": "9709 1.6, 3.1",
@@ -556,12 +641,14 @@ SYLLABUS: dict[str, str] = {
     "ClockTimetable": "1.15, 1.16",
     "CompassConstruction": "4.2",
     "CompletingSquare": "2.5.5; AM 2",
+    "ComplexLoci": "9709 3.9",
     "ConnectedRates": "AM 14.7",
     "CoordinateCircle": "AM 8.1–8.4",
     "CoordinatePlotter": "3.1, 3.4",
     "CumulativeFrequency": "9.6",
     "CurveSketch": "2.11; AM 4.4",
     "DerivativePanels": "AM 14.6, 14.9",
+    "DifferentialEquation": "9709 3.8",
     "DifferentiationStepper": "AM 14.3, 14.4",
     "EquationTransform": "2.1–2.5; all topics",
     "ExpansionGrid": "2.2, 2.5.5",
@@ -573,18 +660,25 @@ SYLLABUS: dict[str, str] = {
     "GraphTransform": "9709 1.2",
     "GraphicalSolution": "2.10",
     "GrowthDecay": "1.13.4, 1.17",
+    "HarmonicForm": "9709 2.3, 3.3",
     "Histogram": "9.7",
+    "ImplicitCurve": "9709 2.4, 3.4",
     "IndexLaws": "1.7, 2.4",
     "InequalityRegion": "2.6",
+    "IntegrationMethod": "9709 3.5",
     "InverseGraph": "2.12; AM 1",
+    "IterationDiagram": "9709 2.6, 3.6",
     "KinematicsGraphs": "AM 14.14, 14.15",
     "LineBuilder": "3.2, 3.3, 3.5",
     "LineMeetsCurve": "9709 1.1, 1.3",
+    "LogLinearisation": "9709 2.2, 3.2",
     "ModulusEquation": "9709 2.1, 3.1",
     "NetFolder": "4.1, 4.2.3",
     "NumberLine": "1.1, 1.4, 1.5, 1.9, 1.10",
     "OptimisationScene": "AM 14.8",
     "ParallelPerpendicular": "3.6, 3.7; AM 7",
+    "ParametricCurve": "9709 2.4, 3.4",
+    "PartialFractions": "9709 3.1, 3.5",
     "PercentageBar": "1.13",
     "PolygonAngles": "4.6.3",
     "PolynomialDivision": "9709 2.1, 3.1",
@@ -611,12 +705,14 @@ SYLLABUS: dict[str, str] = {
     "TangentSlide": "AM 14.1–14.5",
     "TextCard": "all topics",
     "TransformationStage": "7.1",
+    "TrapeziumRule": "9709 2.5, 3.5",
     "TravelGraph": "2.9.3, 2.9.4",
     "TreeDiagram": "8.3",
     "Trig3D": "6.4",
     "TrigEquationSolver": "9709 1.5, 2.3, 3.3",
     "UnitCircleWaves": "AM 10.2, 10.3",
     "VectorArena": "7.2–7.4; AM 13",
+    "VectorLines3D": "9709 3.7",
     "VennDiagram": "1.2; 8.3",
     "VolumeOfRevolution": "9709 1.8",
 }

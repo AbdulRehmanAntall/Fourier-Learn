@@ -390,3 +390,29 @@ def latex_with_pi(value: sp.Expr, approx: bool = True) -> str:
                 exact_tex = rf"\frac{{{numerator}}}{{{bottom}}}"
             return rf"{exact_tex} \approx {format_sf(value)}" if approx else exact_tex
     return latex_approx(value) if approx else latex_value(value)
+
+
+_SPECIAL = (
+    sp.erf,
+    sp.erfi,
+    sp.erfc,
+    sp.Ei,
+    sp.li,
+    sp.Si,
+    sp.Ci,
+    sp.fresnels,
+    sp.fresnelc,
+    sp.gamma,
+    sp.uppergamma,
+    sp.lowergamma,
+    sp.polylog,
+    sp.LambertW,
+    sp.hyper,
+    sp.meijerg,
+)
+
+
+def is_elementary_integral(expr: sp.Expr) -> bool:
+    """Whether SymPy's integral is one a student can write: no unevaluated integral and no
+    special function (erf, Ei, ...) that the syllabus does not use."""
+    return not expr.has(sp.Integral) and not any(expr.has(f) for f in _SPECIAL)

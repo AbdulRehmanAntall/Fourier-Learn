@@ -1147,3 +1147,225 @@ def test_polynomial_division():
     assert predicates("PolynomialDivision", {"dividend": "x**2 + 1", "divisor": "x**2"}) == [
         "degree_order"
     ]
+
+
+# A Level (9709): Pure Mathematics 2 and 3
+
+
+def test_partial_fractions_recombine():
+    import sympy as sp
+
+    x = sp.Symbol("x", real=True)
+    for raw in GRIDS["PartialFractions"]:
+        found = values("PartialFractions", raw)
+        original = sp.sympify(raw["numerator"], locals={"x": x}) / sp.sympify(
+            raw["denominator"], locals={"x": x}
+        )
+        assert sp.simplify(sp.sympify(found["result"], locals={"x": x}) - original) == 0
+    simple = values("PartialFractions", {"numerator": "5*x + 1", "denominator": "(x + 1)*(x - 2)"})
+    assert (simple["A"], simple["B"]) == ("4/3", "11/3")  # A over (x + 1), as written
+
+
+def test_partial_fractions_predicates():
+    raw = {"numerator": "x**2", "denominator": "(x + 1)*(x - 2)"}
+    assert predicates("PartialFractions", raw) == ["proper"]
+    raw = {"numerator": "1", "denominator": "(x + 1)**3"}
+    assert predicates("PartialFractions", raw) == ["denominator_type"]
+    raw = {"numerator": "x + 1", "denominator": "(x + 1)*(x - 2)"}
+    assert predicates("PartialFractions", raw) == ["no_common_factor"]
+
+
+def test_log_linearisation_reads_the_constants():
+    power = values("LogLinearisation", {"model": "power", "points": [[2, 5.66], [8, 45.3]]})
+    assert (power["n"], power["k"]) == ("1.50", "2.00")
+    decay = values("LogLinearisation", {"model": "exponential", "points": [[1, 40], [3, 10]]})
+    assert (decay["a"], decay["k"]) == ("0.5", "80")  # exact values are not padded
+    bad = {"model": "power", "points": [[0, 1], [1, 2]]}
+    assert predicates("LogLinearisation", bad) == ["positive_x"]
+
+
+def test_harmonic_form():
+    found = values("HarmonicForm", {"a": 3, "b": 4, "form": "R sin(t + a)"})
+    assert (found["R"], found["alpha"], found["maximum_at"]) == ("5", "53.1", "36.9")
+    solved = values("HarmonicForm", {"a": 3, "b": 2, "form": "R sin(t + a)", "solve_for": -2})
+    assert (solved["theta_1"], solved["theta_2"]) == ("180.0", "292.6")
+    cosine = values("HarmonicForm", {"a": -2, "b": 3, "form": "R cos(t + a)", "solve_for": 1})
+    assert (cosine["theta_1"], cosine["theta_2"]) == ("40.2", "252.4")
+    wrong = {"a": 3, "b": -4, "form": "R sin(t + a)"}
+    assert predicates("HarmonicForm", wrong) == ["form_matches"]
+    too_big = {"a": 3, "b": 4, "form": "R sin(t + a)", "solve_for": 6}
+    assert predicates("HarmonicForm", too_big) == ["value_possible"]
+
+
+def test_trapezium_rule():
+    found = values(
+        "TrapeziumRule", {"expression": "sin(x)", "lower": "0", "upper": "pi", "strips": 4}
+    )
+    assert (found["estimate"], found["exact"], found["shape"]) == ("1.90", "2", "under")
+    convex = values("TrapeziumRule", {"expression": "x**3", "lower": "1", "upper": "3"})
+    assert convex["shape"] == "over"
+    line = values(
+        "TrapeziumRule", {"expression": "2*x + 1", "lower": "0", "upper": "4", "strips": 2}
+    )
+    assert (line["estimate"], line["shape"]) == ("20", "exact")
+    assert predicates("TrapeziumRule", {"expression": "x", "lower": "2", "upper": "1"}) == [
+        "limits_ordered"
+    ]
+
+
+def test_iteration_diagram():
+    found = values(
+        "IterationDiagram", {"iteration": "(x + 5)**(1/3)", "x0": 2, "sign_change": [1, 2]}
+    )
+    assert (found["converges"], found["root"]) == ("yes", "1.90")
+    runaway = values("IterationDiagram", {"iteration": "(x**2 + 3)/5", "x0": 5})
+    assert runaway["converges"] == "no"
+    no_change = {"iteration": "(x + 5)**(1/3)", "x0": 2, "sign_change": [2, 3]}
+    assert predicates("IterationDiagram", no_change) == ["sign_changes"]
+
+
+def test_parametric_curve():
+    found = values("ParametricCurve", {"x": "t**2", "y": "2*t", "t_min": -2, "t_max": 2, "t0": 1})
+    assert (found["dy_dx"], found["point"], found["line"]) == ("1/t", "(1, 2)", "y = x + 1")
+    normal = {"x": "2*t + 1", "y": "4/t", "t_min": 0.5, "t_max": 4, "t0": 2, "line": "normal"}
+    assert values("ParametricCurve", normal)["line"] == "y = 2*x - 8"
+    vertical = {"x": "t**2", "y": "t", "t_min": -1, "t_max": 1, "t0": 0}
+    assert predicates("ParametricCurve", vertical) == ["gradient_defined"]
+
+
+def test_implicit_curve():
+    raw = {
+        "equation": "x**2 + y**2 = x*y + 7",
+        "point": [3, 2],
+        "x_min": -4,
+        "x_max": 4,
+        "y_min": -4,
+        "y_max": 4,
+    }
+    found = values("ImplicitCurve", raw)
+    assert (found["gradient"], found["line"]) == ("-4", "14 - 4*x")
+    assert predicates("ImplicitCurve", raw | {"point": [1, 1]}) == ["point_on_curve"]
+    circle = raw | {"equation": "x**2 + y**2 = 9", "point": [3, 0]}
+    assert predicates("ImplicitCurve", circle) == ["gradient_defined"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "result"),
+    [
+        (
+            {"method": "parts", "integrand": "x*ln(x)", "u": "ln(x)", "lower": "1", "upper": "2"},
+            "-3/4 + log(4)",
+        ),
+        (
+            {
+                "method": "substitution",
+                "integrand": "x*sqrt(x**2 + 1)",
+                "u": "x**2 + 1",
+                "lower": "0",
+                "upper": "2",
+            },
+            "-1/3 + 5*sqrt(5)/3",
+        ),
+        (
+            {"method": "log_form", "integrand": "tan(x)", "lower": "0", "upper": "pi/4"},
+            "log(sqrt(2))",
+        ),
+    ],
+)
+def test_integration_method_definite(raw, result):
+    assert values("IntegrationMethod", raw)["value"] == result
+
+
+def test_integration_method_predicates():
+    wrong_u = {"method": "parts", "integrand": "x*exp(x**2)", "u": "x"}
+    assert predicates("IntegrationMethod", wrong_u) == ["method_fits"]
+    not_log = {"method": "log_form", "integrand": "x/(x + 1)"}
+    assert predicates("IntegrationMethod", not_log) == ["method_fits"]
+    assert predicates("IntegrationMethod", {"method": "parts", "integrand": "x*sin(x)"}) == [
+        "u_given"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("gradient", "point", "particular"),
+    [
+        ("x*y", [0, 1], "y = exp(x**2/2)"),
+        ("(y - 1)/x", [1, 3], "y = 2*x + 1"),
+        ("-0.5*y", [0, 8], "y = 8*exp(-x/2)"),
+        ("x/y", [0, 2], "y = sqrt(x**2 + 4)"),
+    ],
+)
+def test_differential_equation_particular_solution(gradient, point, particular):
+    raw = {
+        "gradient": gradient,
+        "point": point,
+        "x_min": 0.5 if gradient.endswith("/x") else -2,
+        "x_max": 2,
+    }
+    assert values("DifferentialEquation", raw)["particular"] == particular
+
+
+def test_differential_equation_predicates():
+    base = {"point": [0, 1], "x_min": -1, "x_max": 1}
+    assert predicates("DifferentialEquation", base | {"gradient": "x + y"}) == ["separable"]
+    assert predicates("DifferentialEquation", base | {"gradient": "x*(y - 1)"}) == ["solvable"]
+
+
+def test_vector_lines_3d():
+    meet = {"kind": "intersection", "a": [1, 2, 0], "b": [1, 0, 1], "c": [3, 1, 1], "d": [0, 1, 1]}
+    assert values("VectorLines3D", meet) == {"point": "(3, 2, 2)", "relation": "meet"}
+    skew = {
+        "kind": "intersection",
+        "a": [1, 0, 2],
+        "b": [2, 1, -1],
+        "c": [0, 3, 1],
+        "d": [1, -1, 2],
+    }
+    assert values("VectorLines3D", skew)["relation"] == "skew"
+    parallel = meet | {"c": [3, 0, 0], "d": [-2, 0, -2]}
+    assert values("VectorLines3D", parallel)["relation"] == "parallel"
+    angle = {"kind": "angle", "a": [1, 0, 0], "b": [2, -1, 2], "c": [0, 1, 3], "d": [1, 1, 0]}
+    assert values("VectorLines3D", angle)["angle"] == "76.4"
+    foot = {"kind": "foot", "a": [1, 2, 3], "b": [1, -1, 2], "p": [4, 5, 0]}
+    assert values("VectorLines3D", foot) == {"foot": "(0, 3, 1)", "distance": "sqrt(21)"}
+    assert predicates("VectorLines3D", foot | {"p": [2, 1, 5]}) == ["point_off_line"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "result"),
+    [
+        ({"kind": "multiply", "z": [1, 1], "w": [1, 2]}, "-1 + 3*I"),
+        ({"kind": "divide", "z": [5, 5], "w": [1, 2]}, "3 - I"),
+        ({"kind": "square_roots", "z": [5, 12]}, "3 + 2*I"),
+        ({"kind": "conjugate", "z": [2, 3]}, "2 - 3*I"),
+    ],
+)
+def test_argand_diagram(raw, result):
+    assert values("ArgandDiagram", raw)["result"] == result
+
+
+def test_argand_diagram_modulus_argument_is_exact():
+    found = values("ArgandDiagram", {"kind": "modulus_argument", "z": [-1, "sqrt(3)"]})
+    assert (found["modulus"], found["argument"]) == ("2", "2*pi/3")
+    assert predicates("ArgandDiagram", {"kind": "add", "z": [1, 1]}) == ["w_given"]
+
+
+def test_complex_loci_meeting_points():
+    two_half_lines = {
+        "loci": [
+            {"kind": "half_line", "a": [1, 0], "angle": "3*pi/4"},
+            {"kind": "half_line", "a": [-2, 0], "angle": "pi/4"},
+        ]
+    }
+    assert values("ComplexLoci", two_half_lines)["meet_1"] == "-1/2 + 3/2i"
+    # a half-line meets the circle once, not twice: the other root is behind its start
+    circle_line = {
+        "loci": [
+            {"kind": "circle", "a": [0, 0], "r": 5},
+            {"kind": "half_line", "a": [0, 0], "angle": "pi/4"},
+        ]
+    }
+    found = values("ComplexLoci", circle_line)
+    assert "meet_1" in found and "meet_2" not in found
+    bad = {"loci": [{"kind": "sector", "a": [0, 0], "angle": "pi/2", "angle_2": "0"}]}
+    assert predicates("ComplexLoci", bad) == ["angles_ordered"]

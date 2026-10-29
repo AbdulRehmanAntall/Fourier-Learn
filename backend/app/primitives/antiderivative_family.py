@@ -25,6 +25,7 @@ from app.primitives.symbolic import (
     exact,
     failing_samples,
     format_value,
+    is_elementary_integral,
     latex_value,
     parse_expression,
     sample_points,
@@ -74,7 +75,7 @@ class AntiderivativeFamily(StagedPrimitive[AntiderivativeFamilyParams]):
         integral = sp.integrate(sp.nsimplify(g, rational=True), X, manual=True)
         if integral.has(sp.Integral):
             integral = sp.integrate(sp.nsimplify(g, rational=True), X)
-        if integral.has(sp.Integral):
+        if not is_elementary_integral(integral):
             message = "dy/dx has no integral in a simple form"
             return [_failure("consistency", "integrable", message, "gradient")]
         return []
