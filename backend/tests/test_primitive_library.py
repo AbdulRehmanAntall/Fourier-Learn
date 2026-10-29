@@ -934,3 +934,216 @@ def test_text_card_levels():
     )
     assert len(card.steps(params, Level.SUPPORTED)) == 3
     assert len(card.steps(params, Level.CONCISE)) == 1
+
+
+# A Level (9709): Pure Mathematics 1 and the algebra of Pure Mathematics 2 and 3
+
+
+def test_graph_transform_follows_a_point_and_builds_the_equation():
+    raw = {
+        "expression": "x**2",
+        "x_min": -2,
+        "x_max": 2,
+        "transformations": [
+            {"kind": "translate_x", "value": 1},
+            {"kind": "stretch_y", "value": 2},
+            {"kind": "translate_y", "value": -3},
+        ],
+        "point_x": 1,
+    }
+    found = values("GraphTransform", raw)
+    # y = 2f(x + 1) - 3 with f(x) = x^2: (1, 1) moves left 1, doubles, then drops 3
+    assert found["final_expression"] == "2*x**2 + 4*x - 1"
+    assert [found[f"point_{k}"] for k in range(4)] == ["(1, 1)", "(0, 1)", "(0, 2)", "(0, -1)"]
+    stretch = raw | {"transformations": [{"kind": "stretch_x", "value": 2}]}
+    assert values("GraphTransform", stretch)["point_1"] == "(1/2, 1)"
+    assert predicates(
+        "GraphTransform", stretch | {"transformations": [{"kind": "stretch_x", "value": -2}]}
+    ) == ["stretch_factor"]
+    assert predicates("GraphTransform", raw | {"point_x": 5}) == ["point_on_graph"]
+    assert predicates("GraphTransform", raw | {"expression": "1/x"}) == ["real_and_finite"]
+
+
+def test_function_mapping_range_one_one_and_composite():
+    found = values(
+        "FunctionMapping", {"kind": "range", "f": "(x - 2)**2 + 1", "f_min": 0, "f_max": 5}
+    )
+    assert (found["range_min"], found["range_max"]) == ("1", "10")
+    turning = values(
+        "FunctionMapping", {"kind": "one_one", "f": "x**2 - 4*x + 7", "f_min": -1, "f_max": 5}
+    )
+    assert turning["one_one"] == "no" and turning["restricted_domain"] == "-1 <= x <= 2"
+    monotonic = values(
+        "FunctionMapping", {"kind": "one_one", "f": "1/(x + 1)", "f_min": 0, "f_max": 4}
+    )
+    assert monotonic["one_one"] == "yes"
+    composite = {"kind": "composite", "f": "2*x + 1", "f_min": 0, "f_max": 3, "g": "x**2 - 1"}
+    found = values("FunctionMapping", composite)
+    assert found["gf"] == "4*x**2 + 4*x"
+    assert (found["gf_range_min"], found["gf_range_max"]) == ("0", "48")
+    # the range of f (-2 to 3) is not inside the domain of g (x >= 1/2): no gf
+    outside = {"kind": "composite", "f": "3 - x", "f_min": 0, "f_max": 5, "g": "1/x", "g_min": 0.5}
+    assert values("FunctionMapping", outside)["composite_exists"] == "no"
+    assert predicates("FunctionMapping", composite | {"g": None}) == ["g_given"]
+
+
+def test_line_meets_curve_discriminant():
+    found = values("LineMeetsCurve", {"curve": "x**2 - 4*x + 7", "line": "x + k"})
+    assert found["discriminant"] == "4*k - 3"
+    assert (found["tangent_k_1"], found["tangent_point_1"]) == ("3/4", "(5/2, 13/4)")
+    gradient = values("LineMeetsCurve", {"curve": "x**2 + 3", "line": "k*x - 1"})
+    assert (gradient["tangent_k_1"], gradient["tangent_k_2"]) == ("-4", "4")
+    assert gradient["no_points"] == "Interval.open(-4, 4)"
+    assert predicates("LineMeetsCurve", {"curve": "x**3", "line": "x + k"}) == ["curve_quadratic"]
+    assert predicates("LineMeetsCurve", {"curve": "x**2", "line": "x + 1"}) == ["line_has_k"]
+    assert predicates("LineMeetsCurve", {"curve": "x**2", "line": "k*x**2"}) == ["line_linear"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solutions"),
+    [
+        ({"function": "sin", "b": 2, "c": 30, "k": 0.5}, ["0", "60", "180", "240", "360"]),
+        ({"function": "cos", "k": -0.5}, ["120", "240"]),
+        ({"function": "tan", "k": 2, "x_min": -180, "x_max": 180}, ["-116.6", "63.4"]),
+        ({"function": "cos", "b": 3, "k": 0.8, "x_max": 180}, ["12.3", "107.7", "132.3"]),
+        (
+            {
+                "function": "tan",
+                "b": 0.5,
+                "c": -0.25,
+                "k": 1,
+                "x_min": -2,
+                "x_max": 2,
+                "radians": True,
+            },
+            ["-pi", "pi"],
+        ),
+    ],
+)
+def test_trig_equation_solver_finds_every_solution(raw, solutions):
+    found = values("TrigEquationSolver", raw)
+    assert [found[f"x_{i}"] for i in range(1, int(found["count"]) + 1)] == solutions
+
+
+def test_trig_equation_solver_predicates():
+    assert predicates("TrigEquationSolver", {"function": "sin", "k": 1.5}) == ["value_possible"]
+    assert predicates(
+        "TrigEquationSolver", {"function": "tan", "k": 1, "x_min": -360, "x_max": 720}
+    ) == ["interval_short"]
+    assert predicates(
+        "TrigEquationSolver", {"function": "sin", "k": 0.5, "x_min": 40, "x_max": 50}
+    ) == ["has_solutions"]
+
+
+def test_binomial_expansion():
+    found = values("BinomialExpansion", {"a": 2, "b": 3, "n": 5, "terms": 4})
+    assert [found[f"coefficient_{r}"] for r in range(4)] == ["32", "240", "720", "1080"]
+    rational = values("BinomialExpansion", {"a": 4, "b": -3, "n": -0.5, "terms": 4})
+    assert [rational[f"coefficient_{r}"] for r in range(4)] == ["1/2", "3/16", "27/256", "135/2048"]
+    assert rational["valid_for"] == "|x| < 4/3"
+    assert predicates("BinomialExpansion", {"a": 1, "b": 1, "n": 3, "terms": 5}) == ["terms_exist"]
+    assert predicates("BinomialExpansion", {"a": -2, "b": 1, "n": 0.5}) == ["a_positive"]
+    assert predicates("BinomialExpansion", {"a": 1, "b": 1, "n": 4, "find_power": 4}) == [
+        "power_shown"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("raw", "answer"),
+    [
+        ({"kind": "arithmetic", "a": 3, "d": 2, "find": "sum", "n": 8}, "80"),
+        ({"kind": "arithmetic", "a": 50, "d": -7, "find": "nth_term", "n": 9}, "-6"),
+        ({"kind": "geometric", "a": 64, "r": 0.5, "find": "sum", "n": 7}, "127"),
+        ({"kind": "geometric", "a": 10, "r": -0.6, "find": "sum_to_infinity"}, "25/4"),
+    ],
+)
+def test_progression_answers(raw, answer):
+    assert values("Progression", raw)["answer"] == answer
+
+
+def test_progression_predicates():
+    assert predicates(
+        "Progression", {"kind": "geometric", "a": 1, "r": 2, "find": "sum_to_infinity"}
+    ) == ["convergent"]
+    assert predicates(
+        "Progression", {"kind": "arithmetic", "a": 1, "d": 1, "find": "sum_to_infinity"}
+    ) == ["convergent"]
+    assert predicates(
+        "Progression", {"kind": "geometric", "a": 1, "r": 1, "find": "sum", "n": 5}
+    ) == ["ratio_not_one"]
+
+
+def test_antiderivative_family_constant():
+    found = values(
+        "AntiderivativeFamily", {"gradient": "3*x**2 - 4", "point": [2, 5], "x_min": -3, "x_max": 3}
+    )
+    assert (found["c"], found["curve"]) == ("5", "x**3 - 4*x + 5")
+    chain = values(
+        "AntiderivativeFamily",
+        {"gradient": "(2*x - 1)**3", "point": [1, 0], "x_min": 0, "x_max": 2},
+    )
+    assert chain["integral"] == "(2*x - 1)**4/8"  # kept as a power, as A Level writes it
+    assert chain["c"] == "-1/8"
+
+
+@pytest.mark.parametrize(
+    ("raw", "volume"),
+    [
+        ({"axis": "x", "curve": "sqrt(x)", "lower": 0, "upper": 4}, "8*pi"),
+        ({"axis": "x", "curve": "9 - x**2", "lower": -2, "upper": 2, "inner": "5"}, "704*pi/5"),
+        ({"axis": "y", "curve": "2/y", "lower": 1, "upper": 4}, "3*pi"),
+    ],
+)
+def test_volume_of_revolution(raw, volume):
+    assert values("VolumeOfRevolution", raw)["volume"] == volume
+
+
+def test_volume_of_revolution_predicates():
+    base = {"axis": "x", "curve": "x - 1", "lower": 0, "upper": 2}
+    assert predicates("VolumeOfRevolution", base) == ["one_side_of_axis"]
+    assert predicates("VolumeOfRevolution", base | {"curve": "y"}) == ["expression_parses"]
+    washer = {"axis": "x", "curve": "2", "lower": 0, "upper": 1, "inner": "3"}
+    assert predicates("VolumeOfRevolution", washer) == ["inner_inside"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solution"),
+    [
+        ({"left": "abs(3*x - 2)", "right": "abs(2*x + 7)"}, "{-1, 9}"),
+        ({"left": "2*x + 5", "relation": "<", "right": "abs(x + 1)"}, "Interval.open(-oo, -2)"),
+        ({"left": "abs(x - 3)", "relation": "<=", "right": "4"}, "Interval(-1, 7)"),
+        ({"left": "abs(x + 2)", "right": "3*x - 4"}, "{3}"),  # the other case's root is rejected
+    ],
+)
+def test_modulus_equation(raw, solution):
+    assert values("ModulusEquation", raw)["solution"] == solution
+
+
+def test_modulus_equation_predicates():
+    assert predicates("ModulusEquation", {"left": "x + 1", "right": "3"}) == ["has_modulus"]
+    assert predicates("ModulusEquation", {"left": "abs(x**2 - 1)", "right": "3"}) == [
+        "linear_inside"
+    ]
+    assert predicates("ModulusEquation", {"left": "abs(x)", "right": "-1"}) == ["has_solutions"]
+
+
+def test_polynomial_division():
+    found = values(
+        "PolynomialDivision", {"dividend": "2*x**3 + 3*x**2 - 8*x + 3", "divisor": "x - 1"}
+    )
+    assert (found["quotient"], found["remainder"], found["is_factor"]) == (
+        "2*x**2 + 5*x - 3",
+        "0",
+        "yes",
+    )
+    rest = values(
+        "PolynomialDivision", {"dividend": "6*x**3 + x**2 - 5*x + 2", "divisor": "2*x - 1"}
+    )
+    assert rest["remainder"] == "1/2" and rest["remainder_theorem"] == "f(1/2) = 1/2"
+    quadratic = values(
+        "PolynomialDivision", {"dividend": "x**4 + 2*x**3 - x + 5", "divisor": "x**2 + 1"}
+    )
+    assert (quadratic["quotient"], quadratic["remainder"]) == ("x**2 + 2*x - 1", "6 - 3*x")
+    assert predicates("PolynomialDivision", {"dividend": "x**2 + 1", "divisor": "x**2"}) == [
+        "degree_order"
+    ]

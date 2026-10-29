@@ -7,11 +7,13 @@ changes how it draws.
 from app.contracts import Primitive
 from app.primitives.algebra_balance import AlgebraBalance
 from app.primitives.angle_chaser import AngleChaser
+from app.primitives.antiderivative_family import AntiderivativeFamily
 from app.primitives.area_between_curves import AreaBetweenCurves
 from app.primitives.area_dissector import AreaDissector
 from app.primitives.area_under_curve import AreaUnderCurve
 from app.primitives.averages_visualizer import AveragesVisualizer
 from app.primitives.bearings import Bearings
+from app.primitives.binomial_expansion import BinomialExpansion
 from app.primitives.bounds_interval import BoundsInterval
 from app.primitives.catalog import LIBRARY_VERSION
 from app.primitives.chart_builder import ChartBuilder
@@ -32,7 +34,9 @@ from app.primitives.expansion_grid import ExpansionGrid
 from app.primitives.fraction_model import FractionModel
 from app.primitives.function_graph import FunctionGraph
 from app.primitives.function_machine import FunctionMachine
+from app.primitives.function_mapping import FunctionMapping
 from app.primitives.gradient_triangle import GradientTriangle
+from app.primitives.graph_transform import GraphTransform
 from app.primitives.graphical_solution import GraphicalSolution
 from app.primitives.growth_decay import GrowthDecay
 from app.primitives.histogram import Histogram
@@ -41,14 +45,18 @@ from app.primitives.inequality_region import InequalityRegion
 from app.primitives.inverse_graph import InverseGraph
 from app.primitives.kinematics_graphs import KinematicsGraphs
 from app.primitives.line_builder import LineBuilder
+from app.primitives.line_meets_curve import LineMeetsCurve
+from app.primitives.modulus_equation import ModulusEquation
 from app.primitives.net_folder import NetFolder
 from app.primitives.number_line import NumberLine
 from app.primitives.optimisation_scene import OptimisationScene
 from app.primitives.parallel_perpendicular import ParallelPerpendicular
 from app.primitives.percentage_bar import PercentageBar
 from app.primitives.polygon_angles import PolygonAngles
+from app.primitives.polynomial_division import PolynomialDivision
 from app.primitives.prime_factor_tree import PrimeFactorTree
 from app.primitives.probability_spinner import ProbabilitySpinner
+from app.primitives.progression import Progression
 from app.primitives.proportion_graph import ProportionGraph
 from app.primitives.quadratic_explorer import QuadraticExplorer
 from app.primitives.ratio_splitter import RatioSplitter
@@ -72,9 +80,11 @@ from app.primitives.transformation_stage import TransformationStage
 from app.primitives.travel_graph import TravelGraph
 from app.primitives.tree_diagram import TreeDiagram
 from app.primitives.trig_3d import Trig3D
+from app.primitives.trig_equation_solver import TrigEquationSolver
 from app.primitives.unit_circle_waves import UnitCircleWaves
 from app.primitives.vector_arena import VectorArena
 from app.primitives.venn_diagram import VennDiagram
+from app.primitives.volume_of_revolution import VolumeOfRevolution
 
 PRIMITIVES: dict[str, type[Primitive]] = {
     cls.primitive_id: cls
@@ -148,6 +158,16 @@ PRIMITIVES: dict[str, type[Primitive]] = {
         VectorArena,
         Trig3D,
         TextCard,
+        GraphTransform,
+        FunctionMapping,
+        LineMeetsCurve,
+        TrigEquationSolver,
+        BinomialExpansion,
+        Progression,
+        AntiderivativeFamily,
+        VolumeOfRevolution,
+        ModulusEquation,
+        PolynomialDivision,
     )
 }
 

@@ -429,3 +429,31 @@ def split_columns(box: Box, fractions: Sequence[float], gap: float = 0.2) -> lis
         boxes.append(Box(left, left + width, box.bottom, box.top))
         left += width + gap
     return boxes
+
+
+def stack_lines(
+    texs: Sequence[str],
+    box: Box,
+    *,
+    size: float = 32,
+    buff: float = 0.28,
+    colours: Sequence[object | None] | None = None,
+) -> list[MathTex]:
+    """Lines of working, one MathTex each, left-aligned from the top of `box`: a line too wide
+    for the box is shrunk to fit it, and the stack is shrunk to fit the box's height."""
+    lines = [
+        MathTex(
+            inline(tex),
+            font_size=size,
+            color=(colours[i] if colours else None) or style.TEXT_COLOUR,
+        )
+        for i, tex in enumerate(texs)
+    ]
+    for line in lines:  # a long line shrinks alone, so it does not shrink the others
+        if line.width > box.width:
+            line.scale_to_fit_width(box.width)
+    group = VGroup(*lines).arrange([0, -1, 0], aligned_edge=[-1, 0, 0], buff=buff)
+    if group.height > box.height:
+        group.scale(box.height / group.height)
+    group.move_to([box.left + group.width / 2, box.top - group.height / 2, 0])
+    return lines

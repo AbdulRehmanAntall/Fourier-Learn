@@ -466,6 +466,73 @@ CATALOGUE = [
         "1",
         "Words on screen: a topic heading, a question in the learner's words, or key points",
     ),
+    PrimitiveInfo(
+        "GraphTransform",
+        "Functions",
+        "1",
+        "A graph moved by translations, reflections and stretches to y = pf(qx + r) + s, "
+        "one step at a time",
+    ),
+    PrimitiveInfo(
+        "FunctionMapping",
+        "Functions",
+        "1",
+        "Domain and range from the graph, the one-one test, and the composite gf on number lines",
+    ),
+    PrimitiveInfo(
+        "LineMeetsCurve",
+        "Quadratics",
+        "1",
+        "For which k a line cuts a quadratic curve twice, touches it or misses it, from "
+        "the discriminant",
+    ),
+    PrimitiveInfo(
+        "TrigEquationSolver",
+        "Trigonometry",
+        "1",
+        "Every solution of sin, cos or tan of (bx + c) = k in an interval, from the "
+        "principal value and symmetry",
+    ),
+    PrimitiveInfo(
+        "BinomialExpansion",
+        "Series",
+        "1",
+        "(a + bx)^n term by term: Pascal's triangle for whole n, the infinite series and "
+        "its validity otherwise",
+    ),
+    PrimitiveInfo(
+        "Progression",
+        "Series",
+        "1",
+        "Arithmetic and geometric progressions as bars: the nth term, the sum of n terms "
+        "and the sum to infinity",
+    ),
+    PrimitiveInfo(
+        "AntiderivativeFamily",
+        "Integration",
+        "1",
+        "Integrating dy/dx gives a family of curves y = F(x) + c; a point on the curve fixes c",
+    ),
+    PrimitiveInfo(
+        "VolumeOfRevolution",
+        "Integration",
+        "1",
+        "A region turned about the x- or y-axis: the solid as discs or washers, and its volume",
+    ),
+    PrimitiveInfo(
+        "ModulusEquation",
+        "Algebra",
+        "1",
+        "Equations and inequalities with |ax + b|: squaring or cases, checked against "
+        "the V-shaped graphs",
+    ),
+    PrimitiveInfo(
+        "PolynomialDivision",
+        "Algebra",
+        "1",
+        "Long division of polynomials, with the quotient, remainder, and the remainder "
+        "and factor theorems",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)
@@ -475,11 +542,13 @@ PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)
 SYLLABUS: dict[str, str] = {
     "AlgebraBalance": "2.1–2.3, 2.5",
     "AngleChaser": "4.6.1, 4.6.2",
+    "AntiderivativeFamily": "9709 1.8",
     "AreaBetweenCurves": "AM 14.10–14.13",
     "AreaDissector": "5.2",
     "AreaUnderCurve": "AM 14.10–14.13",
     "AveragesVisualizer": "9.2, 9.3",
     "Bearings": "4.3",
+    "BinomialExpansion": "9709 1.6, 3.1",
     "BoundsInterval": "1.10",
     "ChartBuilder": "9.1, 9.4",
     "CircleSector": "5.3; AM 9",
@@ -499,7 +568,9 @@ SYLLABUS: dict[str, str] = {
     "FractionModel": "1.4, 1.6",
     "FunctionGraph": "2.10",
     "FunctionMachine": "2.12; AM 1",
+    "FunctionMapping": "9709 1.2",
     "GradientTriangle": "3.3",
+    "GraphTransform": "9709 1.2",
     "GraphicalSolution": "2.10",
     "GrowthDecay": "1.13.4, 1.17",
     "Histogram": "9.7",
@@ -508,14 +579,18 @@ SYLLABUS: dict[str, str] = {
     "InverseGraph": "2.12; AM 1",
     "KinematicsGraphs": "AM 14.14, 14.15",
     "LineBuilder": "3.2, 3.3, 3.5",
+    "LineMeetsCurve": "9709 1.1, 1.3",
+    "ModulusEquation": "9709 2.1, 3.1",
     "NetFolder": "4.1, 4.2.3",
     "NumberLine": "1.1, 1.4, 1.5, 1.9, 1.10",
     "OptimisationScene": "AM 14.8",
     "ParallelPerpendicular": "3.6, 3.7; AM 7",
     "PercentageBar": "1.13",
     "PolygonAngles": "4.6.3",
+    "PolynomialDivision": "9709 2.1, 3.1",
     "PrimeFactorTree": "1.1",
     "ProbabilitySpinner": "8.1, 8.2",
+    "Progression": "9709 1.6",
     "ProportionGraph": "2.8",
     "QuadraticExplorer": "2.5.5, 2.11",
     "RatioSplitter": "1.11, 1.12",
@@ -534,12 +609,14 @@ SYLLABUS: dict[str, str] = {
     "TableOfValues": "2.10",
     "TangentNormal": "AM 14.5",
     "TangentSlide": "AM 14.1–14.5",
+    "TextCard": "all topics",
     "TransformationStage": "7.1",
     "TravelGraph": "2.9.3, 2.9.4",
     "TreeDiagram": "8.3",
-    "TextCard": "all topics",
     "Trig3D": "6.4",
+    "TrigEquationSolver": "9709 1.5, 2.3, 3.3",
     "UnitCircleWaves": "AM 10.2, 10.3",
     "VectorArena": "7.2–7.4; AM 13",
     "VennDiagram": "1.2; 8.3",
+    "VolumeOfRevolution": "9709 1.8",
 }
