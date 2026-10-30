@@ -6,7 +6,8 @@ a language model chooses a primitive and fills in its parameters, and nothing el
 
 The library started with the seven primitives of Table 5.2 and now covers the Cambridge O Level
 Mathematics (4024) syllabus and the calculus of Additional Mathematics (4037 Unit 14), with the
-4037 topics that build on it: 69 primitives. [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
+4037 topics that build on it, and the whole of Cambridge International AS & A Level Mathematics
+(9709): 105 primitives. [docs/primitive-coverage.md](primitive-coverage.md) maps every visual the syllabus
 needs to the primitive that draws it. Lessons combine primitives: a graph primitive on the left
 of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on the right.
 
@@ -24,21 +25,21 @@ of the frame with a working primitive (`EquationTransform`, `AlgebraBalance`) on
 
 ### Algebra and graphs (4024 Unit 2)
 
-| Primitive               | Syllabus     | What it shows                                                                 |
-| ----------------------- | ------------ | ----------------------------------------------------------------------------- |
-| `AlgebraBalance`        | 2.1–2.3, 2.5 | Solving an equation or changing the subject by doing the same to both sides   |
-| `ExpansionGrid`         | 2.2, 2.5.5   | Expanding brackets or factorising with a grid (area) model                    |
-| `CompletingSquare`      | 2.5.5; AM 2  | Completing the square as an area, with the missing corner                     |
-| `QuadraticExplorer`     | 2.5.5, 2.11  | A parabola's roots, discriminant, vertex, axis of symmetry and completed form |
-| `InequalityRegion`      | 2.6          | Regions of linear inequalities, unwanted side shaded, region R labelled       |
-| `SequencePattern`       | 2.7          | The nth term from differences or a ratio, with optional dot patterns          |
-| `ProportionGraph`       | 2.8          | Direct and inverse proportion: y = kxⁿ, k from a known pair                   |
-| `CurveSketch`           | 2.11; AM 4.4 | A sketched curve with intercepts, turning points and asymptotes               |
-| `FunctionMachine`       | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse            |
-| `GraphicalSolution`     | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                          |
-| `SimultaneousEquations` | 2.5          | Two equations solved by elimination or substitution, line by line             |
-| `TableOfValues`         | 2.10         | A table of values filled in, then the points plotted and joined               |
-| `InverseGraph`          | 2.12; AM 1   | f and f⁻¹ as reflections in y = x, with a point and its image                 |
+| Primitive               | Syllabus     | What it shows                                                                               |
+| ----------------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| `AlgebraBalance`        | 2.1–2.3, 2.5 | Solving an equation or changing the subject by doing the same to both sides                 |
+| `ExpansionGrid`         | 2.2, 2.5.5   | Expanding brackets or factorising with a grid (area) model                                  |
+| `CompletingSquare`      | 2.5.5; AM 2  | Completing the square as an area, with the missing corner                                   |
+| `QuadraticExplorer`     | 2.5.5, 2.11  | A parabola's roots, discriminant, vertex, axis of symmetry and completed form; inequalities |
+| `InequalityRegion`      | 2.6          | Regions of linear inequalities, unwanted side shaded, region R labelled                     |
+| `SequencePattern`       | 2.7          | The nth term from differences or a ratio, with optional dot patterns                        |
+| `ProportionGraph`       | 2.8          | Direct and inverse proportion: y = kxⁿ, k from a known pair                                 |
+| `CurveSketch`           | 2.11; AM 4.4 | A sketched curve with intercepts, turning points and asymptotes                             |
+| `FunctionMachine`       | 2.12; AM 1   | A function as a machine, values traced through it, and its inverse                          |
+| `GraphicalSolution`     | 2.10         | Solving f(x) = g(x) by reading where two graphs meet                                        |
+| `SimultaneousEquations` | 2.5          | Two equations solved by elimination or substitution, line by line                           |
+| `TableOfValues`         | 2.10         | A table of values filled in, then the points plotted and joined                             |
+| `InverseGraph`          | 2.12; AM 1   | f and f⁻¹ as reflections in y = x, with a point and its image                               |
 
 ### Text on screen (all topics)
 
@@ -145,6 +146,62 @@ a graph primitive solves it on the left.
 | `SineCosineRule`    | 6.3           | The sine rule, the cosine rule or ½ab sin C, chosen from what is known      |
 | `Trig3D`            | 6.4           | Lengths and angles in 3D from right-angled triangles in a cuboid or pyramid |
 | `UnitCircleWaves`   | AM 10.2, 10.3 | A point turning round the unit circle tracing y = a sin(bx) + c             |
+
+### AS & A Level: Pure Mathematics (9709 Papers 1, 2 and 3)
+
+| Primitive              | Syllabus      | What it shows                                                                    |
+| ---------------------- | ------------- | -------------------------------------------------------------------------------- |
+| `GraphTransform`       | 1.2           | y = af(bx + c) + d built from y = f(x) one transformation at a time              |
+| `FunctionMapping`      | 1.2           | Domain, range, one-one test, composite and inverse functions, with y = x         |
+| `LineMeetsCurve`       | 1.1, 1.3      | A line meeting a curve: the discriminant decides two, one (tangent) or no points |
+| `TrigEquationSolver`   | 1.5, 2.3, 3.3 | Every solution of a trigonometric equation in an interval, read from the graph   |
+| `BinomialExpansion`    | 1.6, 3.1      | (a + bx)ⁿ term by term, and the series for any n with its validity               |
+| `Progression`          | 1.6           | Arithmetic and geometric progressions, sums, and the sum to infinity             |
+| `AntiderivativeFamily` | 1.8           | The family y = F(x) + c, and the member through a given point                    |
+| `VolumeOfRevolution`   | 1.8           | The solid swept by rotating a region about an axis, V = π∫y² dx                  |
+| `ModulusEquation`      | 2.1, 3.1      | Modulus equations and inequalities from the graphs of both sides                 |
+| `PolynomialDivision`   | 2.1, 3.1      | Long division of polynomials; the factor and remainder theorems                  |
+| `PartialFractions`     | 3.1, 3.5      | Partial fractions for distinct, repeated and quadratic factors                   |
+| `LogLinearisation`     | 2.2, 3.2      | y = axⁿ or y = abˣ made a straight line by logarithms, constants read off        |
+| `HarmonicForm`         | 2.3, 3.3      | a sin θ + b cos θ as R sin(θ ± α) or R cos(θ ± α), its maximum and equations     |
+| `TrapeziumRule`        | 2.5, 3.5      | The trapezium rule with its strips, and whether it over- or under-estimates      |
+| `IterationDiagram`     | 2.6, 3.6      | A sign-change interval and the staircase or cobweb of xₙ₊₁ = F(xₙ)               |
+| `ParametricCurve`      | 2.4, 3.4      | A curve traced by (x(t), y(t)), with dy/dx = (dy/dt)/(dx/dt) at a point          |
+| `ImplicitCurve`        | 2.4, 3.4      | An implicit curve, implicit differentiation and the tangent at a point           |
+| `IntegrationMethod`    | 3.5           | Integration by parts, by substitution, or to a logarithm, checked by derivative  |
+| `DifferentialEquation` | 3.8           | A separable differential equation solved, with its slope field and solution      |
+| `VectorLines3D`        | 3.7           | Two lines in 3D: parallel, intersecting or skew, and the angle between them      |
+| `ArgandDiagram`        | 3.9           | Complex numbers on the Argand diagram: arithmetic, modulus and argument          |
+| `ComplexLoci`          | 3.9           | Loci (circles, bisectors, half-lines) and the regions they bound                 |
+
+### AS & A Level: Mechanics (9709 Paper 4)
+
+| Primitive            | Syllabus | What it shows                                                                 |
+| -------------------- | -------- | ----------------------------------------------------------------------------- |
+| `ForceDiagram`       | 4.1, 4.4 | Forces resolved along and across a surface; friction, equilibrium or motion   |
+| `SuvatSolver`        | 4.2      | The constant-acceleration equation that fits, beside the v–t graph            |
+| `MomentumCollision`  | 4.3      | A collision before and after: momentum conserved, or the particles coalescing |
+| `ConnectedParticles` | 4.4      | Particles joined by a string or tow-bar: acceleration and tension             |
+| `WorkEnergy`         | 4.5      | The work-energy principle as energy bars, and power P = Fv                    |
+
+### AS & A Level: Probability & Statistics (9709 Papers 5 and 6)
+
+| Primitive              | Syllabus | What it shows                                                                    |
+| ---------------------- | -------- | -------------------------------------------------------------------------------- |
+| `BoxPlot`              | 5.1      | Stem-and-leaf diagrams (back to back), quartiles and box plots compared          |
+| `StandardDeviation`    | 5.1      | Mean and standard deviation from a list, a frequency table, totals or coded data |
+| `ArrangementCounter`   | 5.2      | Arrangements with repeats, together or apart, and selections from groups         |
+| `DiscreteDistribution` | 5.4, 6.1 | A probability table, B(n, p), Geo(p) or Po(λ) as bars, with E(X) and Var(X)      |
+| `NormalDistribution`   | 5.5, 6.1 | Standardising, the inverse normal, finding μ or σ, and approximations            |
+| `LinearCombination`    | 6.2      | E and Var of aX + bY + c and of sums of copies; probabilities of combinations    |
+| `ContinuousPDF`        | 6.3      | A density curve: k, probabilities as areas, the mean, variance and median        |
+| `SamplingEstimation`   | 6.4      | Unbiased estimates, the sample mean's distribution, and confidence intervals     |
+| `HypothesisTest`       | 6.5      | Binomial, Poisson and normal-mean tests with the critical region; Type I and II  |
+
+Two O Level primitives have A Level options: `QuadraticExplorer` solves a quadratic inequality
+(9709 1.1) and `TreeDiagram` finds a conditional probability (9709 5.3). Many O Level and
+Additional Mathematics primitives serve A Level directly; their `SYLLABUS` entries carry the
+9709 codes as well, and [primitive-coverage.md](primitive-coverage.md) lists them by topic.
 
 The files are named after the primitive in snake case, in `backend/app/primitives/`.
 

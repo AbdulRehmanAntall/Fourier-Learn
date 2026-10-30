@@ -1505,3 +1505,133 @@ def test_normal_distribution_predicates():
         "conditions": [{"x": 20, "below": 0.8}, {"x": 30, "below": 0.2}],
     }
     assert predicates("NormalDistribution", crossed) == ["conditions_consistent"]
+
+
+# A Level (9709): Probability & Statistics 2, and the A Level extensions
+
+
+@pytest.mark.parametrize(
+    ("index", "mean", "variance", "probability"),
+    [
+        (0, "5", "25", "0.8413"),  # P(X > Y) = P(X - Y > 0) = Φ(1)
+        (1, "45", "40", None),  # 3X - 2Y + 5: the constant adds no variance
+        (2, "260", "100", "0.1587"),  # four copies: 4 Var(W), not 16 Var(W)
+        (4, "5.5", "5.5", "0.3575"),  # X + Y ~ Po(5.5)
+    ],
+)
+def test_linear_combination(index, mean, variance, probability):
+    found = values("LinearCombination", GRIDS["LinearCombination"][index])
+    assert (found["mean"], found["variance"]) == (mean, variance)
+    assert found.get("probability") == probability
+
+
+def test_linear_combination_predicates():
+    scaled = {
+        "terms": [{"name": "X", "mean": 3, "variance": 3, "coefficient": 2}],
+        "distribution": "poisson",
+        "high": 4,
+    }
+    assert predicates("LinearCombination", scaled) == ["poisson_sum"]
+    unknown = {"terms": [{"name": "X", "mean": 3, "variance": 2}], "distribution": "any", "low": 1}
+    assert predicates("LinearCombination", unknown) == ["distribution_known"]
+
+
+def test_continuous_pdf():
+    found = values("ContinuousPDF", GRIDS["ContinuousPDF"][0])
+    assert (found["k"], found["probability"], found["mean"], found["variance"]) == (
+        "3/32",
+        "11/16",
+        "2",
+        "4/5",
+    )
+    assert values("ContinuousPDF", GRIDS["ContinuousPDF"][1])["median"] == "2.828"  # √8
+    infinite = values("ContinuousPDF", GRIDS["ContinuousPDF"][2])
+    assert (infinite["k"], infinite["mean"], infinite["variance"]) == ("4", "4/3", "2/9")
+
+
+def test_continuous_pdf_predicates():
+    assert predicates("ContinuousPDF", {"pdf": "x", "lower": "0", "upper": "1"}) == ["area_one"]
+    heavy = {"pdf": "k/x**2", "lower": "1", "upper": "inf"}
+    assert predicates("ContinuousPDF", heavy) == ["moments_finite"]
+    negative = {"pdf": "k*(x - 1)", "lower": "0", "upper": "3"}
+    assert predicates("ContinuousPDF", negative)
+
+
+@pytest.mark.parametrize(
+    ("index", "found"),
+    [
+        (0, {"mean": "31", "variance": "32.31"}),
+        (1, {"mean": "61.4", "variance": "6.792"}),  # coded with a = 60
+        (2, {"standard_error": "2", "probability": "0.1587"}),
+        (4, {"lower": "23.14", "upper": "25.46"}),
+        (6, {"lower": "0.1717", "upper": "0.2883"}),
+    ],
+)
+def test_sampling_estimation(index, found):
+    result = values("SamplingEstimation", GRIDS["SamplingEstimation"][index])
+    assert {k: result[k] for k in found} == found
+
+
+@pytest.mark.parametrize(
+    ("index", "found"),
+    [
+        (0, {"p_value": "0.03548", "decision": "reject", "critical_region": "X <= 2"}),
+        (1, {"critical_region": "X <= 5 or X >= 15", "type_1": "0.04139"}),
+        (2, {"critical_region": "X >= 6", "type_2": "0.4032"}),
+        (4, {"decision": "accept", "critical_region": "X <= 5", "type_2": "0.6993"}),
+        (5, {"z": "1.897", "decision": "reject"}),
+        (7, {"decision": "accept", "type_2": "0.1962"}),
+    ],
+)
+def test_hypothesis_test(index, found):
+    result = values("HypothesisTest", GRIDS["HypothesisTest"][index])
+    assert {k: result[k] for k in found} == found
+
+
+def test_hypothesis_test_predicates():
+    wrong_side = {
+        "kind": "binomial",
+        "null_value": 0.3,
+        "tail": "lower",
+        "observed": 2,
+        "n": 20,
+        "alternative": 0.5,
+    }
+    assert predicates("HypothesisTest", wrong_side) == ["alternative_side"]
+    tiny = {"kind": "binomial", "null_value": 0.5, "tail": "lower", "observed": 0, "n": 3}
+    assert predicates("HypothesisTest", tiny) == ["critical_region_exists"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solution"),
+    [
+        ({"a": 1, "b": -2, "c": -3, "inequality": "<"}, "-1 < x < 3"),
+        ({"a": 3, "b": -7, "c": 2, "inequality": ">="}, "x <= 1/3 or x >= 2"),
+        ({"a": 1, "b": -4, "c": 4, "inequality": ">"}, "x != 2"),
+        ({"a": 1, "b": -4, "c": 4, "inequality": "<="}, "x = 2"),
+        ({"a": 0.5, "b": 1, "c": 3, "inequality": "<"}, "no real x"),
+        ({"a": 0.5, "b": 1, "c": 3, "inequality": ">"}, "all real x"),
+    ],
+)
+def test_quadratic_inequality(raw, solution):
+    assert values("QuadraticExplorer", raw)["solution"] == solution
+
+
+def test_tree_diagram_conditional():
+    same = {
+        "outcomes": ["R", "B"],
+        "counts": [3, 2],
+        "replace": False,
+        "find": ["R,R"],
+        "given": ["R,R", "B,B"],
+    }
+    found = values("TreeDiagram", same)
+    assert (found["joint"], found["given"], found["probability"]) == ("3/10", "2/5", "3/4")
+    impossible = {
+        "outcomes": ["R", "B"],
+        "counts": [1, 2],
+        "replace": False,
+        "find": ["B,B"],
+        "given": ["R,R"],
+    }
+    assert predicates("TreeDiagram", impossible) == ["condition_possible"]

@@ -304,6 +304,10 @@ beat. This is a good demo for the FYP-I evaluation.
 >   of 4037, as mapped in [primitive-coverage.md](primitive-coverage.md): 69 primitives draw
 >   every visual the syllabus needs (all 58 rows of the map). Each passes the harness at all
 >   three levels.
+> - **AS & A Level (9709):** 36 more primitives, and A Level options on `QuadraticExplorer`
+>   (inequalities) and `TreeDiagram` (conditional probability), cover every topic of all six
+>   components: Pure Mathematics 1 to 3, Mechanics, and Probability & Statistics 1 and 2 (rows
+>   59 to 90 of the map). 105 primitives in all, each passing the harness at all three levels.
 > - **Plan checks:** the scene-plan reference check (`app/prompt_interpreter/plan_checks.py`).
 > - **Content files:** the concept taxonomy with prerequisite edges, the glossary and the item bank,
 >   as content files in `backend/content/`. The syllabus codes there are still placeholders.

@@ -28,6 +28,7 @@ from app.primitives.completing_square import CompletingSquare
 from app.primitives.complex_loci import ComplexLoci
 from app.primitives.connected_particles import ConnectedParticles
 from app.primitives.connected_rates import ConnectedRates
+from app.primitives.continuous_pdf import ContinuousPDF
 from app.primitives.coordinate_circle import CoordinateCircle
 from app.primitives.coordinate_plotter import CoordinatePlotter
 from app.primitives.cumulative_frequency import CumulativeFrequency
@@ -49,6 +50,7 @@ from app.primitives.graphical_solution import GraphicalSolution
 from app.primitives.growth_decay import GrowthDecay
 from app.primitives.harmonic_form import HarmonicForm
 from app.primitives.histogram import Histogram
+from app.primitives.hypothesis_test import HypothesisTest
 from app.primitives.implicit_curve import ImplicitCurve
 from app.primitives.index_laws import IndexLaws
 from app.primitives.inequality_region import InequalityRegion
@@ -58,6 +60,7 @@ from app.primitives.iteration_diagram import IterationDiagram
 from app.primitives.kinematics_graphs import KinematicsGraphs
 from app.primitives.line_builder import LineBuilder
 from app.primitives.line_meets_curve import LineMeetsCurve
+from app.primitives.linear_combination import LinearCombination
 from app.primitives.log_linearisation import LogLinearisation
 from app.primitives.modulus_equation import ModulusEquation
 from app.primitives.momentum_collision import MomentumCollision
@@ -79,6 +82,7 @@ from app.primitives.quadratic_explorer import QuadraticExplorer
 from app.primitives.ratio_splitter import RatioSplitter
 from app.primitives.right_triangle_trig import RightTriangleTrig
 from app.primitives.sample_space_grid import SampleSpaceGrid
+from app.primitives.sampling_estimation import SamplingEstimation
 from app.primitives.scatter_best_fit import ScatterBestFit
 from app.primitives.secant_to_tangent import SecantToTangent
 from app.primitives.sequence_pattern import SequencePattern
@@ -212,6 +216,10 @@ PRIMITIVES: dict[str, type[Primitive]] = {
         ArrangementCounter,
         DiscreteDistribution,
         NormalDistribution,
+        HypothesisTest,
+        ContinuousPDF,
+        LinearCombination,
+        SamplingEstimation,
     )
 }
 
