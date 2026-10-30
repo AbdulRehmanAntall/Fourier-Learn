@@ -21,6 +21,13 @@ FUNCTIONS: dict[str, object] = {
     "sin": sp.sin,
     "cos": sp.cos,
     "tan": sp.tan,
+    "sec": sp.sec,
+    "cosec": sp.csc,
+    "csc": sp.csc,
+    "cot": sp.cot,
+    "asin": sp.asin,
+    "acos": sp.acos,
+    "atan": sp.atan,
     "sqrt": sp.sqrt,
     "exp": sp.exp,
     "log": sp.log,
@@ -152,6 +159,13 @@ _FUNCTION_LATEX = {
     "sin": r"\sin",
     "cos": r"\cos",
     "tan": r"\tan",
+    "sec": r"\sec",
+    "cosec": r"\operatorname{cosec}",
+    "csc": r"\operatorname{cosec}",
+    "cot": r"\cot",
+    "asin": r"\sin^{-1}",
+    "acos": r"\cos^{-1}",
+    "atan": r"\tan^{-1}",
     "ln": r"\ln",
     "log": r"\log",
 }
@@ -254,6 +268,11 @@ def format_sf(value: sp.Expr | float, figures: int = 3) -> str:
     places = figures - 1 - math.floor(math.log10(abs(number)))
     quantum = Decimal(1).scaleb(-places)
     rounded = Decimal(str(exact_value)).quantize(quantum, rounding=ROUND_HALF_UP)
+    if abs(rounded) >= Decimal(10) ** (figures - places):
+        # 0.99996 rounds up to 1.0000: one place fewer keeps 3 figures (1.00, not 1.000)
+        places -= 1
+        quantum = Decimal(1).scaleb(-places)
+        rounded = Decimal(str(exact_value)).quantize(quantum, rounding=ROUND_HALF_UP)
     if places <= 0:
         return str(int(rounded))
     text = format(rounded, "f")
@@ -371,3 +390,29 @@ def latex_with_pi(value: sp.Expr, approx: bool = True) -> str:
                 exact_tex = rf"\frac{{{numerator}}}{{{bottom}}}"
             return rf"{exact_tex} \approx {format_sf(value)}" if approx else exact_tex
     return latex_approx(value) if approx else latex_value(value)
+
+
+_SPECIAL = (
+    sp.erf,
+    sp.erfi,
+    sp.erfc,
+    sp.Ei,
+    sp.li,
+    sp.Si,
+    sp.Ci,
+    sp.fresnels,
+    sp.fresnelc,
+    sp.gamma,
+    sp.uppergamma,
+    sp.lowergamma,
+    sp.polylog,
+    sp.LambertW,
+    sp.hyper,
+    sp.meijerg,
+)
+
+
+def is_elementary_integral(expr: sp.Expr) -> bool:
+    """Whether SymPy's integral is one a student can write: no unevaluated integral and no
+    special function (erf, Ei, ...) that the syllabus does not use."""
+    return not expr.has(sp.Integral) and not any(expr.has(f) for f in _SPECIAL)

@@ -1,16 +1,20 @@
 """QuadraticExplorer: the parabola y = ax² + bx + c with its roots, vertex, axis of symmetry,
-y-intercept and discriminant (4024 2.5.5, 2.11; AM 2.1 to 2.5; PRIMITIVES.md #15).
+y-intercept and discriminant, and optionally a quadratic inequality solved by reading where the
+curve is above or below the x-axis (4024 2.5.5, 2.11; AM 2.1 to 2.5; 9709 1.1;
+PRIMITIVES.md #15).
 
 The discriminant b² - 4ac decides the roots: two where the curve crosses the x-axis, one where it
 touches it, none where it misses it. The vertex comes from the completed-square form
 a(x - h)² + k, and the axis of symmetry is x = h. Every value is computed exactly by SymPy;
-roots that are surds are shown exactly with a decimal beside them.
+roots that are surds are shown exactly with a decimal beside them. ax² + bx + c < 0 holds
+where the curve is below the x-axis: between the roots when a > 0, outside them when a < 0;
+≤ includes the roots themselves.
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 import sympy as sp
-from manim import DashedLine, Dot
+from manim import BLACK, DashedLine, Dot, Line, VGroup
 from pydantic import Field
 
 from app.contracts import LayoutContract, PredicateFailure, PrimitiveParams
@@ -27,11 +31,14 @@ class QuadraticExplorerParams(PrimitiveParams):
     a: Coefficient = Field(description="Coefficient of x²; not 0")
     b: Coefficient = Field(description="Coefficient of x")
     c: Coefficient = Field(description="Constant term")
+    inequality: Literal["<", "<=", ">", ">="] | None = Field(
+        default=None, description="Also solve ax² + bx + c (this) 0"
+    )
 
 
 class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
     primitive_id = "QuadraticExplorer"
-    version = "1"
+    version = "2"
     topic = "Algebra and graphs"
     params_model = QuadraticExplorerParams
     layout = LayoutContract(
@@ -43,6 +50,7 @@ class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
             ("root_*", "root_*"),
             ("vertex", "root_*"),
             ("intercept", "root_*"),
+            ("solution", "*"),
         ],
     )
 
@@ -76,6 +84,8 @@ class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
         }
         for i, root in enumerate(q.roots, start=1):
             values[f"root_{i}"] = format_value(root)
+        if params.inequality is not None:
+            values["solution"] = q.solution_text(params.inequality)
         return values
 
     def build(self, params: QuadraticExplorerParams, level):
@@ -145,6 +155,14 @@ class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
             parts["intercept_label"] = place_label(
                 text, point, plot.plot_box, obstacles, paths, wide=True
             )
+        if params.inequality is not None:
+            parts["solution"] = _solution_marks(q, params.inequality, plot, lo, hi)
+            parts["solution_text"] = text_line(
+                rf"{tidy_latex(q.f)} {SIGNS[params.inequality]} 0 \iff "
+                + q.solution_latex(params.inequality),
+                plot.lower,
+                colour=style.HIGHLIGHT_COLOUR,
+            )
         return parts
 
     def stages(self, params: QuadraticExplorerParams, level) -> list[Stage]:
@@ -201,6 +219,19 @@ class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
         if not roots:
             steps = [s for s in steps if s.name != "roots"]
             # With no roots to mark, the discriminant step says so.
+        if params.inequality is not None:
+            below = params.inequality in ("<", "<=")
+            steps.append(
+                stage(
+                    "inequality",
+                    f"The inequality holds where the curve is {'below' if below else 'above'} "
+                    "the x-axis",
+                    3.0,
+                    ["solution"],
+                    morph=[("completed", "solution_text")],
+                    emphasise=["solution"],
+                )
+            )
 
         def find(s, name):
             return next(x for x in s if x.name == name)
@@ -221,12 +252,16 @@ class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
                     find(s, "completed"),
                 )
             )
-            out += [x for x in s if x.name == "intercept"]
+            out += [x for x in s if x.name in ("intercept", "inequality")]
             return out
 
         def concise(s):
             graph = combine("graph", "Draw the parabola", 2.5, *s[:3])
             rest = [x for x in s[3:] if x.name != "intercept"]
+            features = combine(
+                "features", "Show the roots, the vertex and the axis of symmetry", 3.5, *rest
+            )
+            rest = [x for x in rest if x.name != "inequality"]
             features = combine(
                 "features", "Show the roots, the vertex and the axis of symmetry", 3.5, *rest
             )
@@ -239,7 +274,7 @@ class QuadraticExplorer(StagedPrimitive[QuadraticExplorerParams]):
                     features,
                     intercept[0],
                 )
-            return [graph, features]
+            return [graph, features, *(x for x in s if x.name == "inequality")]
 
         return by_level(level, steps, standard, concise)
 
@@ -285,3 +320,81 @@ class _Quadratic:
 
     def completed_text(self) -> str:
         return str(self.a * (X - self.h) ** 2 + self.k)
+
+    def solution_set(self, inequality: str):
+        relation = {"<": sp.Lt, "<=": sp.Le, ">": sp.Gt, ">=": sp.Ge}[inequality](self.f, 0)
+        return sp.solve_univariate_inequality(relation, X, relational=False)
+
+    def solution_latex(self, inequality: str) -> str:
+        return _set_latex(self.solution_set(inequality), latex_value)
+
+    def solution_text(self, inequality: str) -> str:
+        return _set_latex(self.solution_set(inequality), format_value, plain=True)
+
+
+SIGNS = {"<": "<", "<=": r"\le", ">": ">", ">=": r"\ge"}
+
+
+def _pieces(solution) -> list:
+    if isinstance(solution, sp.Union):
+        return sorted(solution.args, key=lambda part: float(part.inf))
+    return [solution]
+
+
+def _set_latex(solution, value, plain: bool = False) -> str:
+    """A solution set as inequalities in x: x < 1 or x > 3, -2 <= x <= 2, x != 1, all real x."""
+    le, ge, ne = ("<=", ">=", "!=") if plain else (r"\le", r"\ge", r"\ne")
+    if solution == sp.S.Reals:
+        return "all real x" if plain else r"\text{all real }x"
+    if solution is sp.S.EmptySet:
+        return "no real x" if plain else r"\text{no real }x"
+    pieces = _pieces(solution)
+    if (
+        len(pieces) == 2
+        and pieces[0].sup == pieces[1].inf
+        and pieces[0].inf == -sp.oo
+        and pieces[1].sup == sp.oo
+    ):
+        return f"x {ne} {value(pieces[0].sup)}"
+    out = []
+    for part in pieces:
+        if isinstance(part, sp.FiniteSet):
+            out.append(f"x = {value(next(iter(part)))}")
+            continue
+        left = "<" if part.left_open else le
+        right = "<" if part.right_open else le
+        if part.inf == -sp.oo:
+            out.append(f"x {right} {value(part.sup)}")
+        elif part.sup == sp.oo:
+            out.append(f"x {'>' if part.left_open else ge} {value(part.inf)}")
+        else:
+            out.append(f"{value(part.inf)} {left} x {right} {value(part.sup)}")
+    joiner = " or " if plain else r"\ \text{or}\ "
+    return joiner.join(out)
+
+
+def _solution_marks(q: _Quadratic, inequality: str, plot, lo: float, hi: float) -> VGroup:
+    """The solution on the x-axis: thick segments, with filled dots at included ends and hollow
+    dots at excluded ones."""
+    marks = VGroup()
+    solution = q.solution_set(inequality)
+    if solution is sp.S.EmptySet:
+        return marks
+    for part in _pieces(solution):
+        if isinstance(part, sp.FiniteSet):
+            for v in part:
+                marks.add(Dot(plot.point(float(v), 0), radius=0.1, color=style.HIGHLIGHT_COLOUR))
+            continue
+        a = max(float(part.inf), lo) if part.inf != -sp.oo else lo
+        b = min(float(part.sup), hi) if part.sup != sp.oo else hi
+        marks.add(
+            Line(plot.point(a, 0), plot.point(b, 0), color=style.HIGHLIGHT_COLOUR, stroke_width=9)
+        )
+        for end, is_open in ((part.inf, part.left_open), (part.sup, part.right_open)):
+            if end in (-sp.oo, sp.oo):
+                continue
+            dot = Dot(plot.point(float(end), 0), radius=0.1, color=style.HIGHLIGHT_COLOUR)
+            if is_open:
+                dot.set_fill(BLACK, opacity=1).set_stroke(style.HIGHLIGHT_COLOUR, width=3)
+            marks.add(dot)
+    return marks

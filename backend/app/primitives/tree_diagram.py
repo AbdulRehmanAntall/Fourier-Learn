@@ -1,10 +1,12 @@
 """TreeDiagram: probability tree diagrams for two or three events, independent or drawn from a
-bag with or without replacement; multiply along the branches, add the outcomes you want
-(4024 8.3; PRIMITIVES.md #45).
+bag with or without replacement; multiply along the branches, add the outcomes you want, and
+for a conditional probability divide by the probability of the condition (4024 8.3; 9709 5.3;
+PRIMITIVES.md #45).
 
 Each branch carries its probability; the probabilities from one point add to 1. The probability
 of a path is the product of its branches. Without replacement, the second branch changes,
-because one item has gone from the bag. Everything is exact fractions.
+because one item has gone from the bag. Given that B happened, only B's paths remain, so
+P(A | B) = P(A and B) / P(B). Everything is exact fractions.
 """
 
 import itertools
@@ -44,11 +46,16 @@ class TreeDiagramParams(PrimitiveParams):
         max_length=9,
         description='The paths wanted, outcomes joined by commas, e.g. ["R,B", "B,R"]',
     )
+    given: list[Annotated[str, StringConstraints(pattern=r"^[A-Za-z,]{2,20}$")]] | None = Field(
+        default=None,
+        max_length=9,
+        description="The paths of a condition B, for the conditional probability P(find | given)",
+    )
 
 
 class TreeDiagram(StagedPrimitive[TreeDiagramParams]):
     primitive_id = "TreeDiagram"
-    version = "1"
+    version = "2"
     topic = "Probability"
     params_model = TreeDiagramParams
     layout = LayoutContract(
@@ -87,15 +94,22 @@ class TreeDiagram(StagedPrimitive[TreeDiagramParams]):
             return [
                 _failure("tree_fits", "more than 9 paths: use fewer outcomes or events", "events")
             ]
-        for path in params.find:
+        for path in [*params.find, *(params.given or [])]:
             steps = path.split(",")
             if len(steps) != params.events or any(s not in params.outcomes for s in steps):
                 message = f"{path!r} is not a path of {params.events} outcomes"
                 return [_failure("paths_exist", message, "find")]
+        if params.given is not None and _total(params, params.given) == 0:
+            message = "the condition has probability 0"
+            return [_failure("condition_possible", message, "given")]
         return []
 
     def computed_values(self, params: TreeDiagramParams) -> dict[str, str]:
-        return {"probability": str(_answer(params))}
+        values = {"probability": str(_answer(params))}
+        if params.given is not None:
+            values["given"] = str(_total(params, params.given))
+            values["joint"] = str(_total(params, _joint(params)))
+        return values
 
     def build(self, params: TreeDiagramParams, level):
         title, area = style.graph_boxes(self.layout.region)
@@ -106,6 +120,10 @@ class TreeDiagram(StagedPrimitive[TreeDiagramParams]):
         column = (tree_box.width - 1.4) / events
         gap = tree_box.height / leaves
         wanted = {tuple(p.split(",")) for p in params.find}
+        if params.given is not None:
+            condition = {tuple(p.split(",")) for p in params.given}
+        else:
+            condition = set()
 
         def leaf_y(index: float) -> float:
             return tree_box.top - gap * (index + 0.5)
@@ -145,14 +163,17 @@ class TreeDiagram(StagedPrimitive[TreeDiagramParams]):
         products = VGroup()
         for index, path in enumerate(itertools.product(outcomes, repeat=events)):
             value = _path_probability(params, path)
+            both = path in wanted and (not condition or path in condition)
             text = label(
                 _show(params, value),
                 size=26,
-                colour=style.HIGHLIGHT_COLOUR if path in wanted else style.TEXT_COLOUR,
+                colour=style.HIGHLIGHT_COLOUR if both else style.TEXT_COLOUR,
             )
             text.move_to([tree_box.right - 0.45, leaf_y(index), 0])
             products.add(text)
-            if path in wanted:
+            if path in condition:
+                picked.add(SurroundingRectangle(text, color=style.RUN_COLOUR, buff=0.1))
+            if both:
                 picked.add(SurroundingRectangle(text, color=style.HIGHLIGHT_COLOUR, buff=0.05))
         parts["products"] = products
         parts["picked"] = picked
@@ -192,8 +213,22 @@ class TreeDiagram(StagedPrimitive[TreeDiagramParams]):
             steps.append(stage("third", "And the third event", 3.0, ["branches_3"]))
         steps += [
             stage("multiply", "Multiply along each path", 3.5, ["products"]),
-            stage("add", "Add the paths we want", 3.5, ["picked", *rows], emphasise=["picked"]),
-            stage("answer", "So", 1.5, ["answer"], emphasise=["answer"]),
+            stage(
+                "add",
+                "Add the paths we want"
+                if params.given is None
+                else "Add the paths of the condition, and those also in the event",
+                3.5,
+                ["picked", *rows],
+                emphasise=["picked"],
+            ),
+            stage(
+                "answer",
+                "So" if params.given is None else "Divide: only the condition's paths are left",
+                1.5,
+                ["answer"],
+                emphasise=["answer"],
+            ),
         ]
 
         def standard(s):
@@ -243,11 +278,36 @@ def _path_probability(params: TreeDiagramParams, path) -> sp.Rational:
     return value
 
 
+def _total(params: TreeDiagramParams, paths) -> sp.Rational:
+    return sum((_path_probability(params, tuple(p.split(","))) for p in paths), sp.Integer(0))
+
+
+def _joint(params: TreeDiagramParams) -> list[str]:
+    """The wanted paths that are also paths of the condition: the event A and B."""
+    return [p for p in params.find if p in (params.given or [])]
+
+
 def _answer(params: TreeDiagramParams) -> sp.Rational:
-    return sum((_path_probability(params, tuple(p.split(","))) for p in params.find), sp.Integer(0))
+    if params.given is not None:
+        return _total(params, _joint(params)) / _total(params, params.given)
+    return _total(params, params.find)
+
+
+def _sum_row(params: TreeDiagramParams, name: str, paths) -> str:
+    terms = " + ".join(_show(params, _total(params, [p])) for p in paths) or "0"
+    total = _show(params, _total(params, paths))
+    return rf"{name} = {terms} = {total}" if len(paths) > 1 else rf"{name} = {total}"
 
 
 def _working(params: TreeDiagramParams) -> list[str]:
+    if params.given is not None:
+        joint, given = _total(params, _joint(params)), _total(params, params.given)
+        return [
+            _sum_row(params, "P(B)", params.given),
+            _sum_row(params, r"P(A \cap B)", _joint(params)),
+            rf"P(A \mid B) = \frac{{{_show(params, joint)}}}{{{_show(params, given)}}}"
+            rf" = {_show(params, _answer(params))}",
+        ]
     rows = []
     for p in params.find:
         path = tuple(p.split(","))
@@ -263,16 +323,25 @@ def _working(params: TreeDiagramParams) -> list[str]:
     return rows
 
 
+def _event(paths) -> str:
+    inside = r",\ ".join(rf"\text{{{p.replace(',', '')}}}" for p in paths)
+    return rf"\{{{inside}\}}" if len(paths) > 1 else inside
+
+
 def _question(params: TreeDiagramParams) -> str:
     wanted = r",\ ".join(rf"\text{{{p.replace(',', '')}}}" for p in params.find)
+    events = ""
+    if params.given is not None:
+        events = rf"A = {_event(params.find)},\ B = {_event(params.given)}.\ "
+        wanted = r"A \mid B"
     if params.counts is not None:
         bag = ", ".join(f"{c} {o}" for o, c in zip(params.outcomes, params.counts, strict=True))
         how = "with" if params.replace else "without"
         return (
             rf"\text{{A bag has {bag}. {params.events} are taken {how} replacement.}}\ "
-            rf"P({wanted})?"
+            rf"{events}P({wanted})?"
         )
-    return rf"P({wanted})?"
+    return rf"{events}P({wanted})?"
 
 
 def _failure(predicate, message, *parameters) -> PredicateFailure:

@@ -189,12 +189,72 @@ the area between two curves once tried to hide strips that had never been shown)
 - **Coverage is of visuals, not of every question type.** The 58 visuals cover the syllabus
   content, but some questions combine topics in ways that need two or more primitives in
   sequence. How well the planner combines them is untested beyond single examples.
+- **A Level is untested with learners and with the planner.** The 9709 primitives were checked
+  for correct mathematics and readable frames, as the O Level ones were, but no A Level student
+  has used them, and the lesson planner has not yet been prompted with A Level questions.
 
-## 6. Conclusion
+## 6. Extending the library to AS & A Level (9709)
 
-A finite library of 69 parameterised primitives covers every visual of the specification for
-O Level Mathematics and the calculus of Additional Mathematics, with every one rendering
-without error at all three levels across 432 parameter sets. Correctness by construction held
+The same method was then applied to Cambridge International AS & A Level Mathematics (9709,
+examinations 2026 and 2027). The syllabus was taken topic by topic from the official document
+(Pure Mathematics 1 to 3, Mechanics, Probability & Statistics 1 and 2) and each topic was given a
+primitive, an existing one or a new one: 36 new primitives, two A Level options on existing
+ones (`QuadraticExplorer` solves inequalities, `TreeDiagram` finds conditional probabilities),
+and 9709 codes on 25 O Level and Additional Mathematics primitives that serve A Level directly.
+The new primitives have 251 harness parameter sets between them, each rendered at all three
+levels, and their values were checked by hand against worked answers and statistical tables.
+
+The O Level library made this faster than the first build: the staged base, the plotting and
+table helpers, `stack_lines` for working and the SymPy helpers were reused unchanged, so most
+of the effort went into the mathematics. What the A Level work found:
+
+- **A rounding fault in shared code.** `format_sf` wrote a value just below a power of ten,
+  such as 0.99996 to 4 significant figures, as 1.0000: rounding carried it into the next power
+  of ten, so it gained a figure. A trigonometric solution exposed it. The fix in `symbolic.py`
+  corrects every primitive that formats numbers.
+- **SymPy can answer in functions the syllabus does not have.** It integrates e^(x²) to an
+  expression in erfi, which is correct but no use to a student. `is_elementary_integral` now
+  rejects such results, so `IntegrationMethod`, `DifferentialEquation` and
+  `AntiderivativeFamily` refuse inputs a student could not integrate by hand, with a message.
+  Each integral is also checked by differentiating it back.
+- **Symbol assumptions must match.** `ContinuousPDF` first never found the constant k: it made
+  k a positive symbol, while the safe parser makes every symbol real, and SymPy treats the two
+  as different variables. Tests on the first grid case caught it.
+- **Inputs can be mathematically legal and still meaningless.** A density such as k/x² on
+  x ≥ 1 integrates to 1 but has no mean; a hypothesis test at a low level may have no critical
+  region at all; a normal approximation needs np and nq above 5. Each became a predicate with a
+  message, in the same way as the O Level predicates (§3.4).
+- **Discrete tests need exact sizes.** The actual significance level of a binomial or Poisson
+  test is the probability of its critical region, which is at most the nominal level. Computing
+  it exactly gives P(Type I error) directly, where a table-based answer could not.
+- **Readability again (§3.2).** Long rows were shrunk to fit and became unreadable: a
+  hypothesis test's conclusion, a conditional probability written with its events in full, and
+  the variance of a combination with every coefficient squared. They were split into two rows,
+  or the events were named A and B in the question. Two z labels close together were first
+  stacked, which pushed one off the frame; the harness caught that, and they now move apart
+  sideways. As in the O Level work, review of the frames found the problems the layout check
+  cannot see.
+- **Form follows the syllabus.** Statistics are written as decimals (a median of 19.5, not
+  39/2) and angles in radians as multiples of π (π/3, not 1.05); mechanics uses g = 10 m s⁻² as
+  the syllabus asks. Each choice was made from the frames, not in advance.
+- **Tooling matters.** A helper that converted JSON grids to Python replaced the text "null"
+  inside the parameter name `null_value`. It was found at once because the grid failed to
+  parse, and the helper now writes Python literals directly.
+
+**Can it teach any 9709 topic?** Every topic of the six components has at least one primitive
+(rows 59 to 90 of [primitive-coverage.md](primitive-coverage.md)). A primitive draws the
+method on a worked example; the explanation around it (why the method works, a proof the
+syllabus asks for, the context of a question) comes from the lesson plan's narration and from
+`TextCard`. So a learner who asks "explain hypothesis testing" gets the plan's explanation with
+a test drawn and worked step by step, but the quality of that explanation depends on the planner,
+which is evaluated separately.
+
+## 7. Conclusion
+
+A finite library of 105 parameterised primitives covers every visual of the specification for
+O Level Mathematics and the calculus of Additional Mathematics, and every topic of AS & A Level
+Mathematics, with every one rendering without error at all three levels across 691 parameter
+sets. Correctness by construction held
 for the mathematics: the faults found were about precision and form, and each was fixed at its
 root in shared code. The hardest part was not the mathematics but making every frame readable,
 and the main finding is that a geometric layout checker is necessary but must be paired with

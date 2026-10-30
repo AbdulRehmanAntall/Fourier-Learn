@@ -6,8 +6,10 @@ specification mapped against the official Cambridge syllabi:
 - **Cambridge O Level Mathematics (Syllabus D) 4024**, examinations 2025 to 2027 (Units 1 to 9).
 - **Cambridge O Level Additional Mathematics 4037**, examinations 2025 to 2027 (Unit 14 calculus,
   and the units marked AM).
+- **Cambridge International AS & A Level Mathematics 9709**, examinations 2026 and 2027 (all six
+  components; sections K to P below).
 
-Syllabus codes refer to 4024 unless they start with AM (4037).
+Syllabus codes refer to 4024 unless they start with AM (4037) or 9709.
 
 Design rules, from the specification and the report (§5.3):
 
@@ -21,7 +23,7 @@ Design rules, from the specification and the report (§5.3):
 
 Scope: `CORE` is inside the FYP build scope (functions and graphs, coordinate geometry, travel
 graphs and kinematics, introductory calculus). `EXT` is the rest of 4024. `AM-EXT` is Additional
-Mathematics beyond 4024.
+Mathematics beyond 4024. `A-LEVEL` is 9709.
 
 Status: **done** means the primitive is in the library and passes the validation harness at every
 level; **planned** means it is not built yet.
@@ -133,6 +135,72 @@ level; **planned** means it is not built yet.
 | 56  | Connected rates                 | AM 14.7              | `ConnectedRates`                                   | done   |
 | 57  | Area under a curve              | AM 14.10–14.13       | `AreaUnderCurve`, `AreaBetweenCurves`              | done   |
 | 58  | Kinematics triple graph         | AM 14.14, 14.15      | `KinematicsGraphs`, `TravelGraph`                  | done   |
+
+## K. AS & A Level: Pure Mathematics 1 (9709 Paper 1) `A-LEVEL`
+
+| #   | Topic               | Syllabus | Primitive                                                                                                           | Status |
+| --- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- | ------ |
+| 59  | Quadratics          | 1.1      | `QuadraticExplorer` (with inequalities), `CompletingSquare`, `LineMeetsCurve`, `SimultaneousEquations`              | done   |
+| 60  | Functions           | 1.2      | `FunctionMapping`, `GraphTransform`, `FunctionMachine`, `InverseGraph`                                              | done   |
+| 61  | Coordinate geometry | 1.3      | `ParallelPerpendicular`, `CoordinateCircle`, `LineMeetsCurve`                                                       | done   |
+| 62  | Circular measure    | 1.4      | `CircleSector`                                                                                                      | done   |
+| 63  | Trigonometry        | 1.5      | `TrigEquationSolver`, `UnitCircleWaves`                                                                             | done   |
+| 64  | Series              | 1.6      | `BinomialExpansion`, `Progression`                                                                                  | done   |
+| 65  | Differentiation     | 1.7      | `DifferentiationStepper`, `TangentNormal`, `DerivativePanels`, `OptimisationScene`, `ConnectedRates`, `CurveSketch` | done   |
+| 66  | Integration         | 1.8      | `AntiderivativeFamily`, `AreaUnderCurve`, `AreaBetweenCurves`, `VolumeOfRevolution`                                 | done   |
+
+## L. AS & A Level: Pure Mathematics 2 and 3 (9709 Papers 2 and 3) `A-LEVEL`
+
+Paper 2 (2.1 to 2.6) is a subset of Paper 3 (3.1 to 3.9), so each row gives both codes.
+
+| #   | Topic                                 | Syllabus | Primitive                                                                        | Status |
+| --- | ------------------------------------- | -------- | -------------------------------------------------------------------------------- | ------ |
+| 67  | Algebra                               | 2.1, 3.1 | `ModulusEquation`, `PolynomialDivision`, `PartialFractions`, `BinomialExpansion` | done   |
+| 68  | Logarithmic and exponential functions | 2.2, 3.2 | `LogLinearisation`, `GrowthDecay`                                                | done   |
+| 69  | Trigonometry                          | 2.3, 3.3 | `HarmonicForm`, `TrigEquationSolver`                                             | done   |
+| 70  | Differentiation                       | 2.4, 3.4 | `DifferentiationStepper`, `ParametricCurve`, `ImplicitCurve`                     | done   |
+| 71  | Integration                           | 2.5, 3.5 | `IntegrationMethod`, `PartialFractions`, `TrapeziumRule`                         | done   |
+| 72  | Numerical solution of equations       | 2.6, 3.6 | `IterationDiagram`                                                               | done   |
+| 73  | Vectors                               | 3.7      | `VectorLines3D`                                                                  | done   |
+| 74  | Differential equations                | 3.8      | `DifferentialEquation`                                                           | done   |
+| 75  | Complex numbers                       | 3.9      | `ArgandDiagram`, `ComplexLoci`                                                   | done   |
+
+## M. AS & A Level: Mechanics (9709 Paper 4) `A-LEVEL`
+
+Mechanics uses g = 10 m s⁻², as the syllabus asks.
+
+| #   | Topic                                   | Syllabus | Primitive                            | Status |
+| --- | --------------------------------------- | -------- | ------------------------------------ | ------ |
+| 76  | Forces and equilibrium                  | 4.1      | `ForceDiagram`                       | done   |
+| 77  | Kinematics of motion in a straight line | 4.2      | `SuvatSolver`, `KinematicsGraphs`    | done   |
+| 78  | Momentum                                | 4.3      | `MomentumCollision`                  | done   |
+| 79  | Newton's laws of motion                 | 4.4      | `ConnectedParticles`, `ForceDiagram` | done   |
+| 80  | Energy, work and power                  | 4.5      | `WorkEnergy`                         | done   |
+
+## N. AS & A Level: Probability & Statistics 1 (9709 Paper 5) `A-LEVEL`
+
+| #   | Topic                         | Syllabus | Primitive                                                                      | Status |
+| --- | ----------------------------- | -------- | ------------------------------------------------------------------------------ | ------ |
+| 81  | Representation of data        | 5.1      | `BoxPlot`, `StandardDeviation`, `Histogram`, `CumulativeFrequency`             | done   |
+| 82  | Permutations and combinations | 5.2      | `ArrangementCounter`                                                           | done   |
+| 83  | Probability                   | 5.3      | `TreeDiagram` (with conditional probability), `VennDiagram`, `SampleSpaceGrid` | done   |
+| 84  | Discrete random variables     | 5.4      | `DiscreteDistribution`                                                         | done   |
+| 85  | The normal distribution       | 5.5      | `NormalDistribution`                                                           | done   |
+
+## O. AS & A Level: Probability & Statistics 2 (9709 Paper 6) `A-LEVEL`
+
+| #   | Topic                                   | Syllabus | Primitive                                                    | Status |
+| --- | --------------------------------------- | -------- | ------------------------------------------------------------ | ------ |
+| 86  | The Poisson distribution                | 6.1      | `DiscreteDistribution`, `NormalDistribution` (approximation) | done   |
+| 87  | Linear combinations of random variables | 6.2      | `LinearCombination`                                          | done   |
+| 88  | Continuous random variables             | 6.3      | `ContinuousPDF`                                              | done   |
+| 89  | Sampling and estimation                 | 6.4      | `SamplingEstimation`                                         | done   |
+| 90  | Hypothesis tests                        | 6.5      | `HypothesisTest`                                             | done   |
+
+Every 9709 topic has at least one primitive. A primitive draws the method on a worked example;
+the narration and the lesson plan carry the explanation and any proof the syllabus asks for (for
+example, why dividing by n − 1 makes s² unbiased), using `TextCard` for words that are not part of
+a visual.
 
 ## Text on screen
 

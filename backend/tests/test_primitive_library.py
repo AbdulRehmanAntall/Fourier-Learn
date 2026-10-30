@@ -934,3 +934,704 @@ def test_text_card_levels():
     )
     assert len(card.steps(params, Level.SUPPORTED)) == 3
     assert len(card.steps(params, Level.CONCISE)) == 1
+
+
+# A Level (9709): Pure Mathematics 1 and the algebra of Pure Mathematics 2 and 3
+
+
+def test_graph_transform_follows_a_point_and_builds_the_equation():
+    raw = {
+        "expression": "x**2",
+        "x_min": -2,
+        "x_max": 2,
+        "transformations": [
+            {"kind": "translate_x", "value": 1},
+            {"kind": "stretch_y", "value": 2},
+            {"kind": "translate_y", "value": -3},
+        ],
+        "point_x": 1,
+    }
+    found = values("GraphTransform", raw)
+    # y = 2f(x + 1) - 3 with f(x) = x^2: (1, 1) moves left 1, doubles, then drops 3
+    assert found["final_expression"] == "2*x**2 + 4*x - 1"
+    assert [found[f"point_{k}"] for k in range(4)] == ["(1, 1)", "(0, 1)", "(0, 2)", "(0, -1)"]
+    stretch = raw | {"transformations": [{"kind": "stretch_x", "value": 2}]}
+    assert values("GraphTransform", stretch)["point_1"] == "(1/2, 1)"
+    assert predicates(
+        "GraphTransform", stretch | {"transformations": [{"kind": "stretch_x", "value": -2}]}
+    ) == ["stretch_factor"]
+    assert predicates("GraphTransform", raw | {"point_x": 5}) == ["point_on_graph"]
+    assert predicates("GraphTransform", raw | {"expression": "1/x"}) == ["real_and_finite"]
+
+
+def test_function_mapping_range_one_one_and_composite():
+    found = values(
+        "FunctionMapping", {"kind": "range", "f": "(x - 2)**2 + 1", "f_min": 0, "f_max": 5}
+    )
+    assert (found["range_min"], found["range_max"]) == ("1", "10")
+    turning = values(
+        "FunctionMapping", {"kind": "one_one", "f": "x**2 - 4*x + 7", "f_min": -1, "f_max": 5}
+    )
+    assert turning["one_one"] == "no" and turning["restricted_domain"] == "-1 <= x <= 2"
+    monotonic = values(
+        "FunctionMapping", {"kind": "one_one", "f": "1/(x + 1)", "f_min": 0, "f_max": 4}
+    )
+    assert monotonic["one_one"] == "yes"
+    composite = {"kind": "composite", "f": "2*x + 1", "f_min": 0, "f_max": 3, "g": "x**2 - 1"}
+    found = values("FunctionMapping", composite)
+    assert found["gf"] == "4*x**2 + 4*x"
+    assert (found["gf_range_min"], found["gf_range_max"]) == ("0", "48")
+    # the range of f (-2 to 3) is not inside the domain of g (x >= 1/2): no gf
+    outside = {"kind": "composite", "f": "3 - x", "f_min": 0, "f_max": 5, "g": "1/x", "g_min": 0.5}
+    assert values("FunctionMapping", outside)["composite_exists"] == "no"
+    assert predicates("FunctionMapping", composite | {"g": None}) == ["g_given"]
+
+
+def test_line_meets_curve_discriminant():
+    found = values("LineMeetsCurve", {"curve": "x**2 - 4*x + 7", "line": "x + k"})
+    assert found["discriminant"] == "4*k - 3"
+    assert (found["tangent_k_1"], found["tangent_point_1"]) == ("3/4", "(5/2, 13/4)")
+    gradient = values("LineMeetsCurve", {"curve": "x**2 + 3", "line": "k*x - 1"})
+    assert (gradient["tangent_k_1"], gradient["tangent_k_2"]) == ("-4", "4")
+    assert gradient["no_points"] == "Interval.open(-4, 4)"
+    assert predicates("LineMeetsCurve", {"curve": "x**3", "line": "x + k"}) == ["curve_quadratic"]
+    assert predicates("LineMeetsCurve", {"curve": "x**2", "line": "x + 1"}) == ["line_has_k"]
+    assert predicates("LineMeetsCurve", {"curve": "x**2", "line": "k*x**2"}) == ["line_linear"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solutions"),
+    [
+        ({"function": "sin", "b": 2, "c": 30, "k": 0.5}, ["0", "60", "180", "240", "360"]),
+        ({"function": "cos", "k": -0.5}, ["120", "240"]),
+        ({"function": "tan", "k": 2, "x_min": -180, "x_max": 180}, ["-116.6", "63.4"]),
+        ({"function": "cos", "b": 3, "k": 0.8, "x_max": 180}, ["12.3", "107.7", "132.3"]),
+        (
+            {
+                "function": "tan",
+                "b": 0.5,
+                "c": -0.25,
+                "k": 1,
+                "x_min": -2,
+                "x_max": 2,
+                "radians": True,
+            },
+            ["-pi", "pi"],
+        ),
+    ],
+)
+def test_trig_equation_solver_finds_every_solution(raw, solutions):
+    found = values("TrigEquationSolver", raw)
+    assert [found[f"x_{i}"] for i in range(1, int(found["count"]) + 1)] == solutions
+
+
+def test_trig_equation_solver_predicates():
+    assert predicates("TrigEquationSolver", {"function": "sin", "k": 1.5}) == ["value_possible"]
+    assert predicates(
+        "TrigEquationSolver", {"function": "tan", "k": 1, "x_min": -360, "x_max": 720}
+    ) == ["interval_short"]
+    assert predicates(
+        "TrigEquationSolver", {"function": "sin", "k": 0.5, "x_min": 40, "x_max": 50}
+    ) == ["has_solutions"]
+
+
+def test_binomial_expansion():
+    found = values("BinomialExpansion", {"a": 2, "b": 3, "n": 5, "terms": 4})
+    assert [found[f"coefficient_{r}"] for r in range(4)] == ["32", "240", "720", "1080"]
+    rational = values("BinomialExpansion", {"a": 4, "b": -3, "n": -0.5, "terms": 4})
+    assert [rational[f"coefficient_{r}"] for r in range(4)] == ["1/2", "3/16", "27/256", "135/2048"]
+    assert rational["valid_for"] == "|x| < 4/3"
+    assert predicates("BinomialExpansion", {"a": 1, "b": 1, "n": 3, "terms": 5}) == ["terms_exist"]
+    assert predicates("BinomialExpansion", {"a": -2, "b": 1, "n": 0.5}) == ["a_positive"]
+    assert predicates("BinomialExpansion", {"a": 1, "b": 1, "n": 4, "find_power": 4}) == [
+        "power_shown"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("raw", "answer"),
+    [
+        ({"kind": "arithmetic", "a": 3, "d": 2, "find": "sum", "n": 8}, "80"),
+        ({"kind": "arithmetic", "a": 50, "d": -7, "find": "nth_term", "n": 9}, "-6"),
+        ({"kind": "geometric", "a": 64, "r": 0.5, "find": "sum", "n": 7}, "127"),
+        ({"kind": "geometric", "a": 10, "r": -0.6, "find": "sum_to_infinity"}, "25/4"),
+    ],
+)
+def test_progression_answers(raw, answer):
+    assert values("Progression", raw)["answer"] == answer
+
+
+def test_progression_predicates():
+    assert predicates(
+        "Progression", {"kind": "geometric", "a": 1, "r": 2, "find": "sum_to_infinity"}
+    ) == ["convergent"]
+    assert predicates(
+        "Progression", {"kind": "arithmetic", "a": 1, "d": 1, "find": "sum_to_infinity"}
+    ) == ["convergent"]
+    assert predicates(
+        "Progression", {"kind": "geometric", "a": 1, "r": 1, "find": "sum", "n": 5}
+    ) == ["ratio_not_one"]
+
+
+def test_antiderivative_family_constant():
+    found = values(
+        "AntiderivativeFamily", {"gradient": "3*x**2 - 4", "point": [2, 5], "x_min": -3, "x_max": 3}
+    )
+    assert (found["c"], found["curve"]) == ("5", "x**3 - 4*x + 5")
+    chain = values(
+        "AntiderivativeFamily",
+        {"gradient": "(2*x - 1)**3", "point": [1, 0], "x_min": 0, "x_max": 2},
+    )
+    assert chain["integral"] == "(2*x - 1)**4/8"  # kept as a power, as A Level writes it
+    assert chain["c"] == "-1/8"
+
+
+@pytest.mark.parametrize(
+    ("raw", "volume"),
+    [
+        ({"axis": "x", "curve": "sqrt(x)", "lower": 0, "upper": 4}, "8*pi"),
+        ({"axis": "x", "curve": "9 - x**2", "lower": -2, "upper": 2, "inner": "5"}, "704*pi/5"),
+        ({"axis": "y", "curve": "2/y", "lower": 1, "upper": 4}, "3*pi"),
+    ],
+)
+def test_volume_of_revolution(raw, volume):
+    assert values("VolumeOfRevolution", raw)["volume"] == volume
+
+
+def test_volume_of_revolution_predicates():
+    base = {"axis": "x", "curve": "x - 1", "lower": 0, "upper": 2}
+    assert predicates("VolumeOfRevolution", base) == ["one_side_of_axis"]
+    assert predicates("VolumeOfRevolution", base | {"curve": "y"}) == ["expression_parses"]
+    washer = {"axis": "x", "curve": "2", "lower": 0, "upper": 1, "inner": "3"}
+    assert predicates("VolumeOfRevolution", washer) == ["inner_inside"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solution"),
+    [
+        ({"left": "abs(3*x - 2)", "right": "abs(2*x + 7)"}, "{-1, 9}"),
+        ({"left": "2*x + 5", "relation": "<", "right": "abs(x + 1)"}, "Interval.open(-oo, -2)"),
+        ({"left": "abs(x - 3)", "relation": "<=", "right": "4"}, "Interval(-1, 7)"),
+        ({"left": "abs(x + 2)", "right": "3*x - 4"}, "{3}"),  # the other case's root is rejected
+    ],
+)
+def test_modulus_equation(raw, solution):
+    assert values("ModulusEquation", raw)["solution"] == solution
+
+
+def test_modulus_equation_predicates():
+    assert predicates("ModulusEquation", {"left": "x + 1", "right": "3"}) == ["has_modulus"]
+    assert predicates("ModulusEquation", {"left": "abs(x**2 - 1)", "right": "3"}) == [
+        "linear_inside"
+    ]
+    assert predicates("ModulusEquation", {"left": "abs(x)", "right": "-1"}) == ["has_solutions"]
+
+
+def test_polynomial_division():
+    found = values(
+        "PolynomialDivision", {"dividend": "2*x**3 + 3*x**2 - 8*x + 3", "divisor": "x - 1"}
+    )
+    assert (found["quotient"], found["remainder"], found["is_factor"]) == (
+        "2*x**2 + 5*x - 3",
+        "0",
+        "yes",
+    )
+    rest = values(
+        "PolynomialDivision", {"dividend": "6*x**3 + x**2 - 5*x + 2", "divisor": "2*x - 1"}
+    )
+    assert rest["remainder"] == "1/2" and rest["remainder_theorem"] == "f(1/2) = 1/2"
+    quadratic = values(
+        "PolynomialDivision", {"dividend": "x**4 + 2*x**3 - x + 5", "divisor": "x**2 + 1"}
+    )
+    assert (quadratic["quotient"], quadratic["remainder"]) == ("x**2 + 2*x - 1", "6 - 3*x")
+    assert predicates("PolynomialDivision", {"dividend": "x**2 + 1", "divisor": "x**2"}) == [
+        "degree_order"
+    ]
+
+
+# A Level (9709): Pure Mathematics 2 and 3
+
+
+def test_partial_fractions_recombine():
+    import sympy as sp
+
+    x = sp.Symbol("x", real=True)
+    for raw in GRIDS["PartialFractions"]:
+        found = values("PartialFractions", raw)
+        original = sp.sympify(raw["numerator"], locals={"x": x}) / sp.sympify(
+            raw["denominator"], locals={"x": x}
+        )
+        assert sp.simplify(sp.sympify(found["result"], locals={"x": x}) - original) == 0
+    simple = values("PartialFractions", {"numerator": "5*x + 1", "denominator": "(x + 1)*(x - 2)"})
+    assert (simple["A"], simple["B"]) == ("4/3", "11/3")  # A over (x + 1), as written
+
+
+def test_partial_fractions_predicates():
+    raw = {"numerator": "x**2", "denominator": "(x + 1)*(x - 2)"}
+    assert predicates("PartialFractions", raw) == ["proper"]
+    raw = {"numerator": "1", "denominator": "(x + 1)**3"}
+    assert predicates("PartialFractions", raw) == ["denominator_type"]
+    raw = {"numerator": "x + 1", "denominator": "(x + 1)*(x - 2)"}
+    assert predicates("PartialFractions", raw) == ["no_common_factor"]
+
+
+def test_log_linearisation_reads_the_constants():
+    power = values("LogLinearisation", {"model": "power", "points": [[2, 5.66], [8, 45.3]]})
+    assert (power["n"], power["k"]) == ("1.50", "2.00")
+    decay = values("LogLinearisation", {"model": "exponential", "points": [[1, 40], [3, 10]]})
+    assert (decay["a"], decay["k"]) == ("0.5", "80")  # exact values are not padded
+    bad = {"model": "power", "points": [[0, 1], [1, 2]]}
+    assert predicates("LogLinearisation", bad) == ["positive_x"]
+
+
+def test_harmonic_form():
+    found = values("HarmonicForm", {"a": 3, "b": 4, "form": "R sin(t + a)"})
+    assert (found["R"], found["alpha"], found["maximum_at"]) == ("5", "53.1", "36.9")
+    solved = values("HarmonicForm", {"a": 3, "b": 2, "form": "R sin(t + a)", "solve_for": -2})
+    assert (solved["theta_1"], solved["theta_2"]) == ("180.0", "292.6")
+    cosine = values("HarmonicForm", {"a": -2, "b": 3, "form": "R cos(t + a)", "solve_for": 1})
+    assert (cosine["theta_1"], cosine["theta_2"]) == ("40.2", "252.4")
+    wrong = {"a": 3, "b": -4, "form": "R sin(t + a)"}
+    assert predicates("HarmonicForm", wrong) == ["form_matches"]
+    too_big = {"a": 3, "b": 4, "form": "R sin(t + a)", "solve_for": 6}
+    assert predicates("HarmonicForm", too_big) == ["value_possible"]
+
+
+def test_trapezium_rule():
+    found = values(
+        "TrapeziumRule", {"expression": "sin(x)", "lower": "0", "upper": "pi", "strips": 4}
+    )
+    assert (found["estimate"], found["exact"], found["shape"]) == ("1.90", "2", "under")
+    convex = values("TrapeziumRule", {"expression": "x**3", "lower": "1", "upper": "3"})
+    assert convex["shape"] == "over"
+    line = values(
+        "TrapeziumRule", {"expression": "2*x + 1", "lower": "0", "upper": "4", "strips": 2}
+    )
+    assert (line["estimate"], line["shape"]) == ("20", "exact")
+    assert predicates("TrapeziumRule", {"expression": "x", "lower": "2", "upper": "1"}) == [
+        "limits_ordered"
+    ]
+
+
+def test_iteration_diagram():
+    found = values(
+        "IterationDiagram", {"iteration": "(x + 5)**(1/3)", "x0": 2, "sign_change": [1, 2]}
+    )
+    assert (found["converges"], found["root"]) == ("yes", "1.90")
+    runaway = values("IterationDiagram", {"iteration": "(x**2 + 3)/5", "x0": 5})
+    assert runaway["converges"] == "no"
+    no_change = {"iteration": "(x + 5)**(1/3)", "x0": 2, "sign_change": [2, 3]}
+    assert predicates("IterationDiagram", no_change) == ["sign_changes"]
+
+
+def test_parametric_curve():
+    found = values("ParametricCurve", {"x": "t**2", "y": "2*t", "t_min": -2, "t_max": 2, "t0": 1})
+    assert (found["dy_dx"], found["point"], found["line"]) == ("1/t", "(1, 2)", "y = x + 1")
+    normal = {"x": "2*t + 1", "y": "4/t", "t_min": 0.5, "t_max": 4, "t0": 2, "line": "normal"}
+    assert values("ParametricCurve", normal)["line"] == "y = 2*x - 8"
+    vertical = {"x": "t**2", "y": "t", "t_min": -1, "t_max": 1, "t0": 0}
+    assert predicates("ParametricCurve", vertical) == ["gradient_defined"]
+
+
+def test_implicit_curve():
+    raw = {
+        "equation": "x**2 + y**2 = x*y + 7",
+        "point": [3, 2],
+        "x_min": -4,
+        "x_max": 4,
+        "y_min": -4,
+        "y_max": 4,
+    }
+    found = values("ImplicitCurve", raw)
+    assert (found["gradient"], found["line"]) == ("-4", "14 - 4*x")
+    assert predicates("ImplicitCurve", raw | {"point": [1, 1]}) == ["point_on_curve"]
+    circle = raw | {"equation": "x**2 + y**2 = 9", "point": [3, 0]}
+    assert predicates("ImplicitCurve", circle) == ["gradient_defined"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "result"),
+    [
+        (
+            {"method": "parts", "integrand": "x*ln(x)", "u": "ln(x)", "lower": "1", "upper": "2"},
+            "-3/4 + log(4)",
+        ),
+        (
+            {
+                "method": "substitution",
+                "integrand": "x*sqrt(x**2 + 1)",
+                "u": "x**2 + 1",
+                "lower": "0",
+                "upper": "2",
+            },
+            "-1/3 + 5*sqrt(5)/3",
+        ),
+        (
+            {"method": "log_form", "integrand": "tan(x)", "lower": "0", "upper": "pi/4"},
+            "log(sqrt(2))",
+        ),
+    ],
+)
+def test_integration_method_definite(raw, result):
+    assert values("IntegrationMethod", raw)["value"] == result
+
+
+def test_integration_method_predicates():
+    wrong_u = {"method": "parts", "integrand": "x*exp(x**2)", "u": "x"}
+    assert predicates("IntegrationMethod", wrong_u) == ["method_fits"]
+    not_log = {"method": "log_form", "integrand": "x/(x + 1)"}
+    assert predicates("IntegrationMethod", not_log) == ["method_fits"]
+    assert predicates("IntegrationMethod", {"method": "parts", "integrand": "x*sin(x)"}) == [
+        "u_given"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("gradient", "point", "particular"),
+    [
+        ("x*y", [0, 1], "y = exp(x**2/2)"),
+        ("(y - 1)/x", [1, 3], "y = 2*x + 1"),
+        ("-0.5*y", [0, 8], "y = 8*exp(-x/2)"),
+        ("x/y", [0, 2], "y = sqrt(x**2 + 4)"),
+    ],
+)
+def test_differential_equation_particular_solution(gradient, point, particular):
+    raw = {
+        "gradient": gradient,
+        "point": point,
+        "x_min": 0.5 if gradient.endswith("/x") else -2,
+        "x_max": 2,
+    }
+    assert values("DifferentialEquation", raw)["particular"] == particular
+
+
+def test_differential_equation_predicates():
+    base = {"point": [0, 1], "x_min": -1, "x_max": 1}
+    assert predicates("DifferentialEquation", base | {"gradient": "x + y"}) == ["separable"]
+    assert predicates("DifferentialEquation", base | {"gradient": "x*(y - 1)"}) == ["solvable"]
+
+
+def test_vector_lines_3d():
+    meet = {"kind": "intersection", "a": [1, 2, 0], "b": [1, 0, 1], "c": [3, 1, 1], "d": [0, 1, 1]}
+    assert values("VectorLines3D", meet) == {"point": "(3, 2, 2)", "relation": "meet"}
+    skew = {
+        "kind": "intersection",
+        "a": [1, 0, 2],
+        "b": [2, 1, -1],
+        "c": [0, 3, 1],
+        "d": [1, -1, 2],
+    }
+    assert values("VectorLines3D", skew)["relation"] == "skew"
+    parallel = meet | {"c": [3, 0, 0], "d": [-2, 0, -2]}
+    assert values("VectorLines3D", parallel)["relation"] == "parallel"
+    angle = {"kind": "angle", "a": [1, 0, 0], "b": [2, -1, 2], "c": [0, 1, 3], "d": [1, 1, 0]}
+    assert values("VectorLines3D", angle)["angle"] == "76.4"
+    foot = {"kind": "foot", "a": [1, 2, 3], "b": [1, -1, 2], "p": [4, 5, 0]}
+    assert values("VectorLines3D", foot) == {"foot": "(0, 3, 1)", "distance": "sqrt(21)"}
+    assert predicates("VectorLines3D", foot | {"p": [2, 1, 5]}) == ["point_off_line"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "result"),
+    [
+        ({"kind": "multiply", "z": [1, 1], "w": [1, 2]}, "-1 + 3*I"),
+        ({"kind": "divide", "z": [5, 5], "w": [1, 2]}, "3 - I"),
+        ({"kind": "square_roots", "z": [5, 12]}, "3 + 2*I"),
+        ({"kind": "conjugate", "z": [2, 3]}, "2 - 3*I"),
+    ],
+)
+def test_argand_diagram(raw, result):
+    assert values("ArgandDiagram", raw)["result"] == result
+
+
+def test_argand_diagram_modulus_argument_is_exact():
+    found = values("ArgandDiagram", {"kind": "modulus_argument", "z": [-1, "sqrt(3)"]})
+    assert (found["modulus"], found["argument"]) == ("2", "2*pi/3")
+    assert predicates("ArgandDiagram", {"kind": "add", "z": [1, 1]}) == ["w_given"]
+
+
+def test_complex_loci_meeting_points():
+    two_half_lines = {
+        "loci": [
+            {"kind": "half_line", "a": [1, 0], "angle": "3*pi/4"},
+            {"kind": "half_line", "a": [-2, 0], "angle": "pi/4"},
+        ]
+    }
+    assert values("ComplexLoci", two_half_lines)["meet_1"] == "-1/2 + 3/2i"
+    # a half-line meets the circle once, not twice: the other root is behind its start
+    circle_line = {
+        "loci": [
+            {"kind": "circle", "a": [0, 0], "r": 5},
+            {"kind": "half_line", "a": [0, 0], "angle": "pi/4"},
+        ]
+    }
+    found = values("ComplexLoci", circle_line)
+    assert "meet_1" in found and "meet_2" not in found
+    bad = {"loci": [{"kind": "sector", "a": [0, 0], "angle": "pi/2", "angle_2": "0"}]}
+    assert predicates("ComplexLoci", bad) == ["angles_ordered"]
+
+
+# A Level (9709): Mechanics and Probability & Statistics 1
+
+
+def test_force_diagram_resolves():
+    incline = values("ForceDiagram", GRIDS["ForceDiagram"][0])
+    assert (incline["F"], incline["R"], incline["mu"]) == ("12.6", "29.6", "0.425")
+    three_forces = values("ForceDiagram", GRIDS["ForceDiagram"][1])
+    assert (three_forces["Q"], three_forces["S"]) == ("8.15", "9.22")
+    pulled = values("ForceDiagram", GRIDS["ForceDiagram"][2])
+    assert (pulled["R"], pulled["a"]) == ("25", "4.93")
+    no_mass = {"find": "acceleration", "forces": [{"name": "P", "magnitude": 3, "angle": 0}]}
+    assert predicates("ForceDiagram", no_mass)
+
+
+@pytest.mark.parametrize(
+    ("raw", "found"),
+    [
+        ({"u": 4, "a": 2, "t": 5, "find": "s"}, {"s": "45", "v": "14"}),
+        ({"u": 20, "v": 0, "s": 50, "find": "a"}, {"a": "-4", "t": "5"}),
+        ({"s": 120, "t": 8, "v": 20, "find": "u"}, {"u": "10", "a": "1.25"}),
+        ({"u": 2, "a": 1.5, "s": 30, "find": "v"}, {"v": "9.70", "t": "5.13"}),
+    ],
+)
+def test_suvat_solver(raw, found):
+    result = values("SuvatSolver", raw)
+    assert {k: result[k] for k in found} == found
+
+
+def test_momentum_is_conserved():
+    assert values("MomentumCollision", {"m1": 3, "m2": 2, "u1": 6, "u2": -4, "v2": 5}) == {
+        "v1": "0"
+    }
+    stuck = {"m1": 0.5, "m2": 1.5, "u1": 8, "u2": 0, "coalesce": True}
+    assert values("MomentumCollision", stuck) == {"v1": "2"}
+    assert values("MomentumCollision", GRIDS["MomentumCollision"][3]) == {"m2": "3"}
+
+
+@pytest.mark.parametrize(
+    ("raw", "a", "tension"),
+    [
+        ({"setup": "table_pulley", "m_a": 4, "m_b": 2, "mu": 0.2}, "2", "16"),
+        ({"setup": "two_hanging", "m_a": 3, "m_b": 5}, "2.5", "37.5"),
+        ({"setup": "incline_pulley", "m_a": 2, "m_b": 3, "slope": 30, "mu": 0.25}, "3.13", "20.6"),
+        (GRIDS["ConnectedParticles"][6], "1.5", "800"),
+    ],
+)
+def test_connected_particles(raw, a, tension):
+    found = values("ConnectedParticles", raw)
+    assert (found["a"], found["T"]) == (a, tension)
+
+
+def test_work_energy_and_power():
+    expected = ["8.79", "9.39", "7.2", "75", "1", "15.6", "11500"]
+    for raw, answer in zip(GRIDS["WorkEnergy"], expected, strict=True):
+        assert values("WorkEnergy", raw)[raw["find"]] == answer
+
+
+def test_box_plot_quartiles():
+    odd = values("BoxPlot", GRIDS["BoxPlot"][0])
+    assert (odd["q1_1"], odd["median_1"], odd["q3_1"], odd["iqr_1"]) == ("39/2", "27", "36", "33/2")
+    pair = values("BoxPlot", GRIDS["BoxPlot"][1])
+    assert (pair["median_1"], pair["median_2"], pair["iqr_2"]) == ("91/2", "37", "19")
+    decimals = {"data": [1.5, 2, 3, 4, 5], "stem_leaf": True}
+    assert predicates("BoxPlot", decimals) == ["whole_numbers"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "mean", "sd"),
+    [
+        ({"kind": "list", "data": [4, 7, 7, 8, 10, 12]}, "8", "2.52"),
+        (GRIDS["StandardDeviation"][1], "1.8", "1.14"),
+        ({"kind": "totals", "n": 20, "sum_x": 360, "sum_x2": 6880}, "18", "4.47"),
+        ({"kind": "coded", "n": 12, "sum_x": 30, "sum_x2": 210, "a": 50}, "52.5", "3.35"),
+    ],
+)
+def test_standard_deviation(raw, mean, sd):
+    found = values("StandardDeviation", raw)
+    assert (found["mean"], found["standard_deviation"]) == (mean, sd)
+
+
+@pytest.mark.parametrize(
+    ("raw", "count"),
+    [
+        ({"kind": "word", "word": "NEEDLESS"}, "3360"),
+        ({"kind": "word", "word": "STATISTICS"}, "50400"),
+        ({"kind": "together", "n": 7, "k": 3}, "720"),
+        ({"kind": "apart", "n": 6}, "480"),
+        (GRIDS["ArrangementCounter"][4], "200"),
+    ],
+)
+def test_arrangement_counter(raw, count):
+    assert values("ArrangementCounter", raw)["count"] == count
+
+
+@pytest.mark.parametrize(
+    ("raw", "probability"),
+    [
+        ({"kind": "binomial", "n": 8, "p": "0.3", "high": 2}, "0.5518"),
+        ({"kind": "binomial", "n": 12, "p": "1/4", "low": 3, "high": 5}, "0.5549"),
+        ({"kind": "geometric", "p": "0.2", "low": 4}, "64/125"),
+        ({"kind": "poisson", "lam": 4, "low": 6}, "0.2149"),
+        (GRIDS["DiscreteDistribution"][2], "9/10"),
+    ],
+)
+def test_discrete_distribution(raw, probability):
+    assert values("DiscreteDistribution", raw)["probability"] == probability
+
+
+@pytest.mark.parametrize(
+    ("raw", "found"),
+    [
+        (
+            {"kind": "probability", "mu": 50, "sigma": 8, "low": 45, "high": 60},
+            {"answer": "0.6284"},
+        ),
+        ({"kind": "inverse", "mu": 120, "sigma": 15, "probability": 0.9}, {"answer": "139.2"}),
+        (GRIDS["NormalDistribution"][7], {"mu": "29.83", "sigma": "7.668"}),
+        (GRIDS["NormalDistribution"][8], {"answer": "0.7699"}),  # P(24.5 < X < 35.5)
+        (GRIDS["NormalDistribution"][10], {"answer": "0.1841"}),
+    ],
+)
+def test_normal_distribution(raw, found):
+    result = values("NormalDistribution", raw)
+    assert {k: result[k] for k in found} == found
+
+
+def test_normal_distribution_predicates():
+    small = {"kind": "approximation", "source": "binomial", "n": 10, "p": 0.3, "high": 4}
+    assert predicates("NormalDistribution", small) == ["approximation_valid"]
+    crossed = {
+        "kind": "find_parameters",
+        "conditions": [{"x": 20, "below": 0.8}, {"x": 30, "below": 0.2}],
+    }
+    assert predicates("NormalDistribution", crossed) == ["conditions_consistent"]
+
+
+# A Level (9709): Probability & Statistics 2, and the A Level extensions
+
+
+@pytest.mark.parametrize(
+    ("index", "mean", "variance", "probability"),
+    [
+        (0, "5", "25", "0.8413"),  # P(X > Y) = P(X - Y > 0) = Φ(1)
+        (1, "45", "40", None),  # 3X - 2Y + 5: the constant adds no variance
+        (2, "260", "100", "0.1587"),  # four copies: 4 Var(W), not 16 Var(W)
+        (4, "5.5", "5.5", "0.3575"),  # X + Y ~ Po(5.5)
+    ],
+)
+def test_linear_combination(index, mean, variance, probability):
+    found = values("LinearCombination", GRIDS["LinearCombination"][index])
+    assert (found["mean"], found["variance"]) == (mean, variance)
+    assert found.get("probability") == probability
+
+
+def test_linear_combination_predicates():
+    scaled = {
+        "terms": [{"name": "X", "mean": 3, "variance": 3, "coefficient": 2}],
+        "distribution": "poisson",
+        "high": 4,
+    }
+    assert predicates("LinearCombination", scaled) == ["poisson_sum"]
+    unknown = {"terms": [{"name": "X", "mean": 3, "variance": 2}], "distribution": "any", "low": 1}
+    assert predicates("LinearCombination", unknown) == ["distribution_known"]
+
+
+def test_continuous_pdf():
+    found = values("ContinuousPDF", GRIDS["ContinuousPDF"][0])
+    assert (found["k"], found["probability"], found["mean"], found["variance"]) == (
+        "3/32",
+        "11/16",
+        "2",
+        "4/5",
+    )
+    assert values("ContinuousPDF", GRIDS["ContinuousPDF"][1])["median"] == "2.828"  # √8
+    infinite = values("ContinuousPDF", GRIDS["ContinuousPDF"][2])
+    assert (infinite["k"], infinite["mean"], infinite["variance"]) == ("4", "4/3", "2/9")
+
+
+def test_continuous_pdf_predicates():
+    assert predicates("ContinuousPDF", {"pdf": "x", "lower": "0", "upper": "1"}) == ["area_one"]
+    heavy = {"pdf": "k/x**2", "lower": "1", "upper": "inf"}
+    assert predicates("ContinuousPDF", heavy) == ["moments_finite"]
+    negative = {"pdf": "k*(x - 1)", "lower": "0", "upper": "3"}
+    assert predicates("ContinuousPDF", negative)
+
+
+@pytest.mark.parametrize(
+    ("index", "found"),
+    [
+        (0, {"mean": "31", "variance": "32.31"}),
+        (1, {"mean": "61.4", "variance": "6.792"}),  # coded with a = 60
+        (2, {"standard_error": "2", "probability": "0.1587"}),
+        (4, {"lower": "23.14", "upper": "25.46"}),
+        (6, {"lower": "0.1717", "upper": "0.2883"}),
+    ],
+)
+def test_sampling_estimation(index, found):
+    result = values("SamplingEstimation", GRIDS["SamplingEstimation"][index])
+    assert {k: result[k] for k in found} == found
+
+
+@pytest.mark.parametrize(
+    ("index", "found"),
+    [
+        (0, {"p_value": "0.03548", "decision": "reject", "critical_region": "X <= 2"}),
+        (1, {"critical_region": "X <= 5 or X >= 15", "type_1": "0.04139"}),
+        (2, {"critical_region": "X >= 6", "type_2": "0.4032"}),
+        (4, {"decision": "accept", "critical_region": "X <= 5", "type_2": "0.6993"}),
+        (5, {"z": "1.897", "decision": "reject"}),
+        (7, {"decision": "accept", "type_2": "0.1962"}),
+    ],
+)
+def test_hypothesis_test(index, found):
+    result = values("HypothesisTest", GRIDS["HypothesisTest"][index])
+    assert {k: result[k] for k in found} == found
+
+
+def test_hypothesis_test_predicates():
+    wrong_side = {
+        "kind": "binomial",
+        "null_value": 0.3,
+        "tail": "lower",
+        "observed": 2,
+        "n": 20,
+        "alternative": 0.5,
+    }
+    assert predicates("HypothesisTest", wrong_side) == ["alternative_side"]
+    tiny = {"kind": "binomial", "null_value": 0.5, "tail": "lower", "observed": 0, "n": 3}
+    assert predicates("HypothesisTest", tiny) == ["critical_region_exists"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "solution"),
+    [
+        ({"a": 1, "b": -2, "c": -3, "inequality": "<"}, "-1 < x < 3"),
+        ({"a": 3, "b": -7, "c": 2, "inequality": ">="}, "x <= 1/3 or x >= 2"),
+        ({"a": 1, "b": -4, "c": 4, "inequality": ">"}, "x != 2"),
+        ({"a": 1, "b": -4, "c": 4, "inequality": "<="}, "x = 2"),
+        ({"a": 0.5, "b": 1, "c": 3, "inequality": "<"}, "no real x"),
+        ({"a": 0.5, "b": 1, "c": 3, "inequality": ">"}, "all real x"),
+    ],
+)
+def test_quadratic_inequality(raw, solution):
+    assert values("QuadraticExplorer", raw)["solution"] == solution
+
+
+def test_tree_diagram_conditional():
+    same = {
+        "outcomes": ["R", "B"],
+        "counts": [3, 2],
+        "replace": False,
+        "find": ["R,R"],
+        "given": ["R,R", "B,B"],
+    }
+    found = values("TreeDiagram", same)
+    assert (found["joint"], found["given"], found["probability"]) == ("3/10", "2/5", "3/4")
+    impossible = {
+        "outcomes": ["R", "B"],
+        "counts": [1, 2],
+        "replace": False,
+        "find": ["B,B"],
+        "given": ["R,R"],
+    }
+    assert predicates("TreeDiagram", impossible) == ["condition_possible"]

@@ -83,9 +83,9 @@ CATALOGUE = [
     PrimitiveInfo(
         "QuadraticExplorer",
         "Algebra and graphs",
-        "1",
+        "2",
         "Draws a parabola with its roots, discriminant, vertex, axis of symmetry and "
-        "completed square form.",
+        "completed square form, and solves a quadratic inequality from the graph.",
     ),
     PrimitiveInfo(
         "InequalityRegion",
@@ -395,9 +395,9 @@ CATALOGUE = [
     PrimitiveInfo(
         "TreeDiagram",
         "Probability",
-        "1",
+        "2",
         "Probability trees: multiply along the branches, add the outcomes wanted, with "
-        "or without replacement",
+        "or without replacement, and conditional probability given an event",
     ),
     PrimitiveInfo(
         "SampleSpaceGrid",
@@ -466,80 +466,366 @@ CATALOGUE = [
         "1",
         "Words on screen: a topic heading, a question in the learner's words, or key points",
     ),
+    PrimitiveInfo(
+        "GraphTransform",
+        "Functions",
+        "1",
+        "A graph moved by translations, reflections and stretches to y = pf(qx + r) + s, "
+        "one step at a time",
+    ),
+    PrimitiveInfo(
+        "FunctionMapping",
+        "Functions",
+        "1",
+        "Domain and range from the graph, the one-one test, and the composite gf on number lines",
+    ),
+    PrimitiveInfo(
+        "LineMeetsCurve",
+        "Quadratics",
+        "1",
+        "For which k a line cuts a quadratic curve twice, touches it or misses it, from "
+        "the discriminant",
+    ),
+    PrimitiveInfo(
+        "TrigEquationSolver",
+        "Trigonometry",
+        "1",
+        "Every solution of sin, cos or tan of (bx + c) = k in an interval, from the "
+        "principal value and symmetry",
+    ),
+    PrimitiveInfo(
+        "BinomialExpansion",
+        "Series",
+        "1",
+        "(a + bx)^n term by term: Pascal's triangle for whole n, the infinite series and "
+        "its validity otherwise",
+    ),
+    PrimitiveInfo(
+        "Progression",
+        "Series",
+        "1",
+        "Arithmetic and geometric progressions as bars: the nth term, the sum of n terms "
+        "and the sum to infinity",
+    ),
+    PrimitiveInfo(
+        "AntiderivativeFamily",
+        "Integration",
+        "1",
+        "Integrating dy/dx gives a family of curves y = F(x) + c; a point on the curve fixes c",
+    ),
+    PrimitiveInfo(
+        "VolumeOfRevolution",
+        "Integration",
+        "1",
+        "A region turned about the x- or y-axis: the solid as discs or washers, and its volume",
+    ),
+    PrimitiveInfo(
+        "ModulusEquation",
+        "Algebra",
+        "1",
+        "Equations and inequalities with |ax + b|: squaring or cases, checked against "
+        "the V-shaped graphs",
+    ),
+    PrimitiveInfo(
+        "PolynomialDivision",
+        "Algebra",
+        "1",
+        "Long division of polynomials, with the quotient, remainder, and the remainder "
+        "and factor theorems",
+    ),
+    PrimitiveInfo(
+        "PartialFractions",
+        "Algebra",
+        "1",
+        "A proper fraction split into partial fractions: the form, then substituting "
+        "roots and comparing coefficients",
+    ),
+    PrimitiveInfo(
+        "LogLinearisation",
+        "Logarithms and exponentials",
+        "1",
+        "y = kx^n or y = ka^x made a straight line by taking logs; k, n and a from its "
+        "gradient and intercept",
+    ),
+    PrimitiveInfo(
+        "HarmonicForm",
+        "Trigonometry",
+        "1",
+        "a sin θ + b cos θ as R sin(θ ± α) or R cos(θ ± α): the triangle for R and α, "
+        "and the single wave",
+    ),
+    PrimitiveInfo(
+        "TrapeziumRule",
+        "Integration",
+        "1",
+        "A definite integral estimated with trapezia, and over or under from the way the "
+        "curve bends",
+    ),
+    PrimitiveInfo(
+        "IterationDiagram",
+        "Numerical solution of equations",
+        "1",
+        "A root from a change of sign, then x = F(x) iterated as a staircase or cobweb "
+        "to the required accuracy",
+    ),
+    PrimitiveInfo(
+        "ParametricCurve",
+        "Differentiation",
+        "1",
+        "A curve x = f(t), y = g(t) traced as t grows, dy/dx = (dy/dt)/(dx/dt), and the "
+        "tangent or normal at a point",
+    ),
+    PrimitiveInfo(
+        "ImplicitCurve",
+        "Differentiation",
+        "1",
+        "A curve given by an equation in x and y, differentiated implicitly, with the "
+        "tangent or normal at a point",
+    ),
+    PrimitiveInfo(
+        "IntegrationMethod",
+        "Integration",
+        "1",
+        "An integral by parts, by substitution or as k f'(x)/f(x), checked by "
+        "differentiating the answer",
+    ),
+    PrimitiveInfo(
+        "DifferentialEquation",
+        "Differential equations",
+        "1",
+        "A separable dy/dx = f(x)g(y): slope field, separating the variables, the family "
+        "and the particular solution",
+    ),
+    PrimitiveInfo(
+        "VectorLines3D",
+        "Vectors",
+        "1",
+        "Lines r = a + λb in 3D: parallel, meeting or skew, the angle between them, and "
+        "the foot of a perpendicular",
+    ),
+    PrimitiveInfo(
+        "ArgandDiagram",
+        "Complex numbers",
+        "1",
+        "Complex numbers in the Argand diagram: modulus and argument, conjugate, sums, "
+        "products, quotients and square roots",
+    ),
+    PrimitiveInfo(
+        "ComplexLoci",
+        "Complex numbers",
+        "1",
+        "Loci in the Argand diagram: circles, perpendicular bisectors, half-lines and "
+        "sectors, their regions and meeting points",
+    ),
+    PrimitiveInfo(
+        "ForceDiagram",
+        "Forces and equilibrium",
+        "1",
+        "Forces on a particle, free, on the level or on a slope, resolved to find "
+        "forces, friction or acceleration",
+    ),
+    PrimitiveInfo(
+        "SuvatSolver",
+        "Kinematics",
+        "1",
+        "Constant acceleration: the suvat equation that leaves out the unwanted "
+        "quantity, with the velocity-time graph",
+    ),
+    PrimitiveInfo(
+        "MomentumCollision",
+        "Momentum",
+        "1",
+        "Two particles colliding in a line, before and after, conserving momentum to "
+        "find a velocity or mass",
+    ),
+    PrimitiveInfo(
+        "ConnectedParticles",
+        "Newton's laws of motion",
+        "1",
+        "Two particles joined over a pulley, or a car towing a trailer: Newton's second "
+        "law for each gives a and T",
+    ),
+    PrimitiveInfo(
+        "WorkEnergy",
+        "Energy, work and power",
+        "1",
+        "The work-energy principle as two equal energy stacks, and power P = Fv for a "
+        "vehicle against resistance",
+    ),
+    PrimitiveInfo(
+        "BoxPlot",
+        "Representation of data",
+        "1",
+        "Stem-and-leaf (back-to-back for two sets), quartiles, and box-and-whisker plots "
+        "to compare data",
+    ),
+    PrimitiveInfo(
+        "StandardDeviation",
+        "Representation of data",
+        "1",
+        "Mean and standard deviation from data, a frequency table, grouped data, or "
+        "totals and coded totals",
+    ),
+    PrimitiveInfo(
+        "ArrangementCounter",
+        "Permutations and combinations",
+        "1",
+        "Arrangements with repeated letters, items together or apart, and selections "
+        "from groups, checked by listing",
+    ),
+    PrimitiveInfo(
+        "DiscreteDistribution",
+        "Discrete random variables",
+        "1",
+        "A table, binomial, geometric or Poisson distribution as bars: an event's "
+        "probability, E(X) and Var(X)",
+    ),
+    PrimitiveInfo(
+        "NormalDistribution",
+        "The normal distribution",
+        "1",
+        "Probabilities by standardising, the inverse normal, finding the mean or "
+        "standard deviation, and the normal approximation with a continuity correction",
+    ),
+    PrimitiveInfo(
+        "HypothesisTest",
+        "Hypothesis tests",
+        "1",
+        "Binomial, Poisson and normal-mean significance tests with the critical region "
+        "shaded, and the probabilities of Type I and Type II errors",
+    ),
+    PrimitiveInfo(
+        "ContinuousPDF",
+        "Continuous random variables",
+        "1",
+        "A probability density curve: k from the total area, probabilities as areas, the "
+        "mean, variance and median by integration",
+    ),
+    PrimitiveInfo(
+        "LinearCombination",
+        "Linear combinations of random variables",
+        "1",
+        "The mean and variance of aX + bY + c and of sums of copies, each term's share "
+        "of the variance, and probabilities for normal or Poisson combinations",
+    ),
+    PrimitiveInfo(
+        "SamplingEstimation",
+        "Sampling and estimation",
+        "1",
+        "Unbiased estimates from totals, the distribution of the sample mean, and "
+        "confidence intervals for a mean or a proportion",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)
 
-# The syllabus codes each primitive draws: 4024 unless marked AM (4037), as listed in
-# docs/primitives.md. A lesson planner can match a learner's topic to primitives by them.
+# The syllabus codes each primitive draws: 4024 (O Level) unless marked AM (4037, Additional
+# Mathematics) or 9709 (AS & A Level Mathematics), as listed in docs/primitives.md. A lesson
+# planner can match a learner's topic to primitives by them.
 SYLLABUS: dict[str, str] = {
     "AlgebraBalance": "2.1–2.3, 2.5",
     "AngleChaser": "4.6.1, 4.6.2",
-    "AreaBetweenCurves": "AM 14.10–14.13",
+    "AntiderivativeFamily": "9709 1.8",
+    "AreaBetweenCurves": "AM 14.10–14.13; 9709 1.8",
     "AreaDissector": "5.2",
-    "AreaUnderCurve": "AM 14.10–14.13",
+    "AreaUnderCurve": "AM 14.10–14.13; 9709 1.8",
+    "ArgandDiagram": "9709 3.9",
+    "ArrangementCounter": "9709 5.2",
     "AveragesVisualizer": "9.2, 9.3",
     "Bearings": "4.3",
+    "BinomialExpansion": "9709 1.6, 3.1",
     "BoundsInterval": "1.10",
+    "BoxPlot": "9709 5.1",
     "ChartBuilder": "9.1, 9.4",
-    "CircleSector": "5.3; AM 9",
+    "CircleSector": "5.3; AM 9; 9709 1.4",
     "CircleTheorems": "4.7, 4.8",
     "ClockTimetable": "1.15, 1.16",
     "CompassConstruction": "4.2",
-    "CompletingSquare": "2.5.5; AM 2",
-    "ConnectedRates": "AM 14.7",
-    "CoordinateCircle": "AM 8.1–8.4",
+    "CompletingSquare": "2.5.5; AM 2; 9709 1.1",
+    "ComplexLoci": "9709 3.9",
+    "ConnectedParticles": "9709 4.4",
+    "ConnectedRates": "AM 14.7; 9709 1.7",
+    "ContinuousPDF": "9709 6.3",
+    "CoordinateCircle": "AM 8.1–8.4; 9709 1.3",
     "CoordinatePlotter": "3.1, 3.4",
-    "CumulativeFrequency": "9.6",
-    "CurveSketch": "2.11; AM 4.4",
-    "DerivativePanels": "AM 14.6, 14.9",
-    "DifferentiationStepper": "AM 14.3, 14.4",
+    "CumulativeFrequency": "9.6; 9709 5.1",
+    "CurveSketch": "2.11; AM 4.4; 9709 1.7",
+    "DerivativePanels": "AM 14.6, 14.9; 9709 1.7",
+    "DifferentialEquation": "9709 3.8",
+    "DifferentiationStepper": "AM 14.3, 14.4; 9709 1.7, 2.4, 3.4",
+    "DiscreteDistribution": "9709 5.4, 6.1",
     "EquationTransform": "2.1–2.5; all topics",
     "ExpansionGrid": "2.2, 2.5.5",
+    "ForceDiagram": "9709 4.1, 4.4",
     "FractionModel": "1.4, 1.6",
     "FunctionGraph": "2.10",
-    "FunctionMachine": "2.12; AM 1",
+    "FunctionMachine": "2.12; AM 1; 9709 1.2",
+    "FunctionMapping": "9709 1.2",
     "GradientTriangle": "3.3",
+    "GraphTransform": "9709 1.2",
     "GraphicalSolution": "2.10",
     "GrowthDecay": "1.13.4, 1.17",
-    "Histogram": "9.7",
+    "HarmonicForm": "9709 2.3, 3.3",
+    "Histogram": "9.7; 9709 5.1",
+    "HypothesisTest": "9709 6.5",
+    "ImplicitCurve": "9709 2.4, 3.4",
     "IndexLaws": "1.7, 2.4",
     "InequalityRegion": "2.6",
-    "InverseGraph": "2.12; AM 1",
-    "KinematicsGraphs": "AM 14.14, 14.15",
+    "IntegrationMethod": "9709 3.5",
+    "InverseGraph": "2.12; AM 1; 9709 1.2",
+    "IterationDiagram": "9709 2.6, 3.6",
+    "KinematicsGraphs": "AM 14.14, 14.15; 9709 4.2",
     "LineBuilder": "3.2, 3.3, 3.5",
+    "LineMeetsCurve": "9709 1.1, 1.3",
+    "LinearCombination": "9709 6.2",
+    "LogLinearisation": "9709 2.2, 3.2",
+    "ModulusEquation": "9709 2.1, 3.1",
+    "MomentumCollision": "9709 4.3",
     "NetFolder": "4.1, 4.2.3",
+    "NormalDistribution": "9709 5.5, 6.1",
     "NumberLine": "1.1, 1.4, 1.5, 1.9, 1.10",
-    "OptimisationScene": "AM 14.8",
-    "ParallelPerpendicular": "3.6, 3.7; AM 7",
+    "OptimisationScene": "AM 14.8; 9709 1.7",
+    "ParallelPerpendicular": "3.6, 3.7; AM 7; 9709 1.3",
+    "ParametricCurve": "9709 2.4, 3.4",
+    "PartialFractions": "9709 3.1, 3.5",
     "PercentageBar": "1.13",
     "PolygonAngles": "4.6.3",
+    "PolynomialDivision": "9709 2.1, 3.1",
     "PrimeFactorTree": "1.1",
     "ProbabilitySpinner": "8.1, 8.2",
+    "Progression": "9709 1.6",
     "ProportionGraph": "2.8",
-    "QuadraticExplorer": "2.5.5, 2.11",
+    "QuadraticExplorer": "2.5.5, 2.11; 9709 1.1",
     "RatioSplitter": "1.11, 1.12",
     "RightTriangleTrig": "6.1, 6.2",
-    "SampleSpaceGrid": "8.1, 8.3",
+    "SampleSpaceGrid": "8.1, 8.3; 9709 5.3",
+    "SamplingEstimation": "9709 6.4",
     "ScatterBestFit": "9.5",
-    "SecantToTangent": "AM 14.1; 2.10.4",
+    "SecantToTangent": "AM 14.1; 2.10.4; 9709 1.7",
     "SequencePattern": "2.7",
     "SimilarityScaler": "4.4",
-    "SimultaneousEquations": "2.5",
+    "SimultaneousEquations": "2.5; 9709 1.1",
     "SineCosineRule": "6.3",
     "SolidMensuration": "5.1, 5.4, 5.5",
+    "StandardDeviation": "9709 5.1",
     "StandardForm": "1.7, 1.8",
     "SurdSimplifier": "1.18",
+    "SuvatSolver": "9709 4.2",
     "SymmetryReveal": "4.5",
     "TableOfValues": "2.10",
-    "TangentNormal": "AM 14.5",
-    "TangentSlide": "AM 14.1–14.5",
-    "TransformationStage": "7.1",
-    "TravelGraph": "2.9.3, 2.9.4",
-    "TreeDiagram": "8.3",
+    "TangentNormal": "AM 14.5; 9709 1.7",
+    "TangentSlide": "AM 14.1–14.5; 9709 1.7",
     "TextCard": "all topics",
+    "TransformationStage": "7.1",
+    "TrapeziumRule": "9709 2.5, 3.5",
+    "TravelGraph": "2.9.3, 2.9.4",
+    "TreeDiagram": "8.3; 9709 5.3",
     "Trig3D": "6.4",
-    "UnitCircleWaves": "AM 10.2, 10.3",
+    "TrigEquationSolver": "9709 1.5, 2.3, 3.3",
+    "UnitCircleWaves": "AM 10.2, 10.3; 9709 1.5",
     "VectorArena": "7.2–7.4; AM 13",
-    "VennDiagram": "1.2; 8.3",
+    "VectorLines3D": "9709 3.7",
+    "VennDiagram": "1.2; 8.3; 9709 5.3",
+    "VolumeOfRevolution": "9709 1.8",
+    "WorkEnergy": "9709 4.5",
 }
