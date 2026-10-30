@@ -617,6 +617,76 @@ CATALOGUE = [
         "Loci in the Argand diagram: circles, perpendicular bisectors, half-lines and "
         "sectors, their regions and meeting points",
     ),
+    PrimitiveInfo(
+        "ForceDiagram",
+        "Forces and equilibrium",
+        "1",
+        "Forces on a particle, free, on the level or on a slope, resolved to find "
+        "forces, friction or acceleration",
+    ),
+    PrimitiveInfo(
+        "SuvatSolver",
+        "Kinematics",
+        "1",
+        "Constant acceleration: the suvat equation that leaves out the unwanted "
+        "quantity, with the velocity-time graph",
+    ),
+    PrimitiveInfo(
+        "MomentumCollision",
+        "Momentum",
+        "1",
+        "Two particles colliding in a line, before and after, conserving momentum to "
+        "find a velocity or mass",
+    ),
+    PrimitiveInfo(
+        "ConnectedParticles",
+        "Newton's laws of motion",
+        "1",
+        "Two particles joined over a pulley, or a car towing a trailer: Newton's second "
+        "law for each gives a and T",
+    ),
+    PrimitiveInfo(
+        "WorkEnergy",
+        "Energy, work and power",
+        "1",
+        "The work-energy principle as two equal energy stacks, and power P = Fv for a "
+        "vehicle against resistance",
+    ),
+    PrimitiveInfo(
+        "BoxPlot",
+        "Representation of data",
+        "1",
+        "Stem-and-leaf (back-to-back for two sets), quartiles, and box-and-whisker plots "
+        "to compare data",
+    ),
+    PrimitiveInfo(
+        "StandardDeviation",
+        "Representation of data",
+        "1",
+        "Mean and standard deviation from data, a frequency table, grouped data, or "
+        "totals and coded totals",
+    ),
+    PrimitiveInfo(
+        "ArrangementCounter",
+        "Permutations and combinations",
+        "1",
+        "Arrangements with repeated letters, items together or apart, and selections "
+        "from groups, checked by listing",
+    ),
+    PrimitiveInfo(
+        "DiscreteDistribution",
+        "Discrete random variables",
+        "1",
+        "A table, binomial, geometric or Poisson distribution as bars: an event's "
+        "probability, E(X) and Var(X)",
+    ),
+    PrimitiveInfo(
+        "NormalDistribution",
+        "The normal distribution",
+        "1",
+        "Probabilities by standardising, the inverse normal, finding the mean or "
+        "standard deviation, and the normal approximation with a continuity correction",
+    ),
 ]
 
 PRIMITIVE_IDS = frozenset(info.primitive_id for info in CATALOGUE)
@@ -631,10 +701,12 @@ SYLLABUS: dict[str, str] = {
     "AreaDissector": "5.2",
     "AreaUnderCurve": "AM 14.10–14.13",
     "ArgandDiagram": "9709 3.9",
+    "ArrangementCounter": "9709 5.2",
     "AveragesVisualizer": "9.2, 9.3",
     "Bearings": "4.3",
     "BinomialExpansion": "9709 1.6, 3.1",
     "BoundsInterval": "1.10",
+    "BoxPlot": "9709 5.1",
     "ChartBuilder": "9.1, 9.4",
     "CircleSector": "5.3; AM 9",
     "CircleTheorems": "4.7, 4.8",
@@ -642,6 +714,7 @@ SYLLABUS: dict[str, str] = {
     "CompassConstruction": "4.2",
     "CompletingSquare": "2.5.5; AM 2",
     "ComplexLoci": "9709 3.9",
+    "ConnectedParticles": "9709 4.4",
     "ConnectedRates": "AM 14.7",
     "CoordinateCircle": "AM 8.1–8.4",
     "CoordinatePlotter": "3.1, 3.4",
@@ -650,8 +723,10 @@ SYLLABUS: dict[str, str] = {
     "DerivativePanels": "AM 14.6, 14.9",
     "DifferentialEquation": "9709 3.8",
     "DifferentiationStepper": "AM 14.3, 14.4",
+    "DiscreteDistribution": "9709 5.4, 6.1",
     "EquationTransform": "2.1–2.5; all topics",
     "ExpansionGrid": "2.2, 2.5.5",
+    "ForceDiagram": "9709 4.1, 4.4",
     "FractionModel": "1.4, 1.6",
     "FunctionGraph": "2.10",
     "FunctionMachine": "2.12; AM 1",
@@ -673,7 +748,9 @@ SYLLABUS: dict[str, str] = {
     "LineMeetsCurve": "9709 1.1, 1.3",
     "LogLinearisation": "9709 2.2, 3.2",
     "ModulusEquation": "9709 2.1, 3.1",
+    "MomentumCollision": "9709 4.3",
     "NetFolder": "4.1, 4.2.3",
+    "NormalDistribution": "9709 5.5, 6.1",
     "NumberLine": "1.1, 1.4, 1.5, 1.9, 1.10",
     "OptimisationScene": "AM 14.8",
     "ParallelPerpendicular": "3.6, 3.7; AM 7",
@@ -697,8 +774,10 @@ SYLLABUS: dict[str, str] = {
     "SimultaneousEquations": "2.5",
     "SineCosineRule": "6.3",
     "SolidMensuration": "5.1, 5.4, 5.5",
+    "StandardDeviation": "9709 5.1",
     "StandardForm": "1.7, 1.8",
     "SurdSimplifier": "1.18",
+    "SuvatSolver": "9709 4.2",
     "SymmetryReveal": "4.5",
     "TableOfValues": "2.10",
     "TangentNormal": "AM 14.5",
@@ -715,4 +794,5 @@ SYLLABUS: dict[str, str] = {
     "VectorLines3D": "9709 3.7",
     "VennDiagram": "1.2; 8.3",
     "VolumeOfRevolution": "9709 1.8",
+    "WorkEnergy": "9709 4.5",
 }

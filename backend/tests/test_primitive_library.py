@@ -1369,3 +1369,139 @@ def test_complex_loci_meeting_points():
     assert "meet_1" in found and "meet_2" not in found
     bad = {"loci": [{"kind": "sector", "a": [0, 0], "angle": "pi/2", "angle_2": "0"}]}
     assert predicates("ComplexLoci", bad) == ["angles_ordered"]
+
+
+# A Level (9709): Mechanics and Probability & Statistics 1
+
+
+def test_force_diagram_resolves():
+    incline = values("ForceDiagram", GRIDS["ForceDiagram"][0])
+    assert (incline["F"], incline["R"], incline["mu"]) == ("12.6", "29.6", "0.425")
+    three_forces = values("ForceDiagram", GRIDS["ForceDiagram"][1])
+    assert (three_forces["Q"], three_forces["S"]) == ("8.15", "9.22")
+    pulled = values("ForceDiagram", GRIDS["ForceDiagram"][2])
+    assert (pulled["R"], pulled["a"]) == ("25", "4.93")
+    no_mass = {"find": "acceleration", "forces": [{"name": "P", "magnitude": 3, "angle": 0}]}
+    assert predicates("ForceDiagram", no_mass)
+
+
+@pytest.mark.parametrize(
+    ("raw", "found"),
+    [
+        ({"u": 4, "a": 2, "t": 5, "find": "s"}, {"s": "45", "v": "14"}),
+        ({"u": 20, "v": 0, "s": 50, "find": "a"}, {"a": "-4", "t": "5"}),
+        ({"s": 120, "t": 8, "v": 20, "find": "u"}, {"u": "10", "a": "1.25"}),
+        ({"u": 2, "a": 1.5, "s": 30, "find": "v"}, {"v": "9.70", "t": "5.13"}),
+    ],
+)
+def test_suvat_solver(raw, found):
+    result = values("SuvatSolver", raw)
+    assert {k: result[k] for k in found} == found
+
+
+def test_momentum_is_conserved():
+    assert values("MomentumCollision", {"m1": 3, "m2": 2, "u1": 6, "u2": -4, "v2": 5}) == {
+        "v1": "0"
+    }
+    stuck = {"m1": 0.5, "m2": 1.5, "u1": 8, "u2": 0, "coalesce": True}
+    assert values("MomentumCollision", stuck) == {"v1": "2"}
+    assert values("MomentumCollision", GRIDS["MomentumCollision"][3]) == {"m2": "3"}
+
+
+@pytest.mark.parametrize(
+    ("raw", "a", "tension"),
+    [
+        ({"setup": "table_pulley", "m_a": 4, "m_b": 2, "mu": 0.2}, "2", "16"),
+        ({"setup": "two_hanging", "m_a": 3, "m_b": 5}, "2.5", "37.5"),
+        ({"setup": "incline_pulley", "m_a": 2, "m_b": 3, "slope": 30, "mu": 0.25}, "3.13", "20.6"),
+        (GRIDS["ConnectedParticles"][6], "1.5", "800"),
+    ],
+)
+def test_connected_particles(raw, a, tension):
+    found = values("ConnectedParticles", raw)
+    assert (found["a"], found["T"]) == (a, tension)
+
+
+def test_work_energy_and_power():
+    expected = ["8.79", "9.39", "7.2", "75", "1", "15.6", "11500"]
+    for raw, answer in zip(GRIDS["WorkEnergy"], expected, strict=True):
+        assert values("WorkEnergy", raw)[raw["find"]] == answer
+
+
+def test_box_plot_quartiles():
+    odd = values("BoxPlot", GRIDS["BoxPlot"][0])
+    assert (odd["q1_1"], odd["median_1"], odd["q3_1"], odd["iqr_1"]) == ("39/2", "27", "36", "33/2")
+    pair = values("BoxPlot", GRIDS["BoxPlot"][1])
+    assert (pair["median_1"], pair["median_2"], pair["iqr_2"]) == ("91/2", "37", "19")
+    decimals = {"data": [1.5, 2, 3, 4, 5], "stem_leaf": True}
+    assert predicates("BoxPlot", decimals) == ["whole_numbers"]
+
+
+@pytest.mark.parametrize(
+    ("raw", "mean", "sd"),
+    [
+        ({"kind": "list", "data": [4, 7, 7, 8, 10, 12]}, "8", "2.52"),
+        (GRIDS["StandardDeviation"][1], "1.8", "1.14"),
+        ({"kind": "totals", "n": 20, "sum_x": 360, "sum_x2": 6880}, "18", "4.47"),
+        ({"kind": "coded", "n": 12, "sum_x": 30, "sum_x2": 210, "a": 50}, "52.5", "3.35"),
+    ],
+)
+def test_standard_deviation(raw, mean, sd):
+    found = values("StandardDeviation", raw)
+    assert (found["mean"], found["standard_deviation"]) == (mean, sd)
+
+
+@pytest.mark.parametrize(
+    ("raw", "count"),
+    [
+        ({"kind": "word", "word": "NEEDLESS"}, "3360"),
+        ({"kind": "word", "word": "STATISTICS"}, "50400"),
+        ({"kind": "together", "n": 7, "k": 3}, "720"),
+        ({"kind": "apart", "n": 6}, "480"),
+        (GRIDS["ArrangementCounter"][4], "200"),
+    ],
+)
+def test_arrangement_counter(raw, count):
+    assert values("ArrangementCounter", raw)["count"] == count
+
+
+@pytest.mark.parametrize(
+    ("raw", "probability"),
+    [
+        ({"kind": "binomial", "n": 8, "p": "0.3", "high": 2}, "0.5518"),
+        ({"kind": "binomial", "n": 12, "p": "1/4", "low": 3, "high": 5}, "0.5549"),
+        ({"kind": "geometric", "p": "0.2", "low": 4}, "64/125"),
+        ({"kind": "poisson", "lam": 4, "low": 6}, "0.2149"),
+        (GRIDS["DiscreteDistribution"][2], "9/10"),
+    ],
+)
+def test_discrete_distribution(raw, probability):
+    assert values("DiscreteDistribution", raw)["probability"] == probability
+
+
+@pytest.mark.parametrize(
+    ("raw", "found"),
+    [
+        (
+            {"kind": "probability", "mu": 50, "sigma": 8, "low": 45, "high": 60},
+            {"answer": "0.6284"},
+        ),
+        ({"kind": "inverse", "mu": 120, "sigma": 15, "probability": 0.9}, {"answer": "139.2"}),
+        (GRIDS["NormalDistribution"][7], {"mu": "29.83", "sigma": "7.668"}),
+        (GRIDS["NormalDistribution"][8], {"answer": "0.7699"}),  # P(24.5 < X < 35.5)
+        (GRIDS["NormalDistribution"][10], {"answer": "0.1841"}),
+    ],
+)
+def test_normal_distribution(raw, found):
+    result = values("NormalDistribution", raw)
+    assert {k: result[k] for k in found} == found
+
+
+def test_normal_distribution_predicates():
+    small = {"kind": "approximation", "source": "binomial", "n": 10, "p": 0.3, "high": 4}
+    assert predicates("NormalDistribution", small) == ["approximation_valid"]
+    crossed = {
+        "kind": "find_parameters",
+        "conditions": [{"x": 20, "below": 0.8}, {"x": 30, "below": 0.2}],
+    }
+    assert predicates("NormalDistribution", crossed) == ["conditions_consistent"]

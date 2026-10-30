@@ -12,10 +12,12 @@ from app.primitives.area_between_curves import AreaBetweenCurves
 from app.primitives.area_dissector import AreaDissector
 from app.primitives.area_under_curve import AreaUnderCurve
 from app.primitives.argand_diagram import ArgandDiagram
+from app.primitives.arrangement_counter import ArrangementCounter
 from app.primitives.averages_visualizer import AveragesVisualizer
 from app.primitives.bearings import Bearings
 from app.primitives.binomial_expansion import BinomialExpansion
 from app.primitives.bounds_interval import BoundsInterval
+from app.primitives.box_plot import BoxPlot
 from app.primitives.catalog import LIBRARY_VERSION
 from app.primitives.chart_builder import ChartBuilder
 from app.primitives.circle_sector import CircleSector
@@ -24,6 +26,7 @@ from app.primitives.clock_timetable import ClockTimetable
 from app.primitives.compass_construction import CompassConstruction
 from app.primitives.completing_square import CompletingSquare
 from app.primitives.complex_loci import ComplexLoci
+from app.primitives.connected_particles import ConnectedParticles
 from app.primitives.connected_rates import ConnectedRates
 from app.primitives.coordinate_circle import CoordinateCircle
 from app.primitives.coordinate_plotter import CoordinatePlotter
@@ -32,8 +35,10 @@ from app.primitives.curve_sketch import CurveSketch
 from app.primitives.derivative_panels import DerivativePanels
 from app.primitives.differential_equation import DifferentialEquation
 from app.primitives.differentiation_stepper import DifferentiationStepper
+from app.primitives.discrete_distribution import DiscreteDistribution
 from app.primitives.equation_transform import EquationTransform
 from app.primitives.expansion_grid import ExpansionGrid
+from app.primitives.force_diagram import ForceDiagram
 from app.primitives.fraction_model import FractionModel
 from app.primitives.function_graph import FunctionGraph
 from app.primitives.function_machine import FunctionMachine
@@ -55,7 +60,9 @@ from app.primitives.line_builder import LineBuilder
 from app.primitives.line_meets_curve import LineMeetsCurve
 from app.primitives.log_linearisation import LogLinearisation
 from app.primitives.modulus_equation import ModulusEquation
+from app.primitives.momentum_collision import MomentumCollision
 from app.primitives.net_folder import NetFolder
+from app.primitives.normal_distribution import NormalDistribution
 from app.primitives.number_line import NumberLine
 from app.primitives.optimisation_scene import OptimisationScene
 from app.primitives.parallel_perpendicular import ParallelPerpendicular
@@ -79,8 +86,10 @@ from app.primitives.similarity_scaler import SimilarityScaler
 from app.primitives.simultaneous_equations import SimultaneousEquations
 from app.primitives.sine_cosine_rule import SineCosineRule
 from app.primitives.solid_mensuration import SolidMensuration
+from app.primitives.standard_deviation import StandardDeviation
 from app.primitives.standard_form import StandardForm
 from app.primitives.surd_simplifier import SurdSimplifier
+from app.primitives.suvat_solver import SuvatSolver
 from app.primitives.symmetry_reveal import SymmetryReveal
 from app.primitives.table_of_values import TableOfValues
 from app.primitives.tangent_normal import TangentNormal
@@ -97,6 +106,7 @@ from app.primitives.vector_arena import VectorArena
 from app.primitives.vector_lines_3d import VectorLines3D
 from app.primitives.venn_diagram import VennDiagram
 from app.primitives.volume_of_revolution import VolumeOfRevolution
+from app.primitives.work_energy import WorkEnergy
 
 PRIMITIVES: dict[str, type[Primitive]] = {
     cls.primitive_id: cls
@@ -192,6 +202,16 @@ PRIMITIVES: dict[str, type[Primitive]] = {
         VectorLines3D,
         ArgandDiagram,
         ComplexLoci,
+        ForceDiagram,
+        SuvatSolver,
+        MomentumCollision,
+        ConnectedParticles,
+        WorkEnergy,
+        BoxPlot,
+        StandardDeviation,
+        ArrangementCounter,
+        DiscreteDistribution,
+        NormalDistribution,
     )
 }
 
