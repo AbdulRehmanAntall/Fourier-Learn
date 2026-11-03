@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import type { components } from "@/lib/api/schema";
 
-import { buildTimeline, formatTime, locate, rewind, seekTarget, toModuleTime } from "./useTimeline";
+import {
+  buildTimeline,
+  formatTime,
+  locate,
+  rewind,
+  seekTarget,
+  stepAt,
+  toModuleTime,
+} from "./useTimeline";
 
 type ModuleManifest = components["schemas"]["ModuleManifest"];
 
@@ -108,6 +116,27 @@ describe("a partial manifest", () => {
     expect(seekTarget(timeline, 45)).toEqual({ beat: 1, time_s: 15 });
     // Rewind stops at the start of beat j, the first beat this variant has.
     expect(rewind(timeline, { beat: 1, time_s: 4 })).toEqual({ beat: 1, time_s: 0 });
+  });
+});
+
+describe("stepAt", () => {
+  const beat = {
+    ...manifest(1, [[0, 12]]).beats[0],
+    steps: [
+      { start_s: 0.5, end_s: 4, narration: "first" },
+      { start_s: 5, end_s: 12, narration: "second" },
+    ],
+  };
+
+  it("finds the step being narrated", () => {
+    expect(stepAt(beat, 2).narration).toBe("first");
+    expect(stepAt(beat, 5).narration).toBe("second");
+    expect(stepAt(beat, 12).narration).toBe("second");
+  });
+
+  it("shows the first step before it starts, and keeps a step up in the gap after it", () => {
+    expect(stepAt(beat, 0).narration).toBe("first");
+    expect(stepAt(beat, 4.5).narration).toBe("first");
   });
 });
 

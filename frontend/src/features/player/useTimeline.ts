@@ -9,6 +9,7 @@ import type { components } from "@/lib/api/schema";
 // the beats that are, and are marked not ready: the bar stripes them and seeking skips them.
 
 type ModuleManifest = components["schemas"]["ModuleManifest"];
+type BeatManifest = components["schemas"]["BeatManifest"];
 
 export type Segment = {
   index: number;
@@ -76,6 +77,12 @@ export function seekTarget(timeline: Timeline, t: number): BeatPosition | null {
 export function rewind(timeline: Timeline, position: BeatPosition, seconds = 10): BeatPosition {
   const first = timeline.segments.find((s) => s.ready)!;
   return locate(timeline, Math.max(toModuleTime(timeline, position) - seconds, first.start_s));
+}
+
+/** The step being narrated `time_s` into a beat: the last one started, or the first before it
+ * starts. Between two steps the earlier one's caption stays up. */
+export function stepAt(beat: BeatManifest, time_s: number) {
+  return beat.steps.findLast((step) => step.start_s <= time_s) ?? beat.steps[0];
 }
 
 /** "m:ss", as in the wireframe ("0:20 / 1:00"). */
