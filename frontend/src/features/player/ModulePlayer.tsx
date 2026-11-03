@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 
 import type { Schemas } from "@/lib/api/client";
 
@@ -10,29 +10,46 @@ import { rewind, type BeatPosition, useTimeline } from "./useTimeline";
 import { VideoStage, type VideoStageHandle } from "./VideoStage";
 
 // Plays one variant of a module: the video stage, captions and controls, with the keyboard
-// shortcuts of docs/frontend.md §6.5. The lesson player (LessonPlayer, with the state machine
-// of §6.1) wraps it; the rate and captions setting live there in the end, so they carry over
-// between modules.
+// shortcuts of docs/frontend.md §6.5. The settings belong to whoever renders it (LessonPlayer),
+// so the rate and captions carry over between modules.
+
+export type PlayerSettings = { rate: number; muted: boolean; captions: boolean };
+
+export const DEFAULT_SETTINGS: PlayerSettings = { rate: 1, muted: false, captions: true };
 
 type Props = {
   manifest: Schemas["ModuleManifest"];
+  settings: PlayerSettings;
+  onSettingsChange(settings: PlayerSettings): void;
   start?: BeatPosition;
   /** Try to start playing at once. The browser may refuse; the stage then shows a Play button. */
   autoPlay?: boolean;
+  /** A large button over the video until playback starts, e.g. "Resume" after a reload. */
+  startPrompt?: string;
+  /** Left of the header, e.g. "Module 2 · Gradient of a curve". Defaults to the beat number. */
+  heading?: ReactNode;
   onModuleEnded?(): void;
 };
 
-export function ModulePlayer({ manifest, start, autoPlay = false, onModuleEnded }: Props) {
+export function ModulePlayer({
+  manifest,
+  settings,
+  onSettingsChange,
+  start,
+  autoPlay = false,
+  startPrompt,
+  heading,
+  onModuleEnded,
+}: Props) {
   const timeline = useTimeline(manifest);
   const first = start ?? { beat: manifest.beats[0].index, time_s: 0 };
   const stage = useRef<VideoStageHandle>(null);
   const container = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(first);
   const [playing, setPlaying] = useState(false);
-  const [rate, setRate] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [captions, setCaptions] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const { rate, muted, captions } = settings;
+  const change = (next: Partial<PlayerSettings>) => onSettingsChange({ ...settings, ...next });
 
   const beat = manifest.beats.find((b) => b.index === position.beat);
 
@@ -72,10 +89,10 @@ export function ModulePlayer({ manifest, start, autoPlay = false, onModuleEnded 
         back10();
         break;
       case "c":
-        setCaptions((on) => !on);
+        change({ captions: !captions });
         break;
       case "m":
-        setMuted((on) => !on);
+        change({ muted: !muted });
         break;
       case "f":
         toggleFullscreen();
@@ -99,7 +116,7 @@ export function ModulePlayer({ manifest, start, autoPlay = false, onModuleEnded 
     >
       <div className="flex items-center justify-between text-sm">
         <span className="opacity-70">
-          Beat {position.beat + 1} of {manifest.beat_count}
+          {heading ?? `Beat ${position.beat + 1} of ${manifest.beat_count}`}
         </span>
         <span className="rounded-full border border-current/30 px-3 py-0.5 text-xs font-semibold">
           Level {manifest.level}
@@ -115,6 +132,7 @@ export function ModulePlayer({ manifest, start, autoPlay = false, onModuleEnded 
         onProgress={setPosition}
         onPlayingChange={setPlaying}
         onModuleEnded={() => onModuleEnded?.()}
+        startPrompt={startPrompt}
         className={fullscreen ? "min-h-0 flex-1" : "aspect-video rounded-lg"}
       />
 
@@ -131,9 +149,9 @@ export function ModulePlayer({ manifest, start, autoPlay = false, onModuleEnded 
         onPlayPause={togglePlay}
         onSeek={(target) => stage.current?.seek(target)}
         onRewind={back10}
-        onRate={setRate}
-        onMute={() => setMuted(!muted)}
-        onCaptions={() => setCaptions(!captions)}
+        onRate={(next) => change({ rate: next })}
+        onMute={() => change({ muted: !muted })}
+        onCaptions={() => change({ captions: !captions })}
         onFullscreen={toggleFullscreen}
       />
     </div>

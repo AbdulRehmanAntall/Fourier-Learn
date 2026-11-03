@@ -34,6 +34,8 @@ type Props = {
   onProgress(position: BeatPosition): void;
   onPlayingChange(playing: boolean): void;
   onModuleEnded(): void;
+  /** Show a large button with this label until playback first starts (e.g. "Resume"). */
+  startPrompt?: string;
   className?: string;
   ref?: Ref<VideoStageHandle>;
 };
@@ -46,6 +48,7 @@ export function VideoStage({
   onProgress,
   onPlayingChange,
   onModuleEnded,
+  startPrompt,
   className = "",
   ref,
 }: Props) {
@@ -60,6 +63,7 @@ export function VideoStage({
   const [waitingForBeat, setWaitingForBeat] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [started, setStarted] = useState(false);
 
   const beats = new Map(manifest.beats.map((beat) => [beat.index, beat]));
   const other: Slot = active === 0 ? 1 : 0;
@@ -74,7 +78,10 @@ export function VideoStage({
   function startVideo(video: HTMLVideoElement) {
     video
       .play()
-      .then(() => setBlocked(false))
+      .then(() => {
+        setBlocked(false);
+        setStarted(true);
+      })
       .catch((error: DOMException) => {
         // A pause or a new source interrupts play() with an AbortError; only a refusal matters.
         // Browsers refuse playback with sound until the student has tapped the page.
@@ -239,17 +246,22 @@ export function VideoStage({
         </div>
       )}
 
-      {blocked && (
+      {(blocked || (startPrompt && !started)) && (
         <button
           onClick={play}
-          className="absolute inset-0 grid place-items-center bg-black/40 text-white"
-          aria-label="Play"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 text-white"
+          aria-label={startPrompt && !started ? startPrompt : "Play"}
         >
           <span className="grid size-20 place-items-center rounded-full bg-white/90 text-black">
             <svg viewBox="0 0 24 24" className="ml-1 size-9" fill="currentColor" aria-hidden>
               <path d="M8 5v14l11-7z" />
             </svg>
           </span>
+          {startPrompt && !started && (
+            <span className="text-lg font-semibold" aria-hidden>
+              {startPrompt}
+            </span>
+          )}
         </button>
       )}
     </div>

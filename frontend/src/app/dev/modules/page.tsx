@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ModulePlayer } from "@/features/player/ModulePlayer";
+import { DEFAULT_SETTINGS, ModulePlayer } from "@/features/player/ModulePlayer";
 import {
   levelLabel,
   type BeatManifest,
@@ -86,6 +86,7 @@ export default function DevModulesPage() {
 
 function VariantView({ cacheKey }: { cacheKey: string }) {
   const [manifest, setManifest] = useState<Load<ModuleManifest>>({ kind: "loading" });
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
     getJson<ModuleManifest>(`/api/variants/${cacheKey}/manifest`)
@@ -97,7 +98,7 @@ function VariantView({ cacheKey }: { cacheKey: string }) {
   if (manifest.kind === "error") return <p className="text-sm text-red-600">{manifest.message}</p>;
   return (
     <>
-      <ModulePlayer manifest={manifest.value} />
+      <ModulePlayer manifest={manifest.value} settings={settings} onSettingsChange={setSettings} />
       <BeatTable beats={manifest.value.beats} />
     </>
   );
