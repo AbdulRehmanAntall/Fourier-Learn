@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
     "api:types": "openapi-typescript src/lib/api/openapi.json -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
+    "@tanstack/react-query": "5.105.3",
     "next": "16.4.0",
+    "openapi-fetch": "0.17.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -24,7 +27,8 @@
     "eslint-config-next": "16.4.0",
     "openapi-typescript": "7.13.0",
     "tailwindcss": "4.3.3",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
   },
   "engines": {
     "node": ">=24"
