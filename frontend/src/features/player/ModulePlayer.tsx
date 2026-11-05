@@ -8,16 +8,34 @@ import { Captions } from "./Captions";
 import { ChipBar } from "./ChipBar";
 import { ChipOverlay } from "./ChipOverlay";
 import { Controls } from "./Controls";
-import { chipsAt, rewind, type BeatPosition, useTimeline } from "./useTimeline";
+import { chipsAt, forward, rewind, type BeatPosition, useTimeline } from "./useTimeline";
 import { VideoStage, type VideoStageHandle } from "./VideoStage";
 
 // Plays one variant of a module: the video stage, captions and controls, with the keyboard
 // shortcuts of docs/frontend.md §6.5. The settings belong to whoever renders it (LessonPlayer),
 // so the rate and captions carry over between modules.
 
-export type PlayerSettings = { rate: number; muted: boolean; captions: boolean };
+export type PlayerSettings = { rate: number; volume: number; muted: boolean; captions: boolean };
 
-export const DEFAULT_SETTINGS: PlayerSettings = { rate: 1, muted: false, captions: true };
+export const DEFAULT_SETTINGS: PlayerSettings = {
+  rate: 1,
+  volume: 1,
+  muted: false,
+  captions: true,
+};
+
+/** What the player reports while a lesson is tracked (event logging, saving the position). The
+ * "student" methods are called from the controls and shortcuts, never from <video> events, so
+ * pauses and seeks the player makes itself are not mistaken for the student (§6.10). */
+export type PlaybackTracker = {
+  progress(position: BeatPosition): void;
+  playingChanged(playing: boolean): void;
+  studentSeeked(from: BeatPosition, to: BeatPosition): void;
+  studentPaused(at: BeatPosition): void;
+  studentResumed(): void;
+  speedChanged(at: BeatPosition, fromRate: number, toRate: number): void;
+  chipOpened(at: BeatPosition, term: string): void;
+};
 
 type Props = {
   manifest: Schemas["ModuleManifest"];
@@ -32,6 +50,7 @@ type Props = {
   heading?: ReactNode;
   /** Show concept chips. Their definitions need a logged-in student, and study mode has none. */
   chips?: boolean;
+  tracker?: PlaybackTracker;
   onModuleEnded?(): void;
 };
 
@@ -44,6 +63,7 @@ export function ModulePlayer({
   startPrompt,
   heading,
   chips = false,
+  tracker,
   onModuleEnded,
 }: Props) {
   const timeline = useTimeline(manifest);
@@ -54,13 +74,34 @@ export function ModulePlayer({
   const [playing, setPlaying] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [openChip, setOpenChip] = useState<string | null>(null);
-  const { rate, muted, captions } = settings;
+  const { rate, volume, muted, captions } = settings;
   const change = (next: Partial<PlayerSettings>) => onSettingsChange({ ...settings, ...next });
 
   const beat = manifest.beats.find((b) => b.index === position.beat);
 
-  const togglePlay = () => (playing ? stage.current?.pause() : stage.current?.play());
-  const back10 = () => stage.current?.seek(rewind(timeline, position));
+  function togglePlay() {
+    if (playing) {
+      tracker?.studentPaused(position);
+      stage.current?.pause();
+    } else {
+      tracker?.studentResumed();
+      stage.current?.play();
+    }
+  }
+
+  function seekTo(target: BeatPosition) {
+    tracker?.studentSeeked(position, target);
+    stage.current?.seek(target);
+  }
+
+  const back10 = () => seekTo(rewind(timeline, position));
+  const on10 = () => seekTo(forward(timeline, position));
+
+  function toggleMute() {
+    // Unmuting at volume 0 would stay silent, so bring the sound back too.
+    if (volume === 0) change({ volume: 1, muted: false });
+    else change({ muted: !muted });
+  }
 
   function toggleFullscreen() {
     if (document.fullscreenElement) void document.exitFullscreen();
@@ -94,11 +135,14 @@ export function ModulePlayer({
       case "arrowleft":
         back10();
         break;
+      case "arrowright":
+        on10();
+        break;
       case "c":
         change({ captions: !captions });
         break;
       case "m":
-        change({ muted: !muted });
+        toggleMute();
         break;
       case "f":
         toggleFullscreen();
@@ -134,9 +178,16 @@ export function ModulePlayer({
         manifest={manifest}
         start={first}
         rate={rate}
+        volume={volume}
         muted={muted}
-        onProgress={setPosition}
-        onPlayingChange={setPlaying}
+        onProgress={(next) => {
+          setPosition(next);
+          tracker?.progress(next);
+        }}
+        onPlayingChange={(value) => {
+          setPlaying(value);
+          tracker?.playingChanged(value);
+        }}
         onModuleEnded={() => onModuleEnded?.()}
         startPrompt={startPrompt}
         className={fullscreen ? "min-h-0 flex-1" : "aspect-video rounded-lg"}
@@ -150,7 +201,10 @@ export function ModulePlayer({
           <ChipBar
             chips={beat ? chipsAt(beat, position.time_s) : []}
             open={openChip}
-            onToggle={(term) => setOpenChip(openChip === term ? null : term)}
+            onToggle={(term) => {
+              if (openChip !== term) tracker?.chipOpened(position, term);
+              setOpenChip(openChip === term ? null : term);
+            }}
           />
           {openChip && <ChipOverlay term={openChip} onClose={() => setOpenChip(null)} />}
         </div>
@@ -161,14 +215,20 @@ export function ModulePlayer({
         position={position}
         playing={playing}
         rate={rate}
+        volume={volume}
         muted={muted}
         captions={captions}
         fullscreen={fullscreen}
         onPlayPause={togglePlay}
-        onSeek={(target) => stage.current?.seek(target)}
+        onSeek={seekTo}
         onRewind={back10}
-        onRate={(next) => change({ rate: next })}
-        onMute={() => change({ muted: !muted })}
+        onForward={on10}
+        onVolume={(next) => change({ volume: next, muted: false })}
+        onRate={(next) => {
+          tracker?.speedChanged(position, rate, next);
+          change({ rate: next });
+        }}
+        onMute={toggleMute}
         onCaptions={() => change({ captions: !captions })}
         onFullscreen={toggleFullscreen}
       />

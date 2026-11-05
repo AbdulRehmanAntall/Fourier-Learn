@@ -31,6 +31,15 @@ export const RewindIcon = (props: IconProps) => (
   </Icon>
 );
 
+export const ForwardIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" transform="matrix(-1 0 0 1 24 0)" />
+    <text x="12" y="16" fontSize="6.5" fontWeight="700" textAnchor="middle">
+      10
+    </text>
+  </Icon>
+);
+
 export const VolumeIcon = (props: IconProps) => (
   <Icon {...props}>
     <path d="M4 9v6h4l5 5V4L8 9zm12.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z" />

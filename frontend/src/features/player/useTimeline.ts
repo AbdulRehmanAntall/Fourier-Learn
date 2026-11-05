@@ -79,6 +79,15 @@ export function rewind(timeline: Timeline, position: BeatPosition, seconds = 10)
   return locate(timeline, Math.max(toModuleTime(timeline, position) - seconds, first.start_s));
 }
 
+/** `seconds` on from `position`, across beat boundaries (§6.5). Not past the end of the module,
+ * nor into a beat still rendering: it stops at the end of the last beat that is ready. */
+export function forward(timeline: Timeline, position: BeatPosition, seconds = 10): BeatPosition {
+  const target = locate(timeline, toModuleTime(timeline, position) + seconds);
+  if (timeline.segments[target.beat].ready) return target;
+  const last = timeline.segments.findLast((s) => s.ready)!;
+  return { beat: last.index, time_s: last.duration_s };
+}
+
 /** The step being narrated `time_s` into a beat: the last one started, or the first before it
  * starts. Between two steps the earlier one's caption stays up. */
 export function stepAt(beat: BeatManifest, time_s: number) {

@@ -6,6 +6,7 @@ import {
   buildTimeline,
   chipsAt,
   formatTime,
+  forward,
   locate,
   rewind,
   seekTarget,
@@ -78,6 +79,30 @@ describe("rewind", () => {
 
   it("stops at 0:00", () => {
     expect(rewind(complete, { beat: 0, time_s: 3 })).toEqual({ beat: 0, time_s: 0 });
+  });
+});
+
+describe("forward", () => {
+  it("goes on within a beat", () => {
+    expect(forward(complete, { beat: 0, time_s: 5 })).toEqual({ beat: 0, time_s: 15 });
+  });
+
+  it("crosses beat boundaries", () => {
+    expect(forward(complete, { beat: 0, time_s: 15 })).toEqual({ beat: 1, time_s: 5 });
+  });
+
+  it("stops at the end of the module", () => {
+    expect(forward(complete, { beat: 2, time_s: 20 })).toEqual({ beat: 2, time_s: 25 });
+  });
+
+  it("stops at the end of the last ready beat while the rest render", () => {
+    const timeline = buildTimeline(
+      manifest(3, [
+        [0, 20],
+        [1, 10],
+      ]),
+    );
+    expect(forward(timeline, { beat: 1, time_s: 5 })).toEqual({ beat: 1, time_s: 10 });
   });
 });
 

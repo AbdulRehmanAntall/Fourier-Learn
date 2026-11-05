@@ -5,6 +5,7 @@ import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode
 import {
   CaptionsIcon,
   ExitFullscreenIcon,
+  ForwardIcon,
   FullscreenIcon,
   MutedIcon,
   PauseIcon,
@@ -29,21 +30,26 @@ type Props = {
   position: BeatPosition;
   playing: boolean;
   rate: number;
+  volume: number;
   muted: boolean;
   captions: boolean;
   fullscreen: boolean;
   onPlayPause(): void;
   onSeek(position: BeatPosition): void;
   onRewind(): void;
+  onForward(): void;
   onRate(rate: number): void;
+  onVolume(volume: number): void;
   onMute(): void;
   onCaptions(): void;
   onFullscreen(): void;
 };
 
 export function Controls(props: Props) {
-  const { timeline, position, playing, rate, muted, captions, fullscreen } = props;
+  const { timeline, position, playing, rate, volume, muted, captions, fullscreen } = props;
   const now = toModuleTime(timeline, position);
+  // Muted and volume 0 both mean silence, so the icon and the slider show them the same way.
+  const heard = muted ? 0 : volume;
 
   return (
     <div className="flex flex-col gap-2">
@@ -55,9 +61,23 @@ export function Controls(props: Props) {
         <ControlButton label="Back 10 seconds" onClick={props.onRewind}>
           <RewindIcon />
         </ControlButton>
-        <ControlButton label={muted ? "Unmute" : "Mute"} onClick={props.onMute}>
-          {muted ? <MutedIcon /> : <VolumeIcon />}
+        <ControlButton label="Forward 10 seconds" onClick={props.onForward}>
+          <ForwardIcon />
         </ControlButton>
+        <ControlButton label={heard === 0 ? "Unmute" : "Mute"} onClick={props.onMute}>
+          {heard === 0 ? <MutedIcon /> : <VolumeIcon />}
+        </ControlButton>
+        <input
+          type="range"
+          aria-label="Volume"
+          aria-valuetext={`${Math.round(heard * 100)}%`}
+          min={0}
+          max={1}
+          step={0.05}
+          value={heard}
+          onChange={(event) => props.onVolume(Number(event.target.value))}
+          className="h-11 w-20 cursor-pointer accent-blue-600 sm:w-24"
+        />
         <span className="px-2 text-sm tabular-nums">
           {formatTime(now)} / {formatTime(timeline.duration_s)}
         </span>
