@@ -124,6 +124,7 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
           // A new module, or a new variant after "I'm Lost", starts a fresh stage.
           key={`${state.module.id}:${state.cacheKey}`}
           playback={state}
+          chips={lesson.data?.mode === "adaptive"}
           settings={settings}
           onSettingsChange={setSettings}
           onModuleEnded={() => dispatch({ type: "moduleEnded" })}
@@ -168,11 +169,13 @@ function isWaiting(state: LessonState) {
 
 function Playing({
   playback,
+  chips,
   settings,
   onSettingsChange,
   onModuleEnded,
 }: {
   playback: Playback;
+  chips: boolean;
   settings: PlayerSettings;
   onSettingsChange(settings: PlayerSettings): void;
   onModuleEnded(): void;
@@ -193,6 +196,7 @@ function Playing({
       // After a reload the browser blocks sound until a tap, so ask for one (§6.2).
       autoPlay={!playback.resumed}
       startPrompt={playback.resumed ? "Resume" : undefined}
+      chips={chips}
       heading={
         <>
           <span className="font-semibold">Module {sequence_no}</span> · {title}

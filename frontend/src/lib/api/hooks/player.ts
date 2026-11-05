@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { client, unwrap } from "../client";
 
@@ -10,6 +10,7 @@ export const playerKeys = {
   lesson: (lessonId: number) => ["lesson", lessonId] as const,
   currentModule: (lessonId: number) => ["lesson", lessonId, "current-module"] as const,
   manifest: (cacheKey: string) => ["manifest", cacheKey] as const,
+  definition: (term: string) => ["glossary", term] as const,
 };
 
 const lessonPath = (lessonId: number) => ({ params: { path: { lesson_id: lessonId } } });
@@ -26,6 +27,15 @@ export const finishModule = (lessonId: number, moduleId: number) =>
       params: { path: { lesson_id: lessonId, module_id: moduleId } },
     }),
   );
+
+/** A chip's definition. Shared by the prefetch and the overlay, so a prefetched chip opens
+ * instantly (§6.6); definitions hardly change during a lesson, so it stays fresh for a while. */
+export const definitionOptions = (term: string) =>
+  queryOptions({
+    queryKey: playerKeys.definition(term),
+    queryFn: () => unwrap(client.GET("/api/glossary/{term}", { params: { path: { term } } })),
+    staleTime: 10 * 60 * 1000,
+  });
 
 /** A variant's manifest. It may be partial while beats render (§6.2). */
 export function useManifest(cacheKey: string) {

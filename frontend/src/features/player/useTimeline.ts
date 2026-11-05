@@ -85,6 +85,11 @@ export function stepAt(beat: BeatManifest, time_s: number) {
   return beat.steps.findLast((step) => step.start_s <= time_s) ?? beat.steps[0];
 }
 
+/** The concept chips showing `time_s` into a beat (§6.6). */
+export function chipsAt(beat: BeatManifest, time_s: number) {
+  return beat.chips.filter((chip) => chip.start_s <= time_s && time_s <= chip.end_s);
+}
+
 /** "m:ss", as in the wireframe ("0:20 / 1:00"). */
 export function formatTime(seconds: number): string {
   const whole = Math.floor(Math.max(seconds, 0));

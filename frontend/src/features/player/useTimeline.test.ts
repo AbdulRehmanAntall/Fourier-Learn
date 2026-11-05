@@ -4,6 +4,7 @@ import type { components } from "@/lib/api/schema";
 
 import {
   buildTimeline,
+  chipsAt,
   formatTime,
   locate,
   rewind,
@@ -137,6 +138,30 @@ describe("stepAt", () => {
   it("shows the first step before it starts, and keeps a step up in the gap after it", () => {
     expect(stepAt(beat, 0).narration).toBe("first");
     expect(stepAt(beat, 4.5).narration).toBe("first");
+  });
+});
+
+describe("chipsAt", () => {
+  const beat = {
+    ...manifest(1, [[0, 12]]).beats[0],
+    chips: [
+      { term: "gradient", start_s: 0, end_s: 6 },
+      { term: "rise", start_s: 4, end_s: 12 },
+    ],
+  };
+  const terms = (time_s: number) => chipsAt(beat, time_s).map((chip) => chip.term);
+
+  it("shows the chips whose interval contains the time, ends included", () => {
+    expect(terms(0)).toEqual(["gradient"]);
+    expect(terms(5)).toEqual(["gradient", "rise"]);
+    expect(terms(6)).toEqual(["gradient", "rise"]);
+    expect(terms(12)).toEqual(["rise"]);
+  });
+
+  it("shows nothing outside every interval", () => {
+    const later = { ...beat, chips: [{ term: "run", start_s: 3, end_s: 5 }] };
+    expect(chipsAt(later, 2)).toEqual([]);
+    expect(chipsAt(later, 6)).toEqual([]);
   });
 });
 

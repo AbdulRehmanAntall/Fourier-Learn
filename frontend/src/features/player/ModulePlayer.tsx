@@ -5,8 +5,10 @@ import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "rea
 import type { Schemas } from "@/lib/api/client";
 
 import { Captions } from "./Captions";
+import { ChipBar } from "./ChipBar";
+import { ChipOverlay } from "./ChipOverlay";
 import { Controls } from "./Controls";
-import { rewind, type BeatPosition, useTimeline } from "./useTimeline";
+import { chipsAt, rewind, type BeatPosition, useTimeline } from "./useTimeline";
 import { VideoStage, type VideoStageHandle } from "./VideoStage";
 
 // Plays one variant of a module: the video stage, captions and controls, with the keyboard
@@ -28,6 +30,8 @@ type Props = {
   startPrompt?: string;
   /** Left of the header, e.g. "Module 2 · Gradient of a curve". Defaults to the beat number. */
   heading?: ReactNode;
+  /** Show concept chips. Their definitions need a logged-in student, and study mode has none. */
+  chips?: boolean;
   onModuleEnded?(): void;
 };
 
@@ -39,6 +43,7 @@ export function ModulePlayer({
   autoPlay = false,
   startPrompt,
   heading,
+  chips = false,
   onModuleEnded,
 }: Props) {
   const timeline = useTimeline(manifest);
@@ -48,6 +53,7 @@ export function ModulePlayer({
   const [position, setPosition] = useState(first);
   const [playing, setPlaying] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [openChip, setOpenChip] = useState<string | null>(null);
   const { rate, muted, captions } = settings;
   const change = (next: Partial<PlayerSettings>) => onSettingsChange({ ...settings, ...next });
 
@@ -137,6 +143,18 @@ export function ModulePlayer({
       />
 
       {captions && <Captions beat={beat} time_s={position.time_s} />}
+
+      {chips && (
+        // Always the height of a chip, so the controls don't jump as chips come and go.
+        <div className="relative min-h-11">
+          <ChipBar
+            chips={beat ? chipsAt(beat, position.time_s) : []}
+            open={openChip}
+            onToggle={(term) => setOpenChip(openChip === term ? null : term)}
+          />
+          {openChip && <ChipOverlay term={openChip} onClose={() => setOpenChip(null)} />}
+        </div>
+      )}
 
       <Controls
         timeline={timeline}
