@@ -30,6 +30,7 @@ type Props = {
   /** Where playback begins. Give the stage a new `key` to begin again somewhere else. */
   start: BeatPosition;
   rate: number;
+  volume: number;
   muted: boolean;
   onProgress(position: BeatPosition): void;
   onPlayingChange(playing: boolean): void;
@@ -44,6 +45,7 @@ export function VideoStage({
   manifest,
   start,
   rate,
+  volume,
   muted,
   onProgress,
   onPlayingChange,
@@ -173,6 +175,7 @@ export function VideoStage({
       if (!video) return;
       video.defaultPlaybackRate = rate;
       video.playbackRate = rate;
+      video.volume = volume;
       video.muted = muted;
     });
   });

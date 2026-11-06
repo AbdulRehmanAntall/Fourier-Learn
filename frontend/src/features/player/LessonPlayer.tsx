@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/hooks/player";
 import { useLessonStream } from "@/lib/api/sse";
 
+import type { EventLogger } from "./eventLogger";
 import { GeneratingScreen, Spinner } from "./GeneratingScreen";
 import {
   initialLessonState,
@@ -22,8 +23,15 @@ import {
 } from "./lessonMachine";
 import { LessonSummary } from "./LessonSummary";
 import { ModuleFailed } from "./ModuleFailed";
-import { DEFAULT_SETTINGS, ModulePlayer, type PlayerSettings } from "./ModulePlayer";
+import {
+  DEFAULT_SETTINGS,
+  ModulePlayer,
+  type PlaybackTracker,
+  type PlayerSettings,
+} from "./ModulePlayer";
 import { PreparingNext } from "./PreparingNext";
+import { useEventLogger } from "./useEventLogger";
+import { usePositionSaver } from "./usePositionSaver";
 
 // The lesson page's top component (docs/frontend.md §6): runs the state machine of §6.1 and
 // makes the request each state needs. The event stream (§6.11) moves it on while a module is
@@ -35,6 +43,7 @@ const messageOf = (error: unknown) =>
 export function LessonPlayer({ lessonId }: { lessonId: number }) {
   const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(lessonReducer, initialLessonState);
+  const logger = useEventLogger();
   // Kept for the whole lesson, so the rate and captions carry over between modules (§6.5).
   const [settings, setSettings] = useState<PlayerSettings>(DEFAULT_SETTINGS);
   const lesson = useQuery({
@@ -64,15 +73,19 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
         if (!cancelled) dispatch({ type: "moduleLoaded", current });
       }, failed);
     } else if (state.kind === "moduleEnded") {
-      // The event logger is flushed before this once it exists (§6.8 step 1).
-      finishModule(lessonId, state.module.id).then((end) => {
-        if (!cancelled) dispatch({ type: "finished", end });
-      }, failed);
+      // Events first: finishing applies the learning transition, which reads them (§6.8).
+      const moduleId = state.module.id;
+      logger
+        .flush()
+        .then(() => finishModule(lessonId, moduleId))
+        .then((end) => {
+          if (!cancelled) dispatch({ type: "finished", end });
+        }, failed);
     }
     return () => {
       cancelled = true;
     };
-  }, [state, lessonId, queryClient]);
+  }, [state, lessonId, queryClient, logger]);
 
   // Ask again where the lesson is, after a stream event or a reconnect. A failure here is not
   // shown: the next event or reconnect asks again.
@@ -123,7 +136,10 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
         <Playing
           // A new module, or a new variant after "I'm Lost", starts a fresh stage.
           key={`${state.module.id}:${state.cacheKey}`}
+          lessonId={lessonId}
+          logger={logger}
           playback={state}
+          chips={lesson.data?.mode === "adaptive"}
           settings={settings}
           onSettingsChange={setSettings}
           onModuleEnded={() => dispatch({ type: "moduleEnded" })}
@@ -167,18 +183,34 @@ function isWaiting(state: LessonState) {
 }
 
 function Playing({
+  lessonId,
+  logger,
   playback,
+  chips,
   settings,
   onSettingsChange,
   onModuleEnded,
 }: {
+  lessonId: number;
+  logger: EventLogger;
   playback: Playback;
+  chips: boolean;
   settings: PlayerSettings;
   onSettingsChange(settings: PlayerSettings): void;
   onModuleEnded(): void;
 }) {
   const manifest = useManifest(playback.cacheKey);
-  const { sequence_no, title } = playback.module;
+  const { id: moduleId, sequence_no, title } = playback.module;
+  const saver = usePositionSaver(lessonId, moduleId);
+  const tracker: PlaybackTracker = {
+    progress: saver.progress,
+    playingChanged: saver.playingChanged,
+    studentSeeked: (from, to) => logger.seeked(moduleId, from, to),
+    studentPaused: (at) => logger.paused(moduleId, at),
+    studentResumed: () => logger.endPause(),
+    speedChanged: (at, from, to) => logger.speedChanged(moduleId, at, from, to),
+    chipOpened: (at, term) => logger.chipOpened(moduleId, at, term),
+  };
 
   if (manifest.isPending) return <Centered label="Loading the video…" />;
   if (manifest.isError) {
@@ -193,6 +225,8 @@ function Playing({
       // After a reload the browser blocks sound until a tap, so ask for one (§6.2).
       autoPlay={!playback.resumed}
       startPrompt={playback.resumed ? "Resume" : undefined}
+      chips={chips}
+      tracker={tracker}
       heading={
         <>
           <span className="font-semibold">Module {sequence_no}</span> · {title}

@@ -1,3 +1,4 @@
+import { MathText } from "@/components/MathText";
 import type { Schemas } from "@/lib/api/client";
 
 // A module that couldn't be made (docs/frontend.md §6.8, "A failed module"). With the glossary
@@ -14,8 +15,9 @@ export function ModuleFailed({
     <div className="flex flex-col gap-4 rounded-lg border border-current/15 p-6">
       <p className="text-lg">{failure.message}</p>
       {failure.fallback === "glossary_definition" && failure.definition && (
-        // Plain text until KaTeX is added for the maths in definitions (§9).
-        <p className="rounded-md bg-current/5 p-4 leading-relaxed">{failure.definition}</p>
+        <p className="rounded-md bg-current/5 p-4 leading-relaxed">
+          <MathText text={failure.definition} />
+        </p>
       )}
       <div>
         <button
