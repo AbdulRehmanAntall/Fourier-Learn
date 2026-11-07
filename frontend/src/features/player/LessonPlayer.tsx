@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/hooks/player";
 import { useLessonStream } from "@/lib/api/sse";
 
+import { CheckPanel } from "./CheckPanel";
 import type { EventLogger } from "./eventLogger";
 import { GeneratingScreen, Spinner } from "./GeneratingScreen";
 import {
@@ -152,9 +153,10 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
       return <Centered label="Saving your progress…" />;
     case "check":
       return (
-        <NotBuiltYet
-          title="Quick check before we continue"
-          onContinue={() => dispatch({ type: "checkDone" })}
+        <CheckPanel
+          moduleId={state.module.id}
+          items={state.items}
+          onDone={() => dispatch({ type: "checkDone" })}
         />
       );
     case "branch":
@@ -267,8 +269,8 @@ function ErrorPanel({ message, onRetry }: { message: string; onRetry(): void }) 
   );
 }
 
-/** Stands in for the check and branch panels until they're built; Continue moves on without
- * answering, so nothing is recorded. */
+/** Stands in for the branch panel until it's built; Continue moves on without choosing, so
+ * nothing is recorded. */
 function NotBuiltYet({ title, onContinue }: { title: string; onContinue(): void }) {
   return (
     <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-current/30 p-6">

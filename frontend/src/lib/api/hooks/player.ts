@@ -1,6 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { client, unwrap, type Schemas } from "../client";
+import { ApiError, client, unwrap, type Schemas } from "../client";
+import { retryInBackground } from "../retry";
 
 // The lesson player's calls (docs/frontend.md §6, §7). LessonPlayer's effects call the
 // fetchers directly, because the state machine decides when each is needed; the manifest is a
@@ -32,6 +33,13 @@ export const savePosition = (lessonId: number, position: Schemas["Position"]) =>
   unwrap(
     client.POST("/api/lessons/{lesson_id}/position", { ...lessonPath(lessonId), body: position }),
   );
+
+/** A check answer. It resolves or rejects with the first attempt, so the panel never waits on
+ * a failure, and is retried up to 3 times behind it (§6.8). */
+export const answerCheck = (body: Schemas["CheckResponseRequest"]) =>
+  retryInBackground(() => unwrap(client.POST("/api/check-responses", { body })), {
+    retryable: (error) => error instanceof ApiError && error.isTemporary,
+  });
 
 export const sendEvents = (events: Schemas["InteractionEventBatch"]["events"]) =>
   unwrap(client.POST("/api/events", { body: { events } }));
