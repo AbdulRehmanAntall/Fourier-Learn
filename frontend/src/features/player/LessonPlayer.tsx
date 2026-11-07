@@ -22,6 +22,7 @@ import { GeneratingScreen, Spinner } from "./GeneratingScreen";
 import {
   initialLessonState,
   lessonReducer,
+  nextModuleStatus,
   type LessonState,
   type Playback,
   type SimplerVariant,
@@ -92,6 +93,9 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
         .then((end) => {
           if (!cancelled) dispatch({ type: "finished", end });
         }, failed);
+    } else if (state.kind === "complete") {
+      // The summary lists what was watched, so it reads the lesson as it ended.
+      void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
     }
     return () => {
       cancelled = true;
@@ -140,10 +144,13 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
     }
   }
 
+  const invalidateLesson = () =>
+    void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
+
   useLessonStream(lessonId, {
     onOpen() {
       // Events from before the stream opened are lost, so look again (§6.11).
-      void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
+      invalidateLesson();
       if (isWaiting(state) || state.kind === "playing" || state.kind === "imLost") refresh();
       const target = awaitedVariant(state);
       if (target) {
@@ -164,6 +171,8 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
           break;
         case "beat_ready":
         case "module_ready": {
+          // The header says whether the next module is ready, from the lesson's modules.
+          if (event.type === "module_ready") invalidateLesson();
           const target = awaitedVariant(state);
           if (event.type === "beat_ready") {
             beatsSeen.current.add(beatKey(event.module_id, event.cache_key, event.beat_index));
@@ -184,6 +193,7 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
           break;
         }
         case "module_failed":
+          invalidateLesson();
           if (isWaiting(state) || state.kind === "playing" || state.kind === "imLost") refresh();
           break;
       }
@@ -200,6 +210,7 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
       logger={logger}
       playback={playback}
       adaptive={adaptive}
+      nextModule={nextModuleStatus(lesson.data, playback.module.id)}
       settings={settings}
       onSettingsChange={setSettings}
       onImLost={imLost}
@@ -301,6 +312,7 @@ function Playing({
   logger,
   playback,
   adaptive,
+  nextModule,
   settings,
   onSettingsChange,
   onImLost,
@@ -312,6 +324,7 @@ function Playing({
   logger: EventLogger;
   playback: Playback;
   adaptive: boolean;
+  nextModule: ReturnType<typeof nextModuleStatus>;
   settings: PlayerSettings;
   onSettingsChange(settings: PlayerSettings): void;
   onImLost(moduleId: number, at: BeatPosition): Promise<ImLostOutcome>;
@@ -353,6 +366,11 @@ function Playing({
       heading={
         <>
           <span className="font-semibold">Module {sequence_no}</span> · {title}
+          {nextModule && (
+            <span role="status" className="ml-3 whitespace-nowrap">
+              {nextModule === "ready" ? "Next module ready" : "Preparing next module…"}
+            </span>
+          )}
         </>
       }
       onModuleEnded={onModuleEnded}

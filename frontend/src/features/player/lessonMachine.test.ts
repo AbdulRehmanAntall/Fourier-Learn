@@ -5,6 +5,7 @@ import type { Schemas } from "@/lib/api/client";
 import {
   initialLessonState,
   lessonReducer,
+  nextModuleStatus,
   type LessonEvent,
   type LessonState,
 } from "./lessonMachine";
@@ -263,6 +264,42 @@ describe("I'm Lost", () => {
     );
     expect(again).toMatchObject({ kind: "imLost", playing: { cacheKey: "abc" } });
     expect(again).not.toHaveProperty("playing.simpler");
+  });
+});
+
+describe("nextModuleStatus", () => {
+  const lesson = (...statuses: Schemas["RenderStatus"][]): Schemas["Lesson"] => ({
+    id: 1,
+    title: "Gradients",
+    query_text: "gradient",
+    status: "in_progress",
+    mode: "adaptive",
+    started_at: "2026-11-07T10:00:00Z",
+    position: null,
+    modules: statuses.map((render_status, i) => ({ ...module1, id: 11 + i, render_status })),
+  });
+
+  it("says the next module is being prepared until it is ready", () => {
+    expect(nextModuleStatus(lesson("ready", "queued"), 11)).toBe("preparing");
+    expect(nextModuleStatus(lesson("ready", "rendering"), 11)).toBe("preparing");
+    expect(nextModuleStatus(lesson("ready", "ready"), 11)).toBe("ready");
+  });
+
+  it("looks at the module after the one playing", () => {
+    expect(nextModuleStatus(lesson("ready", "ready", "queued"), 12)).toBe("preparing");
+  });
+
+  it("says nothing on the last module", () => {
+    expect(nextModuleStatus(lesson("ready", "ready"), 12)).toBeNull();
+  });
+
+  it("says nothing about a next module that failed", () => {
+    expect(nextModuleStatus(lesson("ready", "failed"), 11)).toBeNull();
+  });
+
+  it("says nothing before the lesson has loaded, or for an unknown module", () => {
+    expect(nextModuleStatus(undefined, 11)).toBeNull();
+    expect(nextModuleStatus(lesson("ready", "ready"), 99)).toBeNull();
   });
 });
 

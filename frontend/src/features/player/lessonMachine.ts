@@ -74,6 +74,19 @@ export type LessonEvent =
 
 export const initialLessonState: LessonState = { kind: "loading" };
 
+/** What the module header says about the module after this one (§6.5). Nothing for the last
+ * module, or for a next module that failed: it shows its own failure when the lesson gets there. */
+export function nextModuleStatus(
+  lesson: Schemas["Lesson"] | undefined,
+  moduleId: number,
+): "preparing" | "ready" | null {
+  if (!lesson) return null;
+  const index = lesson.modules.findIndex((module) => module.id === moduleId);
+  const next = index < 0 ? undefined : lesson.modules[index + 1];
+  if (!next || next.render_status === "failed") return null;
+  return next.render_status === "ready" ? "ready" : "preparing";
+}
+
 export function lessonReducer(state: LessonState, event: LessonEvent): LessonState {
   switch (event.type) {
     case "moduleLoaded":
