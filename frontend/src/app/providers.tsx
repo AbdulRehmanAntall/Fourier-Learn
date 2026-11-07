@@ -14,10 +14,8 @@ function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // Retry network failures and server errors, not answers like 404 or 409: asking again
-        // won't change them.
         retry: (failures, error) =>
-          failures < 2 && (!(error instanceof ApiError) || error.isNetwork || error.status >= 500),
+          failures < 2 && (!(error instanceof ApiError) || error.isTemporary),
       },
     },
   });

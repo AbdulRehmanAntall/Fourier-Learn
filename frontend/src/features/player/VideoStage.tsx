@@ -21,6 +21,8 @@ export type VideoStageHandle = {
   play(): void;
   pause(): void;
   seek(position: BeatPosition): void;
+  /** Goes to a position and plays, in one step. For the player's own jumps. */
+  playFrom(position: BeatPosition): void;
 };
 
 type Slot = 0 | 1;
@@ -133,7 +135,15 @@ export function VideoStage({
     videos.current[active]?.pause();
   }
 
-  useImperativeHandle(ref, () => ({ play, pause, seek: (position) => goTo(position, playing) }));
+  useImperativeHandle(ref, () => ({
+    play,
+    pause,
+    seek: (position) => goTo(position, playing),
+    playFrom(position) {
+      changePlaying(true);
+      goTo(position, true);
+    },
+  }));
 
   function onEnded() {
     if (current + 1 >= manifest.beat_count) {

@@ -1,36 +1,45 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 
 import { ApiError } from "@/lib/api/client";
 import {
   fetchCurrentModule,
   fetchLesson,
+  fetchManifest,
   finishModule,
   playerKeys,
+  pressImLost,
   useManifest,
 } from "@/lib/api/hooks/player";
 import { useLessonStream } from "@/lib/api/sse";
 
+import { BranchPanel } from "./BranchPanel";
+import { CheckPanel } from "./CheckPanel";
 import type { EventLogger } from "./eventLogger";
 import { GeneratingScreen, Spinner } from "./GeneratingScreen";
 import {
   initialLessonState,
   lessonReducer,
+  nextModuleStatus,
   type LessonState,
   type Playback,
+  type SimplerVariant,
 } from "./lessonMachine";
+import { ImLostOverlay } from "./ImLostOverlay";
 import { LessonSummary } from "./LessonSummary";
 import { ModuleFailed } from "./ModuleFailed";
 import {
   DEFAULT_SETTINGS,
   ModulePlayer,
+  type ImLostOutcome,
   type PlaybackTracker,
   type PlayerSettings,
 } from "./ModulePlayer";
 import { PreparingNext } from "./PreparingNext";
 import { useEventLogger } from "./useEventLogger";
+import type { BeatPosition } from "./useTimeline";
 import { usePositionSaver } from "./usePositionSaver";
 
 // The lesson page's top component (docs/frontend.md §6): runs the state machine of §6.1 and
@@ -44,6 +53,9 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
   const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(lessonReducer, initialLessonState);
   const logger = useEventLogger();
+  // Beats stored while an "I'm Lost" request is in flight: its beat_ready can arrive before its
+  // reply does, and would otherwise be missed.
+  const beatsSeen = useRef(new Set<string>());
   // Kept for the whole lesson, so the rate and captions carry over between modules (§6.5).
   const [settings, setSettings] = useState<PlayerSettings>(DEFAULT_SETTINGS);
   const lesson = useQuery({
@@ -81,6 +93,9 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
         .then((end) => {
           if (!cancelled) dispatch({ type: "finished", end });
         }, failed);
+    } else if (state.kind === "complete") {
+      // The summary lists what was watched, so it reads the lesson as it ended.
+      void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
     }
     return () => {
       cancelled = true;
@@ -96,11 +111,58 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
     );
   }
 
+  async function imLost(moduleId: number, at: BeatPosition): Promise<ImLostOutcome> {
+    beatsSeen.current.clear();
+    try {
+      const result = await pressImLost(lessonId, {
+        module_id: moduleId,
+        beat_index: at.beat,
+        position_s: at.time_s,
+      });
+      if (result.action === "replay") {
+        // A worked example may have been added, which the lesson summary lists.
+        void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
+        return {
+          kind: "replay",
+          beat: result.resume_beat_index,
+          workedExampleAdded: result.worked_example_added,
+        };
+      }
+      const beat = result.resume_beat_index;
+      dispatch({
+        type: "imLostSubstitute",
+        cacheKey: result.cache_key,
+        level: result.level,
+        beat,
+      });
+      if (result.ready || beatsSeen.current.has(beatKey(moduleId, result.cache_key, beat))) {
+        dispatch({ type: "imLostReady" });
+      }
+      return { kind: "substituting" };
+    } catch (error) {
+      return { kind: "failed", message: messageOf(error) };
+    }
+  }
+
+  const invalidateLesson = () =>
+    void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
+
   useLessonStream(lessonId, {
     onOpen() {
       // Events from before the stream opened are lost, so look again (§6.11).
-      void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
-      if (isWaiting(state) || state.kind === "playing") refresh();
+      invalidateLesson();
+      if (isWaiting(state) || state.kind === "playing" || state.kind === "imLost") refresh();
+      const target = awaitedVariant(state);
+      if (target) {
+        fetchManifest(target.cacheKey).then(
+          ({ beats }) => {
+            if (beats.some((beat) => beat.index === target.beat)) {
+              dispatch({ type: "imLostReady" });
+            }
+          },
+          () => {},
+        );
+      }
     },
     onEvent(event) {
       switch (event.type) {
@@ -108,7 +170,20 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
           dispatch({ type: "stageChanged", stage: event.stage });
           break;
         case "beat_ready":
-        case "module_ready":
+        case "module_ready": {
+          // The header says whether the next module is ready, from the lesson's modules.
+          if (event.type === "module_ready") invalidateLesson();
+          const target = awaitedVariant(state);
+          if (event.type === "beat_ready") {
+            beatsSeen.current.add(beatKey(event.module_id, event.cache_key, event.beat_index));
+            if (
+              event.module_id === target?.moduleId &&
+              event.cache_key === target.cacheKey &&
+              event.beat_index === target.beat
+            ) {
+              dispatch({ type: "imLostReady" });
+            }
+          }
           if (state.kind === "playing" && event.cache_key === state.cacheKey) {
             // A partial manifest grows as beats are stored (§6.2).
             void queryClient.invalidateQueries({ queryKey: playerKeys.manifest(state.cacheKey) });
@@ -116,12 +191,34 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
             refresh();
           }
           break;
+        }
         case "module_failed":
-          if (isWaiting(state) || state.kind === "playing") refresh();
+          invalidateLesson();
+          if (isWaiting(state) || state.kind === "playing" || state.kind === "imLost") refresh();
           break;
       }
     },
   });
+
+  const adaptive = lesson.data?.mode === "adaptive";
+  const playing = (playback: Playback, overlay?: ReactNode, banner?: ReactNode) => (
+    <Playing
+      // A new module, or a new variant after "I'm Lost", starts a fresh stage. The same variant
+      // keeps its stage, so the video stays in place behind the "I'm Lost" overlay.
+      key={`${playback.module.id}:${playback.cacheKey}`}
+      lessonId={lessonId}
+      logger={logger}
+      playback={playback}
+      adaptive={adaptive}
+      nextModule={nextModuleStatus(lesson.data, playback.module.id)}
+      settings={settings}
+      onSettingsChange={setSettings}
+      onImLost={imLost}
+      overlay={overlay}
+      banner={banner}
+      onModuleEnded={() => dispatch({ type: "moduleEnded" })}
+    />
+  );
 
   switch (state.kind) {
     case "loading":
@@ -132,36 +229,51 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
     case "nextModule":
       return <PreparingNext />;
     case "playing":
-      return (
-        <Playing
-          // A new module, or a new variant after "I'm Lost", starts a fresh stage.
-          key={`${state.module.id}:${state.cacheKey}`}
-          lessonId={lessonId}
-          logger={logger}
-          playback={state}
-          chips={lesson.data?.mode === "adaptive"}
-          settings={settings}
-          onSettingsChange={setSettings}
-          onModuleEnded={() => dispatch({ type: "moduleEnded" })}
-        />
+      return playing(
+        state,
+        undefined,
+        state.simpler?.ready && (
+          <div
+            role="status"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-current/20 px-4 py-2"
+          >
+            <p>The simpler version is ready.</p>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: "switchToSimpler" })}
+              className="h-11 rounded-full bg-blue-600 px-5 font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              Switch to the simpler version
+            </button>
+          </div>
+        ),
       );
     case "imLost":
-      // Stands in for ImLostOverlay over the paused video (§6.7) until "I'm Lost" is built.
-      return <Centered label="Making a simpler version…" />;
+      return playing(
+        state.playing,
+        <ImLostOverlay onKeepWatching={() => dispatch({ type: "imLostCancelled" })} />,
+      );
     case "moduleEnded":
       return <Centered label="Saving your progress…" />;
     case "check":
       return (
-        <NotBuiltYet
-          title="Quick check before we continue"
-          onContinue={() => dispatch({ type: "checkDone" })}
+        <CheckPanel
+          moduleId={state.module.id}
+          items={state.items}
+          onDone={() => dispatch({ type: "checkDone" })}
         />
       );
     case "branch":
       return (
-        <NotBuiltYet
-          title="Where should the lesson go next?"
-          onContinue={() => dispatch({ type: "branchDone" })}
+        <BranchPanel
+          lessonId={lessonId}
+          moduleId={state.module.id}
+          branch={state.branch}
+          onDone={() => {
+            // A chosen option may add a module, which the lesson summary lists.
+            void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
+            dispatch({ type: "branchDone" });
+          }}
         />
       );
     case "failed":
@@ -178,6 +290,19 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
   }
 }
 
+const beatKey = (moduleId: number, cacheKey: string, beat: number) =>
+  `${moduleId}:${cacheKey}:${beat}`;
+
+/** The simpler variant an "I'm Lost" press is still waiting for, if any, and for which module:
+ * the stream carries other modules' beats too, and variants can be shared between modules. */
+function awaitedVariant(state: LessonState): (SimplerVariant & { moduleId: number }) | null {
+  if (state.kind === "imLost") return { ...state.target, moduleId: state.playing.module.id };
+  if (state.kind === "playing" && state.simpler && !state.simpler.ready) {
+    return { ...state.simpler.target, moduleId: state.module.id };
+  }
+  return null;
+}
+
 function isWaiting(state: LessonState) {
   return state.kind === "generating" || state.kind === "preparing";
 }
@@ -186,17 +311,25 @@ function Playing({
   lessonId,
   logger,
   playback,
-  chips,
+  adaptive,
+  nextModule,
   settings,
   onSettingsChange,
+  onImLost,
+  overlay,
+  banner,
   onModuleEnded,
 }: {
   lessonId: number;
   logger: EventLogger;
   playback: Playback;
-  chips: boolean;
+  adaptive: boolean;
+  nextModule: ReturnType<typeof nextModuleStatus>;
   settings: PlayerSettings;
   onSettingsChange(settings: PlayerSettings): void;
+  onImLost(moduleId: number, at: BeatPosition): Promise<ImLostOutcome>;
+  overlay?: ReactNode;
+  banner?: ReactNode;
   onModuleEnded(): void;
 }) {
   const manifest = useManifest(playback.cacheKey);
@@ -225,11 +358,19 @@ function Playing({
       // After a reload the browser blocks sound until a tap, so ask for one (§6.2).
       autoPlay={!playback.resumed}
       startPrompt={playback.resumed ? "Resume" : undefined}
-      chips={chips}
+      chips={adaptive}
       tracker={tracker}
+      onImLost={adaptive ? (at) => onImLost(moduleId, at) : undefined}
+      overlay={overlay}
+      banner={banner}
       heading={
         <>
           <span className="font-semibold">Module {sequence_no}</span> · {title}
+          {nextModule && (
+            <span role="status" className="ml-3 whitespace-nowrap">
+              {nextModule === "ready" ? "Next module ready" : "Preparing next module…"}
+            </span>
+          )}
         </>
       }
       onModuleEnded={onModuleEnded}
@@ -262,24 +403,6 @@ function ErrorPanel({ message, onRetry }: { message: string; onRetry(): void }) 
         className="h-11 rounded-full border border-current/30 px-6 font-semibold hover:bg-current/10"
       >
         Try again
-      </button>
-    </div>
-  );
-}
-
-/** Stands in for the check and branch panels until they're built; Continue moves on without
- * answering, so nothing is recorded. */
-function NotBuiltYet({ title, onContinue }: { title: string; onContinue(): void }) {
-  return (
-    <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-current/30 p-6">
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="opacity-70">This step isn&apos;t built yet.</p>
-      <button
-        type="button"
-        onClick={onContinue}
-        className="h-11 rounded-full bg-blue-600 px-6 font-semibold text-white hover:bg-blue-700"
-      >
-        Continue
       </button>
     </div>
   );

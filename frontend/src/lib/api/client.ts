@@ -23,6 +23,11 @@ export class ApiError extends Error {
   get isNetwork() {
     return this.status === 0;
   }
+
+  /** A network failure or a server error: asking again may work, unlike a 404 or a 409. */
+  get isTemporary() {
+    return this.isNetwork || this.status >= 500;
+  }
 }
 
 type FieldError = { loc: (string | number)[]; msg: string };

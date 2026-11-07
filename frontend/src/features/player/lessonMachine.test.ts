@@ -5,6 +5,7 @@ import type { Schemas } from "@/lib/api/client";
 import {
   initialLessonState,
   lessonReducer,
+  nextModuleStatus,
   type LessonEvent,
   type LessonState,
 } from "./lessonMachine";
@@ -217,8 +218,88 @@ describe("I'm Lost", () => {
     });
   });
 
+  const keptWatching = run([{ type: "imLostCancelled" }], lost);
+  const simpler = { cacheKey: "simpler", level: 1, beat: 1 };
+
   it("goes back to the old variant when the student keeps watching", () => {
-    expect(run([{ type: "imLostCancelled" }], lost)).toEqual(playing);
+    expect(keptWatching).toEqual({ ...playing, simpler: { target: simpler, ready: false } });
+  });
+
+  it("offers the simpler variant when it arrives later, without switching to it", () => {
+    const offered = run([{ type: "imLostReady" }], keptWatching);
+    expect(offered).toMatchObject({ cacheKey: "abc", simpler: { ready: true } });
+    expect(run([{ type: "switchToSimpler" }], offered)).toMatchObject({
+      kind: "playing",
+      cacheKey: "simpler",
+      level: 1,
+      start: { beat: 1, time_s: 0 },
+    });
+  });
+
+  it("does not switch before the simpler variant is ready", () => {
+    expect(run([{ type: "switchToSimpler" }], keptWatching)).toBe(keptWatching);
+    expect(run([{ type: "switchToSimpler" }], playing)).toBe(playing);
+  });
+
+  it("ignores a late ready when nothing is waiting for it", () => {
+    expect(run([{ type: "imLostReady" }], playing)).toBe(playing);
+  });
+
+  it("fails if the module fails during the wait", () => {
+    expect(run([{ type: "moduleLoaded", current: failed }], lost)).toEqual({
+      kind: "failed",
+      module: module1,
+      failure,
+    });
+  });
+
+  it("keeps waiting when the module is still ready", () => {
+    expect(run([{ type: "moduleLoaded", current: ready }], lost)).toBe(lost);
+  });
+
+  it("doesn't carry a pending offer into a new press", () => {
+    const again = run(
+      [{ type: "imLostSubstitute", cacheKey: "other", level: 1, beat: 2 }],
+      keptWatching,
+    );
+    expect(again).toMatchObject({ kind: "imLost", playing: { cacheKey: "abc" } });
+    expect(again).not.toHaveProperty("playing.simpler");
+  });
+});
+
+describe("nextModuleStatus", () => {
+  const lesson = (...statuses: Schemas["RenderStatus"][]): Schemas["Lesson"] => ({
+    id: 1,
+    title: "Gradients",
+    query_text: "gradient",
+    status: "in_progress",
+    mode: "adaptive",
+    started_at: "2026-11-07T10:00:00Z",
+    position: null,
+    modules: statuses.map((render_status, i) => ({ ...module1, id: 11 + i, render_status })),
+  });
+
+  it("says the next module is being prepared until it is ready", () => {
+    expect(nextModuleStatus(lesson("ready", "queued"), 11)).toBe("preparing");
+    expect(nextModuleStatus(lesson("ready", "rendering"), 11)).toBe("preparing");
+    expect(nextModuleStatus(lesson("ready", "ready"), 11)).toBe("ready");
+  });
+
+  it("looks at the module after the one playing", () => {
+    expect(nextModuleStatus(lesson("ready", "ready", "queued"), 12)).toBe("preparing");
+  });
+
+  it("says nothing on the last module", () => {
+    expect(nextModuleStatus(lesson("ready", "ready"), 12)).toBeNull();
+  });
+
+  it("says nothing about a next module that failed", () => {
+    expect(nextModuleStatus(lesson("ready", "failed"), 11)).toBeNull();
+  });
+
+  it("says nothing before the lesson has loaded, or for an unknown module", () => {
+    expect(nextModuleStatus(undefined, 11)).toBeNull();
+    expect(nextModuleStatus(lesson("ready", "ready"), 99)).toBeNull();
   });
 });
 
