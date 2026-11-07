@@ -44,6 +44,10 @@ export const answerCheck = (body: Schemas["CheckResponseRequest"]) =>
 export const chooseBranch = (lessonId: number, body: Schemas["BranchRequest"]) =>
   unwrap(client.POST("/api/lessons/{lesson_id}/branch", { ...lessonPath(lessonId), body }));
 
+/** The endpoint records the im_lost event itself, so the logger never sends one (§6.7). */
+export const pressImLost = (lessonId: number, body: Schemas["ImLostRequest"]) =>
+  unwrap(client.POST("/api/lessons/{lesson_id}/im-lost", { ...lessonPath(lessonId), body }));
+
 export const sendEvents = (events: Schemas["InteractionEventBatch"]["events"]) =>
   unwrap(client.POST("/api/events", { body: { events } }));
 
@@ -56,15 +60,17 @@ export const definitionOptions = (term: string) =>
     staleTime: 10 * 60 * 1000,
   });
 
+export const fetchManifest = (cacheKey: string) =>
+  unwrap(
+    client.GET("/api/variants/{cache_key}/manifest", {
+      params: { path: { cache_key: cacheKey } },
+    }),
+  );
+
 /** A variant's manifest. It may be partial while beats render (§6.2). */
 export function useManifest(cacheKey: string) {
   return useQuery({
     queryKey: playerKeys.manifest(cacheKey),
-    queryFn: () =>
-      unwrap(
-        client.GET("/api/variants/{cache_key}/manifest", {
-          params: { path: { cache_key: cacheKey } },
-        }),
-      ),
+    queryFn: () => fetchManifest(cacheKey),
   });
 }

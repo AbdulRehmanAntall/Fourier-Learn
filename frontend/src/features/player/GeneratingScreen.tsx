@@ -52,7 +52,7 @@ export function Spinner({ className = "size-10" }: { className?: string }) {
   );
 }
 
-function useElapsedSeconds() {
+export function useElapsedSeconds() {
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     const started = performance.now();

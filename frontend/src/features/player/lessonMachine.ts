@@ -22,11 +22,19 @@ export type Playback = {
   resumed: boolean;
 };
 
+/** The simpler variant "I'm Lost" asked for: where it is, and the beat to start from. */
+export type SimplerVariant = { cacheKey: string; level: Level; beat: number };
+
 export type LessonState =
   | { kind: "loading" }
   | { kind: "generating"; stage: GenerationStage | null }
-  | ({ kind: "playing" } & Playback)
-  | { kind: "imLost"; playing: Playback; target: { cacheKey: string; level: Level; beat: number } }
+  | ({
+      kind: "playing";
+      /** The student chose to keep watching while a simpler variant is made. It is offered
+       * once it is ready, not switched to (§6.7). */
+      simpler?: { target: SimplerVariant; ready: boolean };
+    } & Playback)
+  | { kind: "imLost"; playing: Playback; target: SimplerVariant }
   | { kind: "moduleEnded"; module: ModuleSummary }
   | {
       kind: "check";
@@ -57,6 +65,8 @@ export type LessonEvent =
   | { type: "imLostReady" }
   /** "Keep watching at this level" after the wait ran long. */
   | { type: "imLostCancelled" }
+  /** "Switch to the simpler version", when it arrived after the student kept watching. */
+  | { type: "switchToSimpler" }
   /** Continue past a failed module: finish it, which returns no checks or branch. */
   | { type: "continueAfterFailure" }
   | { type: "requestFailed"; message: string }
@@ -102,22 +112,25 @@ export function lessonReducer(state: LessonState, event: LessonEvent): LessonSta
         target: { cacheKey: event.cacheKey, level: event.level, beat: event.beat },
       };
 
-    case "imLostReady": {
-      if (state.kind !== "imLost") return state;
-      const { playing, target } = state;
-      // The rest of the module plays at the lower level, from the start of beat j (§6.7).
-      return {
-        kind: "playing",
-        module: playing.module,
-        cacheKey: target.cacheKey,
-        level: target.level,
-        start: { beat: target.beat, time_s: 0 },
-        resumed: false,
-      };
-    }
+    case "imLostReady":
+      if (state.kind === "imLost") return playSimpler(state.playing, state.target);
+      return state.kind === "playing" && state.simpler
+        ? { ...state, simpler: { ...state.simpler, ready: true } }
+        : state;
 
     case "imLostCancelled":
-      return state.kind === "imLost" ? { kind: "playing", ...state.playing } : state;
+      return state.kind === "imLost"
+        ? {
+            kind: "playing",
+            ...state.playing,
+            simpler: { target: state.target, ready: false },
+          }
+        : state;
+
+    case "switchToSimpler":
+      return state.kind === "playing" && state.simpler?.ready
+        ? playSimpler(state, state.simpler.target)
+        : state;
 
     case "continueAfterFailure":
       return state.kind === "failed" ? { kind: "moduleEnded", module: state.module } : state;
@@ -144,6 +157,11 @@ function onModuleLoaded(
   if (state.kind === "playing") {
     return current.status === "failed" && current.module?.id === state.module.id
       ? { kind: "failed", module: state.module, failure: current.failure! }
+      : state;
+  }
+  if (state.kind === "imLost") {
+    return current.status === "failed" && current.module?.id === state.playing.module.id
+      ? { kind: "failed", module: state.playing.module, failure: current.failure! }
       : state;
   }
   if (state.kind !== "loading" && state.kind !== "nextModule" && !waiting) return state;
@@ -177,6 +195,18 @@ function onModuleLoaded(
     case "complete":
       return { kind: "complete" };
   }
+}
+
+/** The rest of the module plays at the lower level, from the start of beat j (§6.7). */
+function playSimpler({ module }: Playback, target: SimplerVariant): LessonState {
+  return {
+    kind: "playing",
+    module,
+    cacheKey: target.cacheKey,
+    level: target.level,
+    start: { beat: target.beat, time_s: 0 },
+    resumed: false,
+  };
 }
 
 function withoutKind({ module, cacheKey, level, start, resumed }: Playback): Playback {
