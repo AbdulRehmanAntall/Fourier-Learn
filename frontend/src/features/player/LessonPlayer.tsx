@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/hooks/player";
 import { useLessonStream } from "@/lib/api/sse";
 
+import { BranchPanel } from "./BranchPanel";
 import { CheckPanel } from "./CheckPanel";
 import type { EventLogger } from "./eventLogger";
 import { GeneratingScreen, Spinner } from "./GeneratingScreen";
@@ -161,9 +162,15 @@ export function LessonPlayer({ lessonId }: { lessonId: number }) {
       );
     case "branch":
       return (
-        <NotBuiltYet
-          title="Where should the lesson go next?"
-          onContinue={() => dispatch({ type: "branchDone" })}
+        <BranchPanel
+          lessonId={lessonId}
+          moduleId={state.module.id}
+          branch={state.branch}
+          onDone={() => {
+            // A chosen option may add a module, which the lesson summary lists.
+            void queryClient.invalidateQueries({ queryKey: playerKeys.lesson(lessonId) });
+            dispatch({ type: "branchDone" });
+          }}
         />
       );
     case "failed":
@@ -264,24 +271,6 @@ function ErrorPanel({ message, onRetry }: { message: string; onRetry(): void }) 
         className="h-11 rounded-full border border-current/30 px-6 font-semibold hover:bg-current/10"
       >
         Try again
-      </button>
-    </div>
-  );
-}
-
-/** Stands in for the branch panel until it's built; Continue moves on without choosing, so
- * nothing is recorded. */
-function NotBuiltYet({ title, onContinue }: { title: string; onContinue(): void }) {
-  return (
-    <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed border-current/30 p-6">
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="opacity-70">This step isn&apos;t built yet.</p>
-      <button
-        type="button"
-        onClick={onContinue}
-        className="h-11 rounded-full bg-blue-600 px-6 font-semibold text-white hover:bg-blue-700"
-      >
-        Continue
       </button>
     </div>
   );

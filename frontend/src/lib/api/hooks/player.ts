@@ -41,6 +41,9 @@ export const answerCheck = (body: Schemas["CheckResponseRequest"]) =>
     retryable: (error) => error instanceof ApiError && error.isTemporary,
   });
 
+export const chooseBranch = (lessonId: number, body: Schemas["BranchRequest"]) =>
+  unwrap(client.POST("/api/lessons/{lesson_id}/branch", { ...lessonPath(lessonId), body }));
+
 export const sendEvents = (events: Schemas["InteractionEventBatch"]["events"]) =>
   unwrap(client.POST("/api/events", { body: { events } }));
 
