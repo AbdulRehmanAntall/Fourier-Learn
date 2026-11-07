@@ -33,6 +33,34 @@ export async function openNewLesson(page: Page, query = "gradient of a line") {
   return lessonId as number;
 }
 
+export async function currentModule(page: Page, lessonId: number) {
+  return (await page.request.get(`/api/lessons/${lessonId}/current-module`)).json();
+}
+
+/** Keeps a reference to each EventSource the page opens, for `emitStreamEvent`. Call it before
+ * opening the page. */
+export async function recordStreams(page: Page) {
+  await page.addInitScript(() => {
+    const streams: EventSource[] = [];
+    Object.assign(window, { __streams: streams });
+    window.EventSource = class extends window.EventSource {
+      constructor(url: string | URL, options?: EventSourceInit) {
+        super(url, options);
+        streams.push(this);
+      }
+    };
+  });
+}
+
+/** Delivers an event through the page's real stream, as if the server had sent it. */
+export async function emitStreamEvent(page: Page, event: { type: string; [key: string]: unknown }) {
+  await page.evaluate((message) => {
+    const { __streams: streams } = window as unknown as { __streams: EventSource[] };
+    const data = JSON.stringify(message);
+    streams.at(-1)!.dispatchEvent(new MessageEvent(message.type, { data }));
+  }, event);
+}
+
 export const activeVideo = (page: Page) => page.locator('video[aria-hidden="false"]');
 
 export const seekBar = (page: Page) => page.getByRole("slider", { name: "Seek" });

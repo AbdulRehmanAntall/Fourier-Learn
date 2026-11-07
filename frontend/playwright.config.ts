@@ -14,13 +14,16 @@ export default defineConfig({
   reporter: "list",
   use: {
     baseURL: "http://localhost:3000",
-    // Playwright's own Chromium can't play H.264, our video format, so use Google Chrome.
-    channel: "chrome",
     trace: "retain-on-failure",
     // Without a real click, Chrome may refuse to start video with sound. The refusal is the
     // player's normal path, but these tests are about what happens after it.
     launchOptions: { args: ["--autoplay-policy=no-user-gesture-required"] },
   },
+  // Playwright's own Chromium can't play H.264, our video format, so use the installed browsers.
+  projects: [
+    { name: "chrome", use: { channel: "chrome" } },
+    { name: "edge", use: { channel: "msedge" } },
+  ],
   webServer: {
     command: "npm run dev",
     cwd: "..",
