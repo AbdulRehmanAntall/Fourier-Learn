@@ -11,7 +11,8 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   // One at a time: each test plays real video, and they all use the stub's one test student.
   workers: 1,
-  reporter: "list",
+  // Results in the terminal, and a PDF report in test-reports/e2e-report.pdf (git-ignored).
+  reporter: [["list"], ["./e2e/pdf-reporter.ts"]],
   use: {
     baseURL: "http://localhost:3000",
     trace: "retain-on-failure",
