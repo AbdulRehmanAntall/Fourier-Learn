@@ -8,7 +8,9 @@ import type { BeatPosition } from "./useTimeline";
 
 // Two <video> elements that take turns (docs/frontend.md §6.3). The visible one plays beat i
 // while the hidden one loads beat i + 1 and nothing further (§6.4.7). On `ended` the hidden one
-// starts playing before it is shown, so there is no black frame between beats. Both stay
+// starts playing while still hidden, and is shown on `playing`, once it has a picture: until
+// then the old one keeps showing its last frame, so there is no black frame between beats.
+// Showing it on `play`, or straight away, could flash black for a frame or two. Both stay
 // mounted; the hidden one is only transparent, so it keeps loading.
 //
 // Which beat each element holds is derived, not stored: the active element holds `current` and
@@ -68,6 +70,8 @@ export function VideoStage({
   const [buffering, setBuffering] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [started, setStarted] = useState(false);
+  // The next beat has been started in the hidden element and is shown once it is playing.
+  const [handingOff, setHandingOff] = useState(false);
 
   const beats = new Map(manifest.beats.map((beat) => [beat.index, beat]));
   const other: Slot = active === 0 ? 1 : 0;
@@ -102,6 +106,12 @@ export function VideoStage({
     const hidden = videos.current[other];
     setEnded(false);
     setWaitingForBeat(false);
+    if (handingOff) {
+      // A seek during a hand-off cancels it: the hidden element stops, and the branch below
+      // starts it again if that's where the seek goes.
+      setHandingOff(false);
+      hidden?.pause();
+    }
     if (beat === current && video) {
       video.currentTime = time_s;
       if (andPlay) startVideo(video);
@@ -126,13 +136,15 @@ export function VideoStage({
       goTo({ beat: manifest.beats[0].index, time_s: 0 }, true);
       return;
     }
-    const video = videos.current[active];
+    // During a hand-off the active element has ended; it's the next beat that carries on.
+    const video = videos.current[handingOff ? other : active];
     if (video && !waitingForBeat) startVideo(video);
   }
 
   function pause() {
     changePlaying(false);
     videos.current[active]?.pause();
+    if (handingOff) videos.current[other]?.pause();
   }
 
   useImperativeHandle(ref, () => ({
@@ -157,14 +169,22 @@ export function VideoStage({
       if (hidden) {
         hidden.currentTime = 0;
         startVideo(hidden);
+        setHandingOff(true);
       }
-      setActive(other);
-      setCurrent(current + 1);
     }
   }
 
+  /** The hidden element is playing the next beat: show it. */
+  function showNext(slot: Slot) {
+    setActive(slot);
+    setCurrent(current + 1);
+    setHandingOff(false);
+    setWaitingForBeat(false);
+    setBuffering(false);
+  }
+
   // The beat we were waiting for has arrived: start it while it is still hidden, and show it
-  // once it is playing (onPlay below).
+  // once it is playing (onPlaying below).
   useEffect(() => {
     const hidden = videos.current[other];
     if (!waitingForBeat || !nextReady || !playing || !hidden?.paused) return;
@@ -234,15 +254,12 @@ export function VideoStage({
               if (isActive) onProgress({ beat: current, time_s: event.currentTarget.currentTime });
             }}
             onEnded={() => isActive && onEnded()}
-            onPlay={() => {
-              if (!isActive && waitingForBeat) {
-                setActive(slot);
-                setCurrent(current + 1);
-                setWaitingForBeat(false);
-              }
+            // The next beat stalling before it can be shown is buffering too.
+            onWaiting={() => (isActive || handingOff) && setBuffering(true)}
+            onPlaying={() => {
+              if (isActive) setBuffering(false);
+              else if (handingOff || waitingForBeat) showNext(slot);
             }}
-            onWaiting={() => isActive && setBuffering(true)}
-            onPlaying={() => isActive && setBuffering(false)}
             className={`absolute inset-0 h-full w-full object-contain ${
               isActive ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
