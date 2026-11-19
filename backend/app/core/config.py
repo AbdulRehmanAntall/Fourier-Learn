@@ -48,11 +48,14 @@ class Settings(BaseSettings):
     # Send the session cookie over HTTPS only. Turn on for any deployment served over HTTPS.
     session_cookie_secure: bool = False
 
-    # Language model of the generation pipeline (app/llm). Empty means none is configured, and
-    # lesson generation from a query is unavailable. "fake" plays scripted replies (tests only).
+    # Language model of the generation pipeline (app/llm): "openrouter", or empty for none (lesson
+    # generation from a query is then unavailable). "fake" plays scripted replies (tests only).
     llm_provider: str = ""
+    # The provider's model id, e.g. an OpenRouter id from openrouter.ai/models.
     llm_model: str = ""
     llm_api_key: str = ""
+    llm_base_url: str = "https://openrouter.ai/api/v1"
+    llm_timeout_s: float = 60.0
     # Every request and reply is appended here as one JSON line, for the evaluation (§5.9.1).
     llm_log_path: Path = Path("logs/llm.jsonl")
     # Not used yet.

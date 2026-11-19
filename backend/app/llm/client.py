@@ -10,11 +10,13 @@ Every request and reply is appended to a JSON Lines log, one line per call. The 
 candidate models are compared on them.
 
 Providers:
+- `OpenRouterLLM` (app/llm/openrouter.py): many hosted models behind one API key. The model is
+  chosen with LLM_MODEL.
 - `FakeLLM`: scripted replies, for tests and CI. Needs no network or API key.
 
-A hosted model is added as another `LLMProvider` once one is chosen (docs/PLAN.md, Phase 4). The
-planning model is chosen during development on the plan validity rate (§5.2.1), so nothing outside
-this module may depend on a particular provider.
+The planning model is chosen during development on the plan validity rate (§5.2.1), so nothing
+outside app/llm may depend on a particular provider. Another provider is added as one more
+`LLMProvider` and registered in `_PROVIDERS`.
 """
 
 import json
@@ -208,8 +210,31 @@ def validation_problems(error: ValidationError) -> list[str]:
     return problems
 
 
+def _openrouter() -> LLMProvider:
+    from app.llm.openrouter import OpenRouterLLM
+
+    settings = get_settings()
+    missing = [
+        name
+        for name, value in (
+            ("LLM_API_KEY", settings.llm_api_key),
+            ("LLM_MODEL", settings.llm_model),
+        )
+        if not value.strip()
+    ]
+    if missing:
+        raise LLMNotConfiguredError(f"LLM_PROVIDER is openrouter, so set {' and '.join(missing)}.")
+    return OpenRouterLLM(
+        api_key=settings.llm_api_key.strip(),
+        model=settings.llm_model.strip(),
+        base_url=settings.llm_base_url,
+        timeout_s=settings.llm_timeout_s,
+    )
+
+
 _PROVIDERS: dict[str, Callable[[], LLMProvider]] = {
     FakeLLM.name: FakeLLM,
+    "openrouter": _openrouter,
 }
 
 
