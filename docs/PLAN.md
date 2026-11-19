@@ -351,6 +351,24 @@ beat. This is a good demo for the FYP-I evaluation.
 automatically planned, parameterised, narrated lesson. Everything runs at one level for now.
 First-module wait is measured against the 90 s target.
 
+> **Status: started.**
+>
+> - **LLM client** (`app/llm/`): structured output validated against a Pydantic model, every call
+>   logged as one JSON line (`LLM_LOG_PATH`), and a `FakeLLM` for tests.
+> - **Provider: OpenRouter** (`app/llm/openrouter.py`): one key for many models, so the model
+>   comparison of §5.3.3 is a change of `LLM_MODEL`. Set `LLM_PROVIDER=openrouter`, `LLM_MODEL`
+>   (an id from openrouter.ai/models; `:free` ids cost nothing but are rate-limited) and
+>   `LLM_API_KEY` in `backend/.env`. Rate limits and unavailable hosts are retried. Another
+>   provider is one more `LLMProvider` class.
+> - **Prompt Interpreter** (`app/prompt_interpreter/interpreter.py`): concept names and glossary
+>   definitions in the prompt with no retrieval, the query fenced off as data, replies checked
+>   against the taxonomy, and up to three attempts with the problems sent back.
+> - **Development query set** (`backend/evaluation/dev_queries.json`): every concept at least
+>   twice, plus out-of-scope queries. `python scripts/evaluate_interpreter.py` scores the
+>   configured model on it. The held-out set must be written separately and never used for tuning.
+> - Still to do: the lesson planner, the Code Generator, narration generation, the orchestrator
+>   and the real lesson endpoints.
+
 | Lane  | Tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A** | **Code Generator** (§5.3.3): the parameter model's output is restricted to the primitive's JSON Schema (constrained decoding or structured output), so it cannot produce a name or value outside the schema. Derive the parameters the content does not fix, such as axis ranges. Run the SymPy predicates and send any failing predicate back to the model by name. After 3 attempts, use `default_params`. Also feed layout-check rejections back to the model. **Pipeline orchestrator**: plan → parameters → narration → render, with the first module's beats in parallel and playback from beat 0                                                                                                                                        |

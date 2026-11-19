@@ -216,11 +216,11 @@ them.
 Every setting comes from environment variables or `.env` files. Real `.env` files are git-ignored,
 and only the `.env.example` files are committed.
 
-| File            | Variables                                                                                                                                                                                                              |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                                                                                                     |
-| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `TTS_MODEL_DIR`, `RENDER_QUALITY`, `RENDER_WORKERS`, `STUB_API`, `STUB_LATENCY_MS`, `SESSION_COOKIE_SECURE`, `LLM_API_KEY` / `TTS_API_KEY` (not used yet) |
-| `frontend/.env` | `BACKEND_URL` (where the Next.js server forwards `/api` and `/media`)                                                                                                                                                  |
+| File            | Variables                                                                                                                                                                                                                                                                                           |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env` (root)   | `FRONTEND_PORT` (3000), `BACKEND_PORT` (8000), `POSTGRES_PORT` (5433), Postgres credentials, `DOCKER_FILE_POLLING`                                                                                                                                                                                  |
+| `backend/.env`  | `DATABASE_URL`, `CORS_ORIGINS`, `MEDIA_DIR`, `TTS_PROVIDER`, `TTS_MODEL_DIR`, `RENDER_QUALITY`, `RENDER_WORKERS`, `STUB_API`, `STUB_LATENCY_MS`, `SESSION_COOKIE_SECURE`, `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_TIMEOUT_S`, `LLM_LOG_PATH`, `TTS_API_KEY` (not used yet) |
+| `frontend/.env` | `BACKEND_URL` (where the Next.js server forwards `/api` and `/media`)                                                                                                                                                                                                                               |
 
 The browser only talks to the Next.js app. Next.js forwards `/api/*` and `/media/*` to the
 backend (`frontend/next.config.ts`), so the session cookie works without CORS. Open the app at
