@@ -48,8 +48,14 @@ class Settings(BaseSettings):
     # Send the session cookie over HTTPS only. Turn on for any deployment served over HTTPS.
     session_cookie_secure: bool = False
 
-    # Not used yet.
+    # Language model of the generation pipeline (app/llm). Empty means none is configured, and
+    # lesson generation from a query is unavailable. "fake" plays scripted replies (tests only).
+    llm_provider: str = ""
+    llm_model: str = ""
     llm_api_key: str = ""
+    # Every request and reply is appended here as one JSON line, for the evaluation (§5.9.1).
+    llm_log_path: Path = Path("logs/llm.jsonl")
+    # Not used yet.
     tts_api_key: str = ""
 
     @field_validator("cors_origins", mode="before")
@@ -59,7 +65,7 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
-    @field_validator("media_dir", "tts_model_dir")
+    @field_validator("media_dir", "tts_model_dir", "llm_log_path")
     @classmethod
     def _resolve_path(cls, value: Path) -> Path:
         return value if value.is_absolute() else BACKEND_DIR / value

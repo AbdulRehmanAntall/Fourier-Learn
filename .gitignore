@@ -23,6 +23,9 @@ out/
 next-env.d.ts
 npm-debug.log*
 
+# Language-model call logs (may hold student queries)
+backend/logs/
+
 # Media and Manim output
 backend/media/
 backend/models/
